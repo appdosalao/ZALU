@@ -27,24 +27,18 @@ export const useEnhancedNotifications = () => {
 
     try {
       const filename = defaultFiles[soundType] || defaultFiles.notification;
-      const encoded = encodeURIComponent(filename);
-      const soundsSrc = `/sounds/${encoded}`;
-      const sundsSrc = `/sunds/${encoded}`;
-      const targetSrc =
-        audioRef.current?.src?.includes(soundsSrc) || audioRef.current?.src?.includes(sundsSrc)
-          ? audioRef.current!.src
-          : soundsSrc;
+      const soundsSrc = `/sounds/${encodeURIComponent(filename)}`;
 
-      if (!audioRef.current || audioRef.current.src !== targetSrc) {
-        audioRef.current = new Audio(targetSrc);
-        audioRef.current.volume = 0.7;
-        audioRef.current.preload = 'auto';
-        audioRef.current.onerror = () => {
-          audioRef.current = new Audio(sundsSrc);
-          audioRef.current.volume = 0.7;
-          audioRef.current.preload = 'auto';
-        };
+      if (!audioRef.current) {
+        audioRef.current = new Audio();
       }
+
+      if (audioRef.current.src !== soundsSrc) {
+        audioRef.current.src = soundsSrc;
+      }
+
+      audioRef.current.volume = 0.7;
+      audioRef.current.preload = 'none';
       
       audioRef.current.currentTime = 0;
       await audioRef.current.play();

@@ -31,12 +31,8 @@ export function useNotificacaoGlobal() {
       // Tocar som se configurado
       if (configuracaoNotificacoes?.notificacoes_som) {
         const filename = 'Mensagem de Texto 1.mp3';
-        const encoded = encodeURIComponent(filename);
-        const audio = new Audio(`/sounds/${encoded}`);
-        audio.play().catch(() => {
-          const fallback = new Audio(`/sunds/${encoded}`);
-          fallback.play().catch(() => {});
-        });
+        const audio = new Audio(`/sounds/${encodeURIComponent(filename)}`);
+        audio.play().catch(() => {});
       }
 
     } catch (error) {

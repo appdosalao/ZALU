@@ -96,12 +96,13 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     return <Navigate to="/login" replace />;
   }
 
-  // Se o usuário está autenticado mas o perfil ainda não carregou,
-  // permitimos o acesso se houver uma sessão ativa. O perfil carregará em background.
-  if (!usuario && !session) {
+  if (!usuario) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="h-10 w-10 animate-spin text-primary" />
+          <div className="text-sm text-muted-foreground">Carregando seu perfil...</div>
+        </div>
       </div>
     );
   }

@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
-import { Sheet, SheetContent } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   Tooltip,
@@ -21,7 +21,7 @@ const SIDEBAR_COOKIE_NAME = "sidebar:state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
 const SIDEBAR_WIDTH = "16rem"
 const SIDEBAR_WIDTH_MOBILE = "18rem"
-const SIDEBAR_WIDTH_ICON = "3rem"
+const SIDEBAR_WIDTH_ICON = "4.25rem"
 const SIDEBAR_KEYBOARD_SHORTCUT = "b"
 
 type SidebarContext = {
@@ -129,23 +129,25 @@ const SidebarProvider = React.forwardRef<
 
     return (
       <SidebarContext.Provider value={contextValue}>
-        <div
-          style={
-            {
-              "--sidebar-width": SIDEBAR_WIDTH,
-              "--sidebar-width-icon": SIDEBAR_WIDTH_ICON,
-              ...style,
-            } as CSSProperties
-          }
-          className={cn(
-            "group/sidebar-wrapper flex min-h-svh w-full has-[[data-variant=inset]]:bg-sidebar",
-            className
-          )}
-          ref={ref}
-          {...props}
-        >
-          {children}
-        </div>
+        <TooltipProvider>
+          <div
+            style={
+              {
+                "--sidebar-width": SIDEBAR_WIDTH,
+                "--sidebar-width-icon": SIDEBAR_WIDTH_ICON,
+                ...style,
+              } as CSSProperties
+            }
+            className={cn(
+              "group/sidebar-wrapper flex min-h-svh w-full has-[[data-variant=inset]]:bg-sidebar",
+              className
+            )}
+            ref={ref}
+            {...props}
+          >
+            {children}
+          </div>
+        </TooltipProvider>
       </SidebarContext.Provider>
     )
   }
@@ -172,6 +174,19 @@ const Sidebar = React.forwardRef<
     ref
   ) => {
     const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
+    const touchStartX = React.useRef<number | null>(null)
+    const touchLastX = React.useRef<number | null>(null)
+    const [dragOffsetX, setDragOffsetX] = React.useState(0)
+    const [dragging, setDragging] = React.useState(false)
+
+    React.useEffect(() => {
+      if (!openMobile) {
+        setDragOffsetX(0)
+        setDragging(false)
+        touchStartX.current = null
+        touchLastX.current = null
+      }
+    }, [openMobile])
 
     if (collapsible === "none") {
       return (
@@ -194,15 +209,65 @@ const Sidebar = React.forwardRef<
           <SheetContent
             data-sidebar="sidebar"
             data-mobile="true"
-            className="w-[--sidebar-width] bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
+            className="w-[--sidebar-width] bg-sidebar p-0 text-sidebar-foreground data-[state=open]:duration-300 data-[state=closed]:duration-200 ease-in-out [&>button]:right-3 [&>button]:top-3 [&>button]:h-11 [&>button]:w-11 [&>button]:rounded-xl [&>button]:opacity-100 [&>button]:bg-white/60 [&>button]:text-foreground [&>button]:shadow-sm [&>button]:transition-colors [&>button]:duration-200 [&>button]:ease-in-out [&>button]:hover:bg-white/80 dark:[&>button]:bg-white/10 dark:[&>button]:text-white dark:[&>button]:hover:bg-white/15"
             style={
               {
                 "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
               } as CSSProperties
             }
             side={side}
+            onTouchStart={(event) => {
+              if (!openMobile) return
+              const x = event.touches?.[0]?.clientX
+              if (typeof x !== "number") return
+              touchStartX.current = x
+              touchLastX.current = x
+              setDragging(true)
+            }}
+            onTouchMove={(event) => {
+              if (!openMobile) return
+              if (!dragging) return
+              const startX = touchStartX.current
+              const x = event.touches?.[0]?.clientX
+              if (typeof startX !== "number" || typeof x !== "number") return
+              touchLastX.current = x
+              const deltaX = x - startX
+              if (deltaX < 0) {
+                setDragOffsetX(Math.max(deltaX, -260))
+              } else {
+                setDragOffsetX(0)
+              }
+            }}
+            onTouchEnd={() => {
+              if (!openMobile) return
+              const last = touchLastX.current
+              const startX = touchStartX.current
+              touchStartX.current = null
+              touchLastX.current = null
+              setDragging(false)
+              const delta = typeof startX === "number" && typeof last === "number" ? last - startX : 0
+              if (delta < -90) {
+                setDragOffsetX(0)
+                setOpenMobile(false)
+                return
+              }
+              setDragOffsetX(0)
+            }}
           >
-            <div className="flex h-full w-full flex-col">{children}</div>
+            <SheetTitle className="sr-only">Menu</SheetTitle>
+            <div
+              className="flex h-full w-full flex-col"
+              style={
+                dragging || dragOffsetX !== 0
+                  ? ({
+                      transform: `translateX(${dragOffsetX}px)`,
+                      transition: dragging ? "none" : "transform 200ms ease-in-out",
+                    } as React.CSSProperties)
+                  : undefined
+              }
+            >
+              {children}
+            </div>
           </SheetContent>
         </Sheet>
       )
@@ -508,7 +573,7 @@ const SidebarMenuItem = React.forwardRef<
 SidebarMenuItem.displayName = "SidebarMenuItem"
 
 const sidebarMenuButtonVariants = cva(
-  "peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm outline-none ring-sidebar-ring transition-[width,height,padding] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:!size-8 group-data-[collapsible=icon]:!p-2 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0",
+  "peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-xl p-2 text-left text-sm outline-none ring-sidebar-ring transition-[width,height,padding,color,background-color,box-shadow,transform] duration-200 ease-in-out hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:!size-12 group-data-[collapsible=icon]:!p-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0",
   {
     variants: {
       variant: {

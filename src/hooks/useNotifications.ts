@@ -57,35 +57,33 @@ export const useNotifications = () => {
   const shownNotificationsRef = useRef<Set<string>>(new Set());
   const { configuracaoNotificacoes } = useSupabaseConfiguracoes();
 
+  const buildSoundUrl = useCallback((filename: string) => {
+    return `/sounds/${encodeURIComponent(filename)}`;
+  }, []);
+
   // Inicializar áudio
   useEffect(() => {
     if (settings.soundEnabled) {
       const custom = configuracaoNotificacoes?.som_personalizado;
       const soundType = settings.soundType || 'notification';
       const filename = custom || DEFAULT_SOUND_FILES[soundType];
-      
-      // Construir URLs para /sounds e /sunds (fallback)
-      const soundsSrc = `/sounds/${filename}`;
-      const sundsSrc = `/sunds/${filename}`;
-      
-      const audio = new Audio(soundsSrc);
+
+      const nextSrc = buildSoundUrl(filename);
+      const audio = audioRef.current ?? new Audio();
+      audio.src = nextSrc;
       audio.volume = 0.5;
-      audio.preload = 'auto';
-      audio.onerror = () => {
-        const fallback = new Audio(sundsSrc);
-        fallback.volume = 0.5;
-        fallback.preload = 'auto';
-        audioRef.current = fallback;
-      };
+      audio.preload = 'none';
       audioRef.current = audio;
     }
 
     return () => {
       if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = '';
         audioRef.current = null;
       }
     };
-  }, [settings.soundEnabled, settings.soundType, configuracaoNotificacoes?.som_personalizado]);
+  }, [buildSoundUrl, settings.soundEnabled, settings.soundType, configuracaoNotificacoes?.som_personalizado]);
 
   // Salvar configurações
   useEffect(() => {
@@ -96,32 +94,23 @@ export const useNotifications = () => {
   const playNotificationSound = useCallback(async () => {
     if (!settings.soundEnabled) return;
 
-    const tryPlay = async (srcs: string[]) => {
-      for (const src of srcs) {
-        try {
-          const a = new Audio(src);
-          a.volume = 0.5;
-          a.preload = 'auto';
-          await a.play();
-          audioRef.current = a;
-          return true;
-        } catch {
-          continue;
-        }
-      }
-      return false;
-    };
-
     const custom = configuracaoNotificacoes?.som_personalizado;
     const soundType = settings.soundType || 'notification';
     const filename = custom || DEFAULT_SOUND_FILES[soundType];
-    const candidates = [
-      `/sounds/${filename}`,
-      `/sunds/${filename}`,
-    ];
+    const src = buildSoundUrl(filename);
 
-    await tryPlay(candidates);
-  }, [configuracaoNotificacoes?.som_personalizado, settings.soundEnabled, settings.soundType]);
+    try {
+      const audio = audioRef.current ?? new Audio();
+      if (audio.src !== src) {
+        audio.src = src;
+      }
+      audio.volume = 0.5;
+      audio.preload = 'none';
+      audio.currentTime = 0;
+      audioRef.current = audio;
+      await audio.play();
+    } catch {}
+  }, [buildSoundUrl, configuracaoNotificacoes?.som_personalizado, settings.soundEnabled, settings.soundType]);
 
   // Função para adicionar nova notificação
   const addNotification = useCallback((agendamento: Omit<AgendamentoNotification, 'shown'>) => {

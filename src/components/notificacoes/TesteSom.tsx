@@ -20,19 +20,9 @@ export const TesteSom = () => {
         notification3: 'Mensagem de Texto 3.mp3',
       };
       const filename = defaultFiles[soundType];
-      const encoded = encodeURIComponent(filename);
-      const candidates = [`/sounds/${encoded}`, `/sunds/${encoded}`];
-
-      for (const src of candidates) {
-        try {
-          const audio = new Audio(src);
-          audio.volume = 0.7;
-          await audio.play();
-          break;
-        } catch {
-          continue;
-        }
-      }
+      const audio = new Audio(`/sounds/${encodeURIComponent(filename)}`);
+      audio.volume = 0.7;
+      await audio.play();
     } catch (error) {
       console.error('Erro ao reproduzir som:', error);
       setIsPlaying(false);

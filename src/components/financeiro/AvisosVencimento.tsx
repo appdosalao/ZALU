@@ -71,14 +71,9 @@ export default function AvisosVencimento({ contasFixas, onPagarConta }: AvisosVe
       // Som de alerta (se disponível)
       try {
         const filename = 'Mensagem de Texto 1.mp3';
-        const encoded = encodeURIComponent(filename);
-        const audio = new Audio(`/sounds/${encoded}`);
+        const audio = new Audio(`/sounds/${encodeURIComponent(filename)}`);
         audio.volume = 0.3;
-        audio.play().catch(() => {
-          const fallback = new Audio(`/sunds/${encoded}`);
-          fallback.volume = 0.3;
-          fallback.play().catch(() => {});
-        });
+        audio.play().catch(() => {});
       } catch (error) {
         // Ignorar erro de áudio
       }
