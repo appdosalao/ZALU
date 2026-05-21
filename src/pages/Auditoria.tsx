@@ -184,6 +184,7 @@ export default function Auditoria() {
             variant="outline" 
             size="icon"
             onClick={() => exportarRelatorio('csv')}
+            aria-label="Exportar relatório em CSV"
             title="Exportar CSV"
           >
             <FileText className="h-4 w-4" />
@@ -192,6 +193,7 @@ export default function Auditoria() {
             variant="outline" 
             size="icon"
             onClick={() => exportarRelatorio('json')}
+            aria-label="Exportar relatório em JSON"
             title="Exportar JSON"
           >
             <Download className="h-4 w-4" />
