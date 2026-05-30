@@ -271,6 +271,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email: dados.email,
       password: dados.senha,
       options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
         data: {
           nome_completo: dados.nome_completo,
           nome_personalizado_app: dados.nome_personalizado_app,
@@ -456,4 +457,3 @@ export function useAuth() {
   }
   return context;
 }
-

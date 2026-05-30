@@ -13,6 +13,15 @@ export const authenticate = async (req: AuthenticatedRequest, res: Response, nex
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.warn(
+        JSON.stringify({
+          type: 'auth_missing_token',
+          path: req.originalUrl,
+          ip: req.ip,
+          ua: req.headers['user-agent'],
+          ts: new Date().toISOString(),
+        })
+      );
       return res.status(401).json({ error: 'unauthorized', message: 'Token de autenticação não fornecido' });
     }
 
@@ -21,6 +30,15 @@ export const authenticate = async (req: AuthenticatedRequest, res: Response, nex
     const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
 
     if (error || !user) {
+      console.warn(
+        JSON.stringify({
+          type: 'auth_invalid_token',
+          path: req.originalUrl,
+          ip: req.ip,
+          ua: req.headers['user-agent'],
+          ts: new Date().toISOString(),
+        })
+      );
       return res.status(401).json({ error: 'unauthorized', message: 'Token inválido ou expirado' });
     }
 

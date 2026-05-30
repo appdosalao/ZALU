@@ -58,6 +58,8 @@
     "dotenv": "^17.3.1",
     "embla-carousel-react": "^8.3.0",
     "express": "^5.2.1",
+    "express-rate-limit": "^7.5.1",
+    "helmet": "^8.1.0",
     "input-otp": "^1.2.4",
     "lucide-react": "^0.462.0",
     "next-themes": "^0.3.0",

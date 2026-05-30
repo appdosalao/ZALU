@@ -31,10 +31,18 @@ const Produtos = lazy(() => import('./pages/Produtos'));
 const Assinatura = lazy(() => import('./pages/Assinatura'));
 const IntegracaoCakto = lazy(() => import('./pages/IntegracaoCakto'));
 const TesteFidelidade = lazy(() => import('./pages/TesteFidelidade'));
+const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'));
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
+const AdminUsers = lazy(() => import('./pages/admin/AdminUsers'));
+const AdminMetrics = lazy(() => import('./pages/admin/AdminMetrics'));
+const AdminAudit = lazy(() => import('./pages/admin/AdminAudit'));
 
 const Onboarding = lazy(() => import('./pages/Onboarding'));
 const Login = lazy(() => import('./pages/Login'));
 const Cadastro = lazy(() => import('./pages/Cadastro'));
+const EsqueciSenha = lazy(() => import('./pages/EsqueciSenha'));
+const AuthCallback = lazy(() => import('./pages/AuthCallback'));
+const RedefinirSenha = lazy(() => import('./pages/RedefinirSenha'));
 const AgendamentoOnline = lazy(() => import('./pages/AgendamentoOnline'));
 const Privacidade = lazy(() => import('./pages/Privacidade'));
 const Termos = lazy(() => import('./pages/Termos'));
@@ -57,7 +65,7 @@ const RouteFallback = (
 
 const AppContent = () => {
   const location = useLocation();
-  const publicRoutes = ['/agendamento-online', '/agendamento-publico', '/agendar', '/login', '/cadastro', '/privacidade', '/termos', '/sobre', '/planos', '/checkout', '/pagamento/retorno', '/payment/success'];
+  const publicRoutes = ['/agendamento-online', '/agendamento-publico', '/agendar', '/login', '/cadastro', '/esqueci-senha', '/auth/callback', '/redefinir-senha', '/admin', '/privacidade', '/termos', '/sobre', '/planos', '/checkout', '/pagamento/retorno', '/payment/success'];
   const isPublicRoute = publicRoutes.some(path => location.pathname.startsWith(path));
 
   return (
@@ -68,6 +76,19 @@ const AppContent = () => {
         {/* Rotas públicas */}
         <Route path="/login" element={<Suspense fallback={RouteFallback}><Login /></Suspense>} />
         <Route path="/cadastro" element={<Suspense fallback={RouteFallback}><Cadastro /></Suspense>} />
+        <Route path="/esqueci-senha" element={<Suspense fallback={RouteFallback}><EsqueciSenha /></Suspense>} />
+        <Route path="/auth/callback" element={<Suspense fallback={RouteFallback}><AuthCallback /></Suspense>} />
+        <Route path="/redefinir-senha" element={<Suspense fallback={RouteFallback}><RedefinirSenha /></Suspense>} />
+        <Route path="/admin" element={
+          <ProtectedRoute>
+            <Suspense fallback={RouteFallback}><AdminLayout /></Suspense>
+          </ProtectedRoute>
+        }>
+          <Route index element={<Suspense fallback={RouteFallback}><AdminDashboard /></Suspense>} />
+          <Route path="usuarios" element={<Suspense fallback={RouteFallback}><AdminUsers /></Suspense>} />
+          <Route path="metricas" element={<Suspense fallback={RouteFallback}><AdminMetrics /></Suspense>} />
+          <Route path="auditoria" element={<Suspense fallback={RouteFallback}><AdminAudit /></Suspense>} />
+        </Route>
         <Route path="/onboarding" element={
           <ProtectedRoute>
             <Suspense fallback={RouteFallback}><Onboarding /></Suspense>

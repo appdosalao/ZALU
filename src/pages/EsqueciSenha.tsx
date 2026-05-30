@@ -3,34 +3,38 @@ import { Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AppLogo } from '@/components/branding/AppLogo';
+import { supabase } from '@/integrations/supabase/client';
 
 const esqueceuSenhaSchema = z.object({
   email: z.string().email('E-mail inválido'),
 });
 
+type FormValues = z.infer<typeof esqueceuSenhaSchema>;
+
 const EsqueciSenha = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  const { register, handleSubmit, formState: { errors } } = useForm({
+  const { register, handleSubmit, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(esqueceuSenhaSchema),
   });
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: FormValues) => {
     setIsLoading(true);
     
     try {
-      // TODO: Implementar com Supabase
-      await new Promise(resolve => setTimeout(resolve, 2000)); // Simular delay
+      const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent('/redefinir-senha')}`;
+      const { error } = await supabase.auth.resetPasswordForEmail(data.email, { redirectTo });
+      if (error) throw error;
       setSuccess(true);
     } catch (err) {
-      console.error('Erro ao enviar e-mail:', err);
+      toast.error('Não foi possível enviar o e-mail de recuperação. Tente novamente.');
     } finally {
       setIsLoading(false);
     }

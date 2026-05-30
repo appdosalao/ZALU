@@ -11,6 +11,9 @@ import {
   Settings,
   LogOut,
   ExternalLink,
+  Instagram,
+  Facebook,
+  Video,
   Megaphone,
   Package,
   Download,
@@ -35,6 +38,13 @@ import { AppLogo } from "@/components/branding/AppLogo";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useConfigAgendamentoOnline } from "@/hooks/useConfigAgendamentoOnline";
 import { toast } from "sonner";
+
+const parseCsv = (value?: string) => {
+  return (value || "")
+    .split(",")
+    .map((v) => v.trim().toLowerCase())
+    .filter(Boolean);
+};
 
 const navigationItems = [
   {
@@ -90,23 +100,23 @@ const navigationItems = [
 ];
 
 export function AppSidebar() {
-  const { state, setOpenMobile, toggleSidebar } = useSidebar() as any;
+  const { state, setOpenMobile, toggleSidebar } = useSidebar();
   const isMobileDevice = useIsMobile();
   const location = useLocation();
-  const { usuario, logout } = useSupabaseAuth();
+  const { usuario, user, logout } = useSupabaseAuth();
   const { config } = useConfigAgendamentoOnline();
   const { isInstallable, isInstalled, installApp } = usePWAContext();
   const currentPath = location.pathname;
+  const adminEmails = parseCsv(import.meta.env.VITE_ADMIN_EMAILS);
+  const authEmail = (user?.email || usuario?.email || "").trim().toLowerCase();
+  const isAdmin = !!authEmail && adminEmails.includes(authEmail);
 
   const isActive = (path: string) => currentPath === path;
 
   const handleNavClick = () => {
-    try {
-      if (isMobileDevice) {
-        // Fecha o sheet no mobile
-        setOpenMobile?.(false);
-      }
-    } catch {}
+    if (isMobileDevice) {
+      setOpenMobile(false);
+    }
   };
 
   // Gerar o link público do agendamento online com o slug (s) ou o ID do usuário (uid)
@@ -193,7 +203,7 @@ export function AppSidebar() {
           <SidebarGroupLabel>Navegação</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navigationItems.map((item) => {
+              {[...navigationItems, ...(isAdmin ? [{ title: "Admin", href: "/admin", icon: Shield }] : [])].map((item) => {
                 const Icon = item.icon;
                 const active = isActive(item.href);
                 const iconSizeClass = state === "collapsed" ? "h-[18px] w-[18px]" : "h-4 w-4";
@@ -255,11 +265,75 @@ export function AppSidebar() {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-2 text-primary"
+                    onClick={handleNavClick}
                   >
                     <div className={iconWrapClass(false, "from-primary to-lilac-primary")}>
                       <ExternalLink className="h-4 w-4 flex-shrink-0" />
                     </div>
                     <span className="truncate group-data-[collapsible=icon]:sr-only">Agendamento Online</span>
+                  </a>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  size="lg"
+                  tooltip="Instagram"
+                  className="group h-12 rounded-xl px-3 py-2 transition-all duration-200 ease-in-out hover:bg-white/40 hover:-translate-y-px active:translate-y-0 dark:hover:bg-white/10"
+                >
+                  <a
+                    href="https://www.instagram.com/salao.de.bolso/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-primary"
+                    onClick={handleNavClick}
+                  >
+                    <div className={iconWrapClass(false, "from-rose-500 to-pink-400")}>
+                      <Instagram className="h-4 w-4 flex-shrink-0" />
+                    </div>
+                    <span className="truncate group-data-[collapsible=icon]:sr-only">Instagram</span>
+                  </a>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  size="lg"
+                  tooltip="Facebook"
+                  className="group h-12 rounded-xl px-3 py-2 transition-all duration-200 ease-in-out hover:bg-white/40 hover:-translate-y-px active:translate-y-0 dark:hover:bg-white/10"
+                >
+                  <a
+                    href="https://www.facebook.com/profile.php?id=61588465179526&locale=pt_BR"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-primary"
+                    onClick={handleNavClick}
+                  >
+                    <div className={iconWrapClass(false, "from-indigo-500 to-sky-400")}>
+                      <Facebook className="h-4 w-4 flex-shrink-0" />
+                    </div>
+                    <span className="truncate group-data-[collapsible=icon]:sr-only">Facebook</span>
+                  </a>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  size="lg"
+                  tooltip="TikTok"
+                  className="group h-12 rounded-xl px-3 py-2 transition-all duration-200 ease-in-out hover:bg-white/40 hover:-translate-y-px active:translate-y-0 dark:hover:bg-white/10"
+                >
+                  <a
+                    href="https://www.tiktok.com/@salao_de_bolso"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-primary"
+                    onClick={handleNavClick}
+                  >
+                    <div className={iconWrapClass(false, "from-slate-600 to-slate-400")}>
+                      <Video className="h-4 w-4 flex-shrink-0" />
+                    </div>
+                    <span className="truncate group-data-[collapsible=icon]:sr-only">TikTok</span>
                   </a>
                 </SidebarMenuButton>
               </SidebarMenuItem>

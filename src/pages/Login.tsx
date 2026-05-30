@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -25,7 +25,7 @@ const Login = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const redirect = searchParams.get('redirect') || '/';
-  const { login } = useSupabaseAuth();
+  const { login, isAuthenticated, isLoading: authLoading } = useSupabaseAuth();
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -42,6 +42,19 @@ const Login = () => {
       document.documentElement.setAttribute('data-theme', savedTheme);
     }
   }, []);
+
+  useEffect(() => {
+    if (!authLoading && isAuthenticated) {
+      navigate(redirect, { replace: true });
+    }
+  }, [authLoading, isAuthenticated, navigate, redirect]);
+
+  const infoMessage = useMemo(() => {
+    if (searchParams.get('password_updated') === '1') return 'Senha atualizada. Faça login novamente.';
+    if (searchParams.get('confirmed') === '1') return 'E-mail confirmado. Você já pode entrar.';
+    if (searchParams.get('check_email') === '1') return 'Conta criada. Verifique seu e-mail para confirmar e depois faça login.';
+    return '';
+  }, [searchParams]);
 
   const onSubmit = async (data: UsuarioLogin) => {
     setIsLoading(true);
@@ -127,6 +140,11 @@ const Login = () => {
             
             <CardContent className="px-8 pb-10">
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                {infoMessage && (
+                  <Alert className="animate-in slide-in-from-top-2 duration-300">
+                    <AlertDescription className="text-sm font-medium">{infoMessage}</AlertDescription>
+                  </Alert>
+                )}
                 {error && (
                   <Alert variant="destructive" className="animate-in slide-in-from-top-2 duration-300">
                     <AlertDescription className="text-sm font-medium">{error}</AlertDescription>

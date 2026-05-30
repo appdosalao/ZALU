@@ -7,8 +7,9 @@ import { ConfiguracaoNotificacoesAvancadas } from '@/components/configuracoes/Co
 import { ConfiguracaoNotificacoesPush } from '@/components/configuracoes/ConfiguracaoNotificacoesPush';
 import { ConfiguracaoBackup } from '@/components/configuracoes/ConfiguracaoBackup';
 import { ConfiguracaoAgendamentoOnline } from '@/components/configuracoes/ConfiguracaoAgendamentoOnline';
+import { ConfiguracaoConta } from '@/components/configuracoes/ConfiguracaoConta';
 import { Badge } from '@/components/ui/badge';
-import { Check, Clock, Bell, Calendar, Crown, CreditCard, Download, RefreshCw, Settings } from 'lucide-react';
+import { Check, Clock, Bell, Calendar, Crown, CreditCard, Download, Lock, RefreshCw, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
@@ -87,7 +88,7 @@ export default function Configuracoes() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <ScrollArea className="w-full whitespace-nowrap">
-          <TabsList className="flex md:grid md:grid-cols-5 gap-1 p-1 w-full bg-muted rounded-lg">
+          <TabsList className="flex md:grid md:grid-cols-6 gap-1 p-1 w-full bg-muted rounded-lg">
             <TabsTrigger value="horarios" className="flex items-center gap-2 min-h-[44px] flex-1">
               <Clock className="h-4 w-4" />
               Horários
@@ -103,6 +104,10 @@ export default function Configuracoes() {
             <TabsTrigger value="backup" className="flex items-center gap-2 min-h-[44px] flex-1">
               <Download className="h-4 w-4" />
               Backup
+            </TabsTrigger>
+            <TabsTrigger value="conta" className="flex items-center gap-2 min-h-[44px] flex-1">
+              <Lock className="h-4 w-4" />
+              Conta
             </TabsTrigger>
             <TabsTrigger value="assinatura" className="flex items-center gap-2 min-h-[44px] flex-1">
               <Crown className="h-4 w-4" />
@@ -164,6 +169,10 @@ export default function Configuracoes() {
 
         <TabsContent value="backup" className="space-y-6">
           <ConfiguracaoBackup />
+        </TabsContent>
+
+        <TabsContent value="conta" className="space-y-6">
+          <ConfiguracaoConta />
         </TabsContent>
 
         <TabsContent value="assinatura" className="space-y-6">
