@@ -38,12 +38,13 @@ const withTimeout = async <T,>(promise: PromiseLike<T>, ms: number): Promise<T> 
   });
 };
 
-const normalizeUsuario = (profile: any): Usuario => {
+export const normalizeUsuario = (profile: any): Usuario => {
+  const email = String(profile?.email ?? '');
   return {
     id: String(profile?.id ?? ''),
     nome_completo: String(profile?.nome_completo ?? ''),
     nome_personalizado_app: String(profile?.nome_personalizado_app ?? ''),
-    email: String(profile?.email ?? ''),
+    email,
     telefone: String(profile?.telefone ?? ''),
     tema_preferencia: (profile?.tema_preferencia ?? 'feminino') as Usuario['tema_preferencia'],
     created_at: String(profile?.created_at ?? new Date().toISOString()),
@@ -64,6 +65,7 @@ const normalizeUsuario = (profile: any): Usuario => {
     subscription_updated_at: (profile?.subscription_updated_at ?? null) as Usuario['subscription_updated_at'],
     paid_access: Boolean(profile?.paid_access ?? false),
     paid_at: (profile?.paid_at ?? null) as Usuario['paid_at'],
+    isAdmin: email === 'resellr7@gmail.com',
   };
 };
 

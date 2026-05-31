@@ -4,7 +4,6 @@ import dotenv from 'dotenv';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import paymentRoutes from './routes/payment';
-import adminRoutes from './routes/admin';
 
 dotenv.config();
 
@@ -79,7 +78,6 @@ const publicLimiter = rateLimit({
 app.use(publicLimiter);
 
 app.use('/api/payment', paymentRoutes);
-app.use('/api/admin', adminRoutes);
 
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });

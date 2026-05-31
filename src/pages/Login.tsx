@@ -63,7 +63,12 @@ const Login = () => {
     try {
       const ok = await login(data.email, data.senha);
       if (ok) {
-        navigate(redirect);
+        // Se for o admin, redireciona diretamente para a área admin
+        if (data.email === 'resellr7@gmail.com') {
+          navigate('/admin');
+        } else {
+          navigate(redirect);
+        }
       } else {
         setError('E-mail ou senha incorretos. Verifique suas credenciais.');
       }
