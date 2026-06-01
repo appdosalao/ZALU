@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { ConfiguracaoHorarios } from '@/components/configuracoes/ConfiguracaoHorarios-Simple';
+import { ConfiguracaoHorarios } from '@/components/configuracoes/ConfiguracaoHorarios';
 import { ConfiguracaoNotificacoesAvancadas } from '@/components/configuracoes/ConfiguracaoNotificacoesAvancadas';
 import { ConfiguracaoNotificacoesPush } from '@/components/configuracoes/ConfiguracaoNotificacoesPush';
 import { ConfiguracaoBackup } from '@/components/configuracoes/ConfiguracaoBackup';
