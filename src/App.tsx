@@ -8,6 +8,7 @@ import { PWAProvider } from "./components/pwa/PWAProvider";
 import Layout from "./components/Layout";
 import { NotificationProviderAvancado } from "./components/notificacoes/NotificationProviderAvancado";
 import { BackupPrompt } from "./components/configuracoes/BackupPrompt";
+import { PWAUpdateNotification } from "./components/PWAUpdateNotification";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -67,6 +68,7 @@ const AppContent = () => {
     <div id="app-container">
       {!isPublicRoute && <BackupPrompt />}
       <Toaster position="top-right" />
+      <PWAUpdateNotification />
       <Routes>
         {/* Rotas públicas */}
         <Route path="/login" element={<Suspense fallback={RouteFallback}><Login /></Suspense>} />
