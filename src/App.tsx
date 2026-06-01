@@ -59,9 +59,15 @@ const RouteFallback = (
   </div>
 );
 
+const RedirectWithQuery = ({ to }: { to: string }) => {
+  const location = useLocation();
+  return <Navigate to={`${to}${location.search}`} replace />;
+};
+
 const AppContent = () => {
   const location = useLocation();
-  const publicRoutes = ['/agendamento-online', '/agendamento-publico', '/agendar', '/login', '/cadastro', '/esqueci-senha', '/auth/callback', '/redefinir-senha', '/privacidade', '/termos', '/sobre', '/planos', '/checkout', '/pagamento/retorno', '/payment/success'];
+  // Atualizado para não incluir as rotas alternativas, mas só a principal
+  const publicRoutes = ['/agendamento-online', '/login', '/cadastro', '/esqueci-senha', '/auth/callback', '/redefinir-senha', '/privacidade', '/termos', '/sobre', '/planos', '/checkout', '/pagamento/retorno', '/payment/success'];
   const isPublicRoute = publicRoutes.some(path => location.pathname.startsWith(path));
 
   return (
@@ -81,9 +87,11 @@ const AppContent = () => {
             <Suspense fallback={RouteFallback}><Onboarding /></Suspense>
           </ProtectedRoute>
         } />
+        {/* Rota principal de agendamento online */}
         <Route path="/agendamento-online" element={<Suspense fallback={RouteFallback}><AgendamentoOnline /></Suspense>} />
-        <Route path="/agendamento-publico" element={<Suspense fallback={RouteFallback}><AgendamentoOnline /></Suspense>} />
-        <Route path="/agendar" element={<Suspense fallback={RouteFallback}><AgendamentoOnline /></Suspense>} />
+        {/* Rotas alternativas redirecionam para a principal, mantendo parâmetros */}
+        <Route path="/agendamento-publico" element={<RedirectWithQuery to="/agendamento-online" />} />
+        <Route path="/agendar" element={<RedirectWithQuery to="/agendamento-online" />} />
         <Route path="/privacidade" element={<Suspense fallback={RouteFallback}><Privacidade /></Suspense>} />
         <Route path="/termos" element={<Suspense fallback={RouteFallback}><Termos /></Suspense>} />
         <Route path="/planos" element={<Suspense fallback={RouteFallback}><Planos /></Suspense>} />
