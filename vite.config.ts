@@ -6,7 +6,7 @@ import { VitePWA } from 'vite-plugin-pwa';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  base: "/lilac-luxe-salon-100/",
+  base: "/",
   server: {
     host: "::",
     port: 8080,
@@ -31,8 +31,8 @@ export default defineConfig(({ mode }) => ({
         theme_color: '#D6B2E7',
         background_color: '#ffffff',
         display: 'standalone',
-        scope: '/lilac-luxe-salon-100/',
-        start_url: '/lilac-luxe-salon-100/',
+        scope: '/',
+        start_url: '/',
         orientation: 'portrait',
         icons: [
           {
