@@ -8,7 +8,6 @@ import {
   DollarSign,
   Clock,
   Shield,
-  ShieldCheck,
   Settings,
   LogOut,
   ExternalLink,
@@ -90,14 +89,6 @@ const navigationItems = [
     title: "Configurações",
     href: "/configuracoes",
     icon: Settings,
-  },
-];
-
-const adminNavigationItems = [
-  {
-    title: "Área Admin",
-    href: "/admin",
-    icon: ShieldCheck,
   },
 ];
 
@@ -198,83 +189,42 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        {/* Se for admin, só mostra a navegação de admin */}
-        {usuario?.isAdmin ? (
-          <SidebarGroup>
-            <SidebarGroupLabel>Administração</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {adminNavigationItems.map((item) => {
-                  const Icon = item.icon;
-                  const active = isActive(item.href);
-                  const iconSizeClass = state === "collapsed" ? "h-[18px] w-[18px]" : "h-4 w-4";
-                  
-                  return (
-                    <SidebarMenuItem key={item.href}>
-                      <SidebarMenuButton 
-                        asChild 
-                        isActive={active}
-                        size="lg"
-                        tooltip={item.title}
-                        className="group relative h-12 rounded-xl px-3 py-2 overflow-hidden transition-all duration-200 ease-in-out hover:bg-white/40 hover:-translate-y-px active:translate-y-0 data-[active=true]:bg-gradient-to-b data-[active=true]:from-white/75 data-[active=true]:to-white/45 data-[active=true]:text-sidebar-foreground data-[active=true]:ring-1 data-[active=true]:ring-primary/15 data-[active=true]:shadow-[0_1px_0_0_hsl(0_0%_100%/0.80),0_22px_44px_-30px_hsl(var(--primary)/0.40)] data-[active=true]:before:content-[''] data-[active=true]:before:absolute data-[active=true]:before:inset-0 data-[active=true]:before:bg-gradient-to-b data-[active=true]:before:from-white/55 data-[active=true]:before:to-transparent data-[active=true]:before:pointer-events-none data-[active=true]:after:content-[''] data-[active=true]:after:absolute data-[active=true]:after:left-0 data-[active=true]:after:top-2 data-[active=true]:after:bottom-2 data-[active=true]:after:w-1 data-[active=true]:after:rounded-full data-[active=true]:after:bg-gradient-to-b data-[active=true]:after:from-rose-500 data-[active=true]:after:to-pink-600 data-[active=true]:after:shadow-[0_0_0_1px_hsl(0_0%_100%/0.35)] dark:hover:bg-white/10 dark:data-[active=true]:bg-white/10 dark:data-[active=true]:ring-white/10 dark:data-[active=true]:shadow-[0_1px_0_0_hsl(0_0%_100%/0.06),0_22px_44px_-30px_hsl(0_0%_0%/0.65)]"
+        <SidebarGroup>
+          <SidebarGroupLabel>Navegação</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {navigationItems.map((item) => {
+                const Icon = item.icon;
+                const active = isActive(item.href);
+                const iconSizeClass = state === "collapsed" ? "h-[18px] w-[18px]" : "h-4 w-4";
+                
+                return (
+                  <SidebarMenuItem key={item.href}>
+                    <SidebarMenuButton 
+                      asChild 
+                      isActive={active}
+                      size="lg"
+                      tooltip={item.title}
+                      className="group relative h-12 rounded-xl px-3 py-2 overflow-hidden transition-all duration-200 ease-in-out hover:bg-white/40 hover:-translate-y-px active:translate-y-0 data-[active=true]:bg-gradient-to-b data-[active=true]:from-white/75 data-[active=true]:to-white/45 data-[active=true]:text-sidebar-foreground data-[active=true]:ring-1 data-[active=true]:ring-primary/15 data-[active=true]:shadow-[0_1px_0_0_hsl(0_0%_100%/0.80),0_22px_44px_-30px_hsl(var(--primary)/0.40)] data-[active=true]:before:content-[''] data-[active=true]:before:absolute data-[active=true]:before:inset-0 data-[active=true]:before:bg-gradient-to-b data-[active=true]:before:from-white/55 data-[active=true]:before:to-transparent data-[active=true]:before:pointer-events-none data-[active=true]:after:content-[''] data-[active=true]:after:absolute data-[active=true]:after:left-0 data-[active=true]:after:top-2 data-[active=true]:after:bottom-2 data-[active=true]:after:w-1 data-[active=true]:after:rounded-full data-[active=true]:after:bg-gradient-to-b data-[active=true]:after:from-primary data-[active=true]:after:to-lilac-primary data-[active=true]:after:shadow-[0_0_0_1px_hsl(0_0%_100%/0.35)] dark:hover:bg-white/10 dark:data-[active=true]:bg-white/10 dark:data-[active=true]:ring-white/10 dark:data-[active=true]:shadow-[0_1px_0_0_hsl(0_0%_100%/0.06),0_22px_44px_-30px_hsl(0_0%_0%/0.65)]"
+                    >
+                      <Link
+                        to={item.href}
+                        className="flex w-full items-center gap-3 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0"
+                        onClick={handleNavClick}
+                        aria-current={active ? "page" : undefined}
                       >
-                        <Link
-                          to={item.href}
-                          className="flex w-full items-center gap-3 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0"
-                          onClick={handleNavClick}
-                          aria-current={active ? "page" : undefined}
-                        >
-                          <div className={iconWrapClass(active, "from-rose-500 to-pink-600")}>
-                            <Icon className={`${iconSizeClass} flex-shrink-0`} strokeWidth={2.2} />
-                          </div>
-                          <span className="truncate group-data-[collapsible=icon]:sr-only">{item.title}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  );
-                })}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        ) : (
-          /* Se não for admin, mostra a navegação normal */
-          <SidebarGroup>
-            <SidebarGroupLabel>Navegação</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {navigationItems.map((item) => {
-                  const Icon = item.icon;
-                  const active = isActive(item.href);
-                  const iconSizeClass = state === "collapsed" ? "h-[18px] w-[18px]" : "h-4 w-4";
-                  
-                  return (
-                    <SidebarMenuItem key={item.href}>
-                      <SidebarMenuButton 
-                        asChild 
-                        isActive={active}
-                        size="lg"
-                        tooltip={item.title}
-                        className="group relative h-12 rounded-xl px-3 py-2 overflow-hidden transition-all duration-200 ease-in-out hover:bg-white/40 hover:-translate-y-px active:translate-y-0 data-[active=true]:bg-gradient-to-b data-[active=true]:from-white/75 data-[active=true]:to-white/45 data-[active=true]:text-sidebar-foreground data-[active=true]:ring-1 data-[active=true]:ring-primary/15 data-[active=true]:shadow-[0_1px_0_0_hsl(0_0%_100%/0.80),0_22px_44px_-30px_hsl(var(--primary)/0.40)] data-[active=true]:before:content-[''] data-[active=true]:before:absolute data-[active=true]:before:inset-0 data-[active=true]:before:bg-gradient-to-b data-[active=true]:before:from-white/55 data-[active=true]:before:to-transparent data-[active=true]:before:pointer-events-none data-[active=true]:after:content-[''] data-[active=true]:after:absolute data-[active=true]:after:left-0 data-[active=true]:after:top-2 data-[active=true]:after:bottom-2 data-[active=true]:after:w-1 data-[active=true]:after:rounded-full data-[active=true]:after:bg-gradient-to-b data-[active=true]:after:from-primary data-[active=true]:after:to-lilac-primary data-[active=true]:after:shadow-[0_0_0_1px_hsl(0_0%_100%/0.35)] dark:hover:bg-white/10 dark:data-[active=true]:bg-white/10 dark:data-[active=true]:ring-white/10 dark:data-[active=true]:shadow-[0_1px_0_0_hsl(0_0%_100%/0.06),0_22px_44px_-30px_hsl(0_0%_0%/0.65)]"
-                      >
-                        <Link
-                          to={item.href}
-                          className="flex w-full items-center gap-3 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0"
-                          onClick={handleNavClick}
-                          aria-current={active ? "page" : undefined}
-                        >
-                          <div className={iconWrapClass(active, badgeFor(item.href))}>
-                            <Icon className={`${iconSizeClass} flex-shrink-0`} strokeWidth={2.2} />
-                          </div>
-                          <span className="truncate group-data-[collapsible=icon]:sr-only">{item.title}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  );
-                })}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
+                        <div className={iconWrapClass(active, badgeFor(item.href))}>
+                          <Icon className={`${iconSizeClass} flex-shrink-0`} strokeWidth={2.2} />
+                        </div>
+                        <span className="truncate group-data-[collapsible=icon]:sr-only">{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
 
         <SidebarGroup>
           <SidebarGroupLabel>Links Externos</SidebarGroupLabel>

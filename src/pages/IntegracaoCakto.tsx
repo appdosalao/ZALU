@@ -7,9 +7,8 @@ export default function IntegracaoCakto() {
   const { usuario, user } = useSupabaseAuth();
   const { isPaid } = usePaidAccess();
 
-  const mensalUrlConfigured = Boolean(
-    import.meta.env.VITE_CAKTO_CHECKOUT_MENSAL_URL || import.meta.env.VITE_CAKTO_CHECKOUT_VITALICIO_URL
-  );
+  const mensalUrlConfigured = Boolean(import.meta.env.VITE_CAKTO_CHECKOUT_MENSAL_URL);
+  const vitalicioUrlConfigured = Boolean(import.meta.env.VITE_CAKTO_CHECKOUT_VITALICIO_URL);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
@@ -32,6 +31,12 @@ export default function IntegracaoCakto() {
                 <div className="text-sm text-muted-foreground">Checkout mensal configurado</div>
                 <Badge variant={mensalUrlConfigured ? 'default' : 'outline'}>
                   {mensalUrlConfigured ? 'OK' : 'Faltando'}
+                </Badge>
+              </div>
+              <div className="flex items-center justify-between gap-4">
+                <div className="text-sm text-muted-foreground">Checkout vitalício configurado</div>
+                <Badge variant={vitalicioUrlConfigured ? 'default' : 'outline'}>
+                  {vitalicioUrlConfigured ? 'OK' : 'Faltando'}
                 </Badge>
               </div>
               <div className="flex items-center justify-between gap-4">
@@ -62,10 +67,10 @@ export default function IntegracaoCakto() {
                 <CardDescription>Itens mínimos para o fluxo funcionar</CardDescription>
               </CardHeader>
               <CardContent className="space-y-2 text-sm">
-                <div>1) Produto/Oferta: crie um produto de assinatura mensal (recorrente).</div>
-                <div>2) Link de checkout: configure em `VITE_CAKTO_CHECKOUT_MENSAL_URL`.</div>
-                <div>3) Webhook: cadastre o endpoint e selecione pelo menos `purchase_approved`.</div>
-                <div>4) Chave secreta: defina a mesma `CAKTO_WEBHOOK_SECRET` no webhook e no backend.</div>
+                <div>1) Produto/Oferta: crie um produto de assinatura mensal (recorrente) e um produto vitalício.</div>
+                <div>2) Link de checkout: configure VITE_CAKTO_CHECKOUT_MENSAL_URL e VITE_CAKTO_CHECKOUT_VITALICIO_URL.</div>
+                <div>3) Webhook: cadastre o endpoint e selecione pelo menos purchase_approved.</div>
+                <div>4) Chave secreta: defina a mesma CAKTO_WEBHOOK_SECRET no webhook e no backend.</div>
                 <div>5) Testes: use “Enviar evento de teste” para validar o recebimento.</div>
               </CardContent>
             </Card>
@@ -78,9 +83,9 @@ export default function IntegracaoCakto() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-2 text-sm">
-                <div>1) Crie uma chave de API no painel (client_id/client_secret) com escopo `orders`.</div>
-                <div>2) Configure `CAKTO_CLIENT_ID`, `CAKTO_CLIENT_SECRET` no backend.</div>
-                <div>3) Ative `CAKTO_VERIFY_BY_API=true` para buscar o pedido em `public_api/orders`.</div>
+                <div>1) Crie uma chave de API no painel (client_id/client_secret) com escopo orders.</div>
+                <div>2) Configure CAKTO_CLIENT_ID, CAKTO_CLIENT_SECRET no backend.</div>
+                <div>3) Ative CAKTO_VERIFY_BY_API=true para buscar o pedido em public_api/orders.</div>
               </CardContent>
             </Card>
           </CardContent>
@@ -89,4 +94,3 @@ export default function IntegracaoCakto() {
     </div>
   );
 }
-

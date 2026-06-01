@@ -48,8 +48,10 @@ export default function Assinatura() {
   }, [isPaid, isPaidLoading, trialValid, trialRemainingDays, usuario?.subscription_status]);
 
   const planLabel = useMemo(() => {
-    return isPaid ? 'Mensal (R$ 7,90/mês)' : 'Teste grátis (7 dias)';
-  }, [isPaid]);
+    if (!isPaid) return 'Teste grátis (7 dias)';
+    if (usuario?.plan_type === 'vitalicio') return 'Vitalício (acesso permanente)';
+    return 'Mensal (R$ 7,90/mês)';
+  }, [isPaid, usuario?.plan_type]);
 
   const refresh = async () => {
     setLoading(true);
@@ -110,9 +112,9 @@ export default function Assinatura() {
 
             {!isPaid && (
               <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 mb-4">
-                <h3 className="font-medium text-primary mb-2">Assinatura mensal disponível</h3>
+                <h3 className="font-medium text-primary mb-2">Escolha seu plano</h3>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Assine para manter acesso completo ao app. Ideal para quem quer profissionalizar a gestão do salão e ganhar tempo no dia a dia.
+                  Opções flexíveis para profissionalizar o seu salão.
                 </p>
                 <div className="grid gap-2 sm:grid-cols-2">
                   {[
@@ -134,12 +136,12 @@ export default function Assinatura() {
 
             <div className="grid gap-3 sm:grid-cols-2">
               <Button 
-                onClick={() => navigate('/checkout')} 
+                onClick={() => navigate('/planos')} 
                 className="w-full h-11"
                 variant={isPaid ? "outline" : "default"}
                 disabled={isPaid}
               >
-                {isPaid ? 'Assinatura ativa' : 'Assinar por R$ 7,90/mês'}
+                {isPaid ? 'Assinatura ativa' : 'Ver planos'}
               </Button>
               <Button onClick={() => void refresh()} variant="outline" disabled={loading || isPaidLoading} className="w-full h-11 gap-2">
                 <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
@@ -152,4 +154,3 @@ export default function Assinatura() {
     </div>
   );
 }
-

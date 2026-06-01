@@ -23,7 +23,6 @@ export interface Usuario {
   subscription_updated_at: string | null;
   paid_access: boolean;
   paid_at: string | null;
-  isAdmin: boolean;
 }
 
 export interface UsuarioCadastro {

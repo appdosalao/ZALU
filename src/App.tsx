@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
-import { Suspense, lazy, useEffect } from 'react';
-import { SupabaseAuthProvider, useSupabaseAuth } from "./contexts/SupabaseAuthContext";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { Suspense, lazy } from 'react';
+import { SupabaseAuthProvider } from "./contexts/SupabaseAuthContext";
 import { Toaster } from "sonner";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { PWAProvider } from "./components/pwa/PWAProvider";
@@ -31,7 +31,6 @@ const Produtos = lazy(() => import('./pages/Produtos'));
 const Assinatura = lazy(() => import('./pages/Assinatura'));
 const IntegracaoCakto = lazy(() => import('./pages/IntegracaoCakto'));
 const TesteFidelidade = lazy(() => import('./pages/TesteFidelidade'));
-const Admin = lazy(() => import('./pages/Admin'));
 
 const Onboarding = lazy(() => import('./pages/Onboarding'));
 const Login = lazy(() => import('./pages/Login'));
@@ -61,31 +60,8 @@ const RouteFallback = (
 
 const AppContent = () => {
   const location = useLocation();
-  const navigate = useNavigate();
-  const { usuario, isAuthenticated } = useSupabaseAuth();
   const publicRoutes = ['/agendamento-online', '/agendamento-publico', '/agendar', '/login', '/cadastro', '/esqueci-senha', '/auth/callback', '/redefinir-senha', '/privacidade', '/termos', '/sobre', '/planos', '/checkout', '/pagamento/retorno', '/payment/success'];
   const isPublicRoute = publicRoutes.some(path => location.pathname.startsWith(path));
-
-  // Redirecionamento para admin
-  useEffect(() => {
-    if (isAuthenticated && usuario?.isAdmin) {
-      // Se admin tentar acessar outra rota protegida, redireciona para /admin
-      if (location.pathname !== '/admin' && !isPublicRoute) {
-        navigate('/admin', { replace: true });
-      }
-    }
-  }, [isAuthenticated, usuario?.isAdmin, location.pathname, isPublicRoute, navigate]);
-
-  // Componente de roteamento protegido para admin
-  const AdminRoute = ({ children }: { children: React.ReactNode }) => {
-    if (!isAuthenticated) {
-      return <Navigate to="/login" replace />;
-    }
-    if (!usuario?.isAdmin) {
-      return <Navigate to="/" replace />;
-    }
-    return <>{children}</>;
-  };
 
   return (
     <div id="app-container">
@@ -208,13 +184,6 @@ const AppContent = () => {
               <Suspense fallback={RouteFallback}><TesteFidelidade /></Suspense>
             </Layout>
           </ProtectedRoute>
-        } />
-        <Route path="/admin" element={
-          <AdminRoute>
-            <Layout>
-              <Suspense fallback={RouteFallback}><Admin /></Suspense>
-            </Layout>
-          </AdminRoute>
         } />
         
         {/* Redirecionamentos e Catch-all */}

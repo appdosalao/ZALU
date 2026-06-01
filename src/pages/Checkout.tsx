@@ -1,31 +1,93 @@
-import { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useMemo, useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Check, Loader2, Lock, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, Check, Crown, Loader2, Lock, ShieldCheck, Zap } from 'lucide-react';
 import { toast } from 'sonner';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { buildCaktoCheckoutUrl } from '@/lib/caktoCheckout';
 
+type PlanType = 'mensal' | 'vitalicio';
+
+const PLAN_DETAILS = {
+  mensal: {
+    name: 'Plano Mensal',
+    price: 'R$ 7,90/mês',
+    description: 'Assinatura recorrente com cobrança mensal',
+    badgeVariant: 'default' as const,
+    consentText: 'Li e concordo que estou assinando um plano mensal recorrente de R$ 7,90/mês e confirmo estar ciente das políticas de pagamento/cancelamento.',
+    features: [
+      'Acesso completo ao app enquanto a assinatura estiver ativa',
+      'Agendamentos e clientes ilimitados',
+      'Controle financeiro e relatórios',
+      'Atualizações futuras inclusas',
+    ],
+    getEnvUrl: () => import.meta.env.VITE_CAKTO_CHECKOUT_MENSAL_URL,
+    icon: Zap,
+    color: 'text-primary',
+  },
+  vitalicio: {
+    name: 'Plano Vitalício',
+    price: 'R$ 197,00 (único pagamento)',
+    description: 'Pagamento único, acesso permanente',
+    badgeVariant: 'outline' as const,
+    consentText: 'Li e concordo que estou comprando um plano vitalício de R$ 197,00 (pagamento único) e confirmo estar ciente das políticas de pagamento.',
+    features: [
+      'Acesso PERMANENTE ao app, sem mensalidades',
+      'Agendamentos e clientes ilimitados',
+      'Controle financeiro e relatórios',
+      'Todas as atualizações futuras inclusas',
+      'Suporte e melhorias contínuas',
+      'Prioridade no atendimento',
+    ],
+    getEnvUrl: () => import.meta.env.VITE_CAKTO_CHECKOUT_VITALICIO_URL,
+    icon: Crown,
+    color: 'text-amber-500',
+  },
+};
+
 export default function Checkout() {
   const navigate = useNavigate();
-  const [mensalConsent, setMensalConsent] = useState(false);
+  const [searchParams] = useSearchParams();
+  const [planType, setPlanType] = useState<PlanType>('mensal');
+  const [consent, setConsent] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
   const { isAuthenticated, session, usuario } = useSupabaseAuth();
 
-  const resumo = useMemo(() => {
-    return 'Assinatura mensal (R$ 7,90/mês)';
+  // Log variables on mount
+  useEffect(() => {
+    console.log('=== Checkout Component Mounted ===');
+    console.log('VITE_CAKTO_CHECKOUT_MENSAL_URL:', import.meta.env.VITE_CAKTO_CHECKOUT_MENSAL_URL);
+    console.log('VITE_CAKTO_CHECKOUT_VITALICIO_URL:', import.meta.env.VITE_CAKTO_CHECKOUT_VITALICIO_URL);
   }, []);
+
+  // Read plan from URL on initial load
+  useEffect(() => {
+    const planFromUrl = searchParams.get('plan');
+    if (planFromUrl === 'vitalicio') {
+      setPlanType('vitalicio');
+    } else {
+      setPlanType('mensal');
+    }
+  }, [searchParams]);
+
+  const planDetails = PLAN_DETAILS[planType];
+  const PlanIcon = planDetails.icon;
 
   const redirectToCakto = async () => {
     const userId = session?.user?.id ?? null;
-    const baseUrl = String(
-      import.meta.env.VITE_CAKTO_CHECKOUT_MENSAL_URL || import.meta.env.VITE_CAKTO_CHECKOUT_VITALICIO_URL || ''
-    ).trim();
+    const baseUrl = planDetails.getEnvUrl();
+
+    // Debug logs
+    console.log('=== Debug Checkout ===');
+    console.log('Plano selecionado:', planType);
+    console.log('VITE_CAKTO_CHECKOUT_MENSAL_URL:', import.meta.env.VITE_CAKTO_CHECKOUT_MENSAL_URL);
+    console.log('VITE_CAKTO_CHECKOUT_VITALICIO_URL:', import.meta.env.VITE_CAKTO_CHECKOUT_VITALICIO_URL);
+    console.log('URL base obtida:', baseUrl);
 
     if (!isAuthenticated || !userId || !usuario) {
       toast.error('Faça login para continuar');
@@ -34,12 +96,12 @@ export default function Checkout() {
     }
 
     if (!baseUrl) {
-      toast.error('Checkout mensal não configurado');
+      toast.error(`Checkout ${planType} não configurado`);
       return;
     }
 
-    if (!mensalConsent) {
-      toast.error('Confirme o termo da assinatura mensal para continuar');
+    if (!consent) {
+      toast.error('Confirme o termo para continuar');
       return;
     }
 
@@ -74,33 +136,62 @@ export default function Checkout() {
           <div className="text-sm text-muted-foreground">Checkout Seguro</div>
         </div>
 
-        <Card className="shadow-xl border-primary/20">
+        {/* Plan Selector */}
+        <div className="grid gap-4 mb-6 md:grid-cols-2">
+          <Card 
+            className={`cursor-pointer transition-all hover:scale-[1.02] ${planType === 'mensal' ? 'border-2 border-primary shadow-lg' : 'border border-border'}`}
+            onClick={() => setPlanType('mensal')}
+          >
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Zap className="h-5 w-5 text-primary" />
+                <h3 className="font-bold text-lg">Plano Mensal</h3>
+                {planType === 'mensal' && <Badge className="ml-auto">Selecionado</Badge>}
+              </div>
+              <p className="text-2xl font-extrabold text-primary">R$ 7,90/mês</p>
+            </CardContent>
+          </Card>
+          
+          <Card 
+            className={`cursor-pointer transition-all hover:scale-[1.02] ${planType === 'vitalicio' ? 'border-2 border-amber-500 shadow-lg' : 'border border-border'}`}
+            onClick={() => setPlanType('vitalicio')}
+          >
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Crown className="h-5 w-5 text-amber-500" />
+                <h3 className="font-bold text-lg">Plano Vitalício</h3>
+                {planType === 'vitalicio' && <Badge className="ml-auto bg-amber-500">Selecionado</Badge>}
+              </div>
+              <p className="text-2xl font-extrabold text-amber-500">R$ 197,00</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Card className={`shadow-xl ${planType === 'vitalicio' ? 'border-amber-500/50' : 'border-primary/20'}`}>
           <CardHeader className="space-y-3">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <CardTitle className="text-2xl">Finalizar Compra</CardTitle>
-                <CardDescription className="text-base">{resumo}</CardDescription>
+                <div className="flex items-center gap-2">
+                  <PlanIcon className={`h-6 w-6 ${planDetails.color}`} />
+                  <CardTitle className="text-2xl">Finalizar Compra</CardTitle>
+                </div>
+                <CardDescription className="text-base">{planDetails.description}</CardDescription>
               </div>
-              <Badge variant="outline" className="gap-1">
+              <Badge variant={planDetails.badgeVariant} className="gap-1">
                 <Lock className="h-3.5 w-3.5" />
                 Checkout Cakto
               </Badge>
             </div>
-            <div className="rounded-xl border bg-primary/5 p-4">
+            <div className={`rounded-xl border p-4 ${planType === 'vitalicio' ? 'bg-amber-500/10 border-amber-500/30' : 'bg-primary/5 border-primary/30'}`}>
               <div className="text-sm text-muted-foreground">Você está adquirindo</div>
-              <div className="mt-1 text-lg font-semibold">Assinatura mensal do Salão de Bolso</div>
+              <div className="mt-1 text-lg font-semibold">{planDetails.name}</div>
               <div className="mt-2 grid gap-2 sm:grid-cols-2">
-                {[
-                  'Acesso completo ao app enquanto a assinatura estiver ativa',
-                  'Agendamentos e clientes ilimitados',
-                  'Controle financeiro e relatórios',
-                  'Atualizações futuras inclusas',
-                ].map((t) => (
-                  <div key={t} className="flex items-start gap-2 text-sm">
-                    <div className="mt-0.5 bg-green-100 dark:bg-green-900/30 rounded-full p-1">
+                {planDetails.features.map((text) => (
+                  <div key={text} className="flex items-start gap-2 text-sm">
+                    <div className="mt-0.5 bg-green-100 dark:bg-green-900/30 rounded-full p-0.5">
                       <Check className="h-3 w-3 text-green-600 dark:text-green-400" strokeWidth={3} />
                     </div>
-                    <span className="text-foreground/80">{t}</span>
+                    <span className="text-foreground/80">{text}</span>
                   </div>
                 ))}
               </div>
@@ -130,20 +221,20 @@ export default function Checkout() {
 
             <div className="flex items-start gap-3 rounded-lg border p-4 bg-muted/30">
               <Checkbox
-                id="mensal-consent"
-                checked={mensalConsent}
-                onCheckedChange={(v) => setMensalConsent(Boolean(v))}
+                id="consent"
+                checked={consent}
+                onCheckedChange={(v) => setConsent(Boolean(v))}
                 className="mt-1"
               />
-              <label htmlFor="mensal-consent" className="text-sm leading-snug cursor-pointer font-medium">
-                Li e concordo que estou assinando um plano mensal recorrente de R$ 7,90/mês e confirmo estar ciente das políticas de pagamento/cancelamento.
+              <label htmlFor="consent" className="text-sm leading-snug cursor-pointer font-medium">
+                {planDetails.consentText}
               </label>
             </div>
 
             <Button 
               onClick={redirectToCakto} 
-              className="w-full h-14 text-lg font-bold"
-              disabled={isRedirecting || !mensalConsent}
+              className={`w-full h-14 text-lg font-bold ${planType === 'vitalicio' ? 'bg-amber-500 hover:bg-amber-600' : ''}`}
+              disabled={isRedirecting || !consent}
             >
               {isRedirecting ? (
                 <>
@@ -151,7 +242,7 @@ export default function Checkout() {
                   Abrindo checkout...
                 </>
               ) : (
-                'Ir para o pagamento seguro'
+                `Ir para o pagamento seguro - ${planDetails.price}`
               )}
             </Button>
 
@@ -180,7 +271,9 @@ export default function Checkout() {
                 <AccordionItem value="faq-3">
                   <AccordionTrigger>A assinatura renova automaticamente?</AccordionTrigger>
                   <AccordionContent>
-                    Sim. Por ser um plano mensal, a cobrança é recorrente conforme as regras exibidas no checkout. Você pode cancelar conforme a política do provedor de pagamento.
+                    {planType === 'mensal' 
+                      ? 'Sim. Por ser um plano mensal, a cobrança é recorrente conforme as regras exibidas no checkout. Você pode cancelar conforme a política do provedor de pagamento.'
+                      : 'Não. O plano vitalício é um pagamento único, sem renovações automáticas.'}
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
@@ -191,4 +284,3 @@ export default function Checkout() {
     </div>
   );
 }
-
