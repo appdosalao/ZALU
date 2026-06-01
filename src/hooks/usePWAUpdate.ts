@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { registerSW } from 'virtual:pwa-register';
 
 type PWAUpdateStatus = {
@@ -10,7 +10,7 @@ type PWAUpdateStatus = {
 export function usePWAUpdate(): PWAUpdateStatus {
   const [needRefresh, setNeedRefresh] = useState(false);
   const [offlineReady, setOfflineReady] = useState(false);
-  const [updateServiceWorker, setUpdateServiceWorker] = useState<() => void>(() => {});
+  const updateSWRef = useRef<(reloadPage?: boolean) => Promise<void>>();
 
   const handleNeedRefresh = useCallback(() => {
     setNeedRefresh(true);
@@ -20,19 +20,17 @@ export function usePWAUpdate(): PWAUpdateStatus {
     setOfflineReady(true);
   }, []);
 
+  const updateServiceWorker = useCallback(() => {
+    if (updateSWRef.current) {
+      updateSWRef.current(true);
+    }
+  }, []);
+
   useEffect(() => {
-    const updateSW = registerSW({
+    updateSWRef.current = registerSW({
       onNeedRefresh: handleNeedRefresh,
       onOfflineReady: handleOfflineReady,
     });
-
-    setUpdateServiceWorker(() => () => {
-      updateSW(true);
-    });
-
-    return () => {
-      // Cleanup if needed
-    };
   }, [handleNeedRefresh, handleOfflineReady]);
 
   return {
