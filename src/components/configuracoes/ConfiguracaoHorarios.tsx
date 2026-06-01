@@ -89,7 +89,7 @@ export function ConfiguracaoHorarios() {
     );
   };
 
-  const handleHorarioChange = (diaSemana: number, campo: string, valor: string) => {
+  const handleHorarioChange = (diaSemana: number, campo: string, valor: string | boolean | number) => {
     setHorariosForm(prev => 
       prev.map(h => 
         h.dia_semana === diaSemana ? { ...h, [campo]: valor } : h
@@ -279,7 +279,7 @@ export function ConfiguracaoHorarios() {
                           type="number"
                           min="0"
                           value={horario.tempo_minimo_antecedencia || 60}
-                          onChange={(e) => handleHorarioChange(dia.id, 'tempo_minimo_antecedencia', e.target.value)}
+                          onChange={(e) => handleHorarioChange(dia.id, 'tempo_minimo_antecedencia', Number(e.target.value))}
                           placeholder="60"
                         />
                       </div>
@@ -290,7 +290,7 @@ export function ConfiguracaoHorarios() {
                           type="number"
                           min="0"
                           value={horario.tempo_maximo_antecedencia || 4320}
-                          onChange={(e) => handleHorarioChange(dia.id, 'tempo_maximo_antecedencia', e.target.value)}
+                          onChange={(e) => handleHorarioChange(dia.id, 'tempo_maximo_antecedencia', Number(e.target.value))}
                           placeholder="4320"
                         />
                       </div>
@@ -300,7 +300,7 @@ export function ConfiguracaoHorarios() {
                       <Switch
                         id={`permite-fora-horario-${dia.id}`}
                         checked={horario.permite_agendamento_fora_horario || false}
-                        onCheckedChange={(checked) => handleHorarioChange(dia.id, 'permite_agendamento_fora_horario', checked.toString())}
+                        onCheckedChange={(checked) => handleHorarioChange(dia.id, 'permite_agendamento_fora_horario', checked)}
                       />
                       <Label htmlFor={`permite-fora-horario-${dia.id}`} className="text-xs">
                         Permitir agendamentos fora do horário comercial

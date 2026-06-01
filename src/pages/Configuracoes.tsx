@@ -4,7 +4,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { ConfiguracaoHorarios } from '@/components/configuracoes/ConfiguracaoHorarios';
 import { ConfiguracaoNotificacoesAvancadas } from '@/components/configuracoes/ConfiguracaoNotificacoesAvancadas';
-import { ConfiguracaoNotificacoesPush } from '@/components/configuracoes/ConfiguracaoNotificacoesPush';
 import { ConfiguracaoBackup } from '@/components/configuracoes/ConfiguracaoBackup';
 import { ConfiguracaoAgendamentoOnline } from '@/components/configuracoes/ConfiguracaoAgendamentoOnline';
 import { ConfiguracaoConta } from '@/components/configuracoes/ConfiguracaoConta';

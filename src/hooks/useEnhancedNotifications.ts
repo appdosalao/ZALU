@@ -3,7 +3,7 @@ import { useNotifications } from './useNotifications';
 import { usePushNotifications } from './usePushNotifications';
 import { useNotificationScheduler } from './useNotificationScheduler';
 import { useConfiguracoes } from './useConfiguracoes';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 export const useEnhancedNotifications = () => {
   const { playNotificationSound } = useNotifications();

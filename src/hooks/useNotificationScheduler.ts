@@ -1,7 +1,7 @@
 import { useCallback, useEffect } from 'react';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { usePushNotifications } from './usePushNotifications';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { TipoNotificacao } from '@/types/notificacao';
 
 interface ScheduledNotification {

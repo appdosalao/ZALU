@@ -88,6 +88,7 @@ export function ConfiguracaoNotificacoesAvancadas() {
       await salvarNotificacoes(localConfig);
     } catch (error) {
       console.error('Erro ao salvar configurações:', error);
+      toast.error('Erro ao salvar configurações. Tente novamente.');
     }
   };
 
@@ -263,7 +264,7 @@ export function ConfiguracaoNotificacoesAvancadas() {
                           toast.success('Som adicionado à biblioteca');
                           await reload();
                         } else {
-                          toast.error('Arquivo não encontrado em /sounds ou /sunds');
+                          toast.error('Arquivo não encontrado em /sounds');
                         }
                       }}
                     >

@@ -1,8 +1,11 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { Agendamento, AgendamentoFiltros } from '@/types/agendamento';
 import { toast } from 'sonner';
+import { useNotifications } from './useNotifications';
+import { useEnhancedNotifications } from './useEnhancedNotifications';
+import { useServicos } from './useServicos';
 
 interface AgendamentoOnlineData {
   id: string;
@@ -22,12 +25,19 @@ interface AgendamentoOnlineData {
 
 export function useSupabaseAgendamentos() {
   const { user } = useSupabaseAuth();
+  const { todosServicos: servicos } = useServicos();
+  const { addNotification } = useNotifications();
+  const { handleNewAppointment } = useEnhancedNotifications();
   const [agendamentos, setAgendamentos] = useState<Agendamento[]>([]);
   const [agendamentosOnline, setAgendamentosOnline] = useState<AgendamentoOnlineData[]>([]);
   const [loading, setLoading] = useState(false);
   const [filtros, setFiltros] = useState<AgendamentoFiltros>({ mes: new Date().toISOString().slice(0,7) });
   const [paginaAtual, setPaginaAtual] = useState(1);
   const [itensPorPagina] = useState(10);
+  
+  // Refs para trackear IDs de agendamentos já notificados
+  const notificadosAgendamentosRef = useRef<Set<string>>(new Set());
+  const notificadosOnlineRef = useRef<Set<string>>(new Set());
 
   // Verificar se horário está disponível usando a função do Supabase
   const verificarHorarioDisponivel = async (data: string, hora: string) => {
@@ -203,6 +213,83 @@ export function useSupabaseAgendamentos() {
     };
   };
 
+  // Verificar e notificar novos agendamentos
+  const verificarENotificarNovosAgendamentos = async (
+    novosAgendamentos: Agendamento[],
+    novosOnline: AgendamentoOnlineData[]
+  ) => {
+    // Verificar agendamentos regulares
+    for (const ag of novosAgendamentos) {
+      if (!notificadosAgendamentosRef.current.has(ag.id)) {
+        notificadosAgendamentosRef.current.add(ag.id);
+        
+        // Enriquecer com nome do serviço
+        const servico = servicos.find(s => s.id === ag.servicoId);
+        const agendamentoEnriquecido = {
+          ...ag,
+          servicoNome: servico?.nome || ag.servicoNome,
+          horario: ag.hora,
+          criadoEm: ag.createdAt
+        };
+        
+        addNotification({
+          id: agendamentoEnriquecido.id,
+          clienteNome: agendamentoEnriquecido.clienteNome,
+          servicoNome: agendamentoEnriquecido.servicoNome,
+          data: agendamentoEnriquecido.data,
+          horario: agendamentoEnriquecido.horario,
+          origem: agendamentoEnriquecido.origem,
+          criadoEm: agendamentoEnriquecido.criadoEm
+        });
+        await handleNewAppointment(agendamentoEnriquecido);
+      }
+    }
+    
+    // Verificar agendamentos online
+    for (const agOnline of novosOnline) {
+      const idOnline = `online_${agOnline.id}`;
+      if (!notificadosOnlineRef.current.has(idOnline) && agOnline.status !== 'excluido' && agOnline.status !== 'cancelado') {
+        notificadosOnlineRef.current.add(idOnline);
+        
+        // Enriquecer com dados
+        const servico = servicos.find(s => s.id === agOnline.servico_id);
+        const agendamentoConvertido: Agendamento = {
+          id: idOnline,
+          clienteId: '',
+          clienteNome: agOnline.nome_completo,
+          servicoId: agOnline.servico_id,
+          servicoNome: servico?.nome || 'Serviço Online',
+          data: agOnline.data,
+          hora: agOnline.horario,
+          duracao: agOnline.duracao,
+          valor: agOnline.valor,
+          valorPago: 0,
+          valorDevido: agOnline.valor,
+          formaPagamento: 'fiado' as const,
+          statusPagamento: 'em_aberto' as const,
+          status: agOnline.status === 'confirmado' ? 'agendado' as const : 'agendado' as const,
+          origem: 'online' as const,
+          origem_cronograma: false,
+          confirmado: agOnline.status === 'confirmado',
+          observacoes: agOnline.observacoes,
+          createdAt: agOnline.created_at,
+          updatedAt: agOnline.updated_at
+        };
+        
+        addNotification({
+          id: agendamentoConvertido.id,
+          clienteNome: agendamentoConvertido.clienteNome,
+          servicoNome: agendamentoConvertido.servicoNome,
+          data: agendamentoConvertido.data,
+          horario: agendamentoConvertido.hora,
+          origem: agendamentoConvertido.origem,
+          criadoEm: agendamentoConvertido.createdAt
+        });
+        await handleNewAppointment(agendamentoConvertido);
+      }
+    }
+  };
+
   // Carregar todos os agendamentos
   const carregarAgendamentos = async (mesFiltroArg?: string) => {
     const mesFiltro = mesFiltroArg || filtros.mes;
@@ -215,6 +302,9 @@ export function useSupabaseAgendamentos() {
 
       setAgendamentos(agendamentosReg);
       setAgendamentosOnline(agendamentosOnl);
+      
+      // Verificar e notificar novos agendamentos
+      await verificarENotificarNovosAgendamentos(agendamentosReg, agendamentosOnl);
     } catch (error) {
       console.error('Erro ao carregar agendamentos:', error);
       toast.error('Erro ao carregar agendamentos');
