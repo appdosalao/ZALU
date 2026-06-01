@@ -1,6 +1,6 @@
 import { Router, Response } from 'express';
-import { authenticate, AuthenticatedRequest } from '@/middlewares/authenticate';
-import { supabaseAdmin } from '@/lib/supabaseServer';
+import { authenticate, AuthenticatedRequest } from '../middlewares/authenticate.js';
+import { supabaseAdmin } from '../lib/supabaseServer.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
