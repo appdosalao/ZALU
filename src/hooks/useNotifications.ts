@@ -54,7 +54,19 @@ export const useNotifications = () => {
   const [notifications, setNotifications] = useState<AgendamentoNotification[]>([]);
   const [lastChecked, setLastChecked] = useState<string>(new Date().toISOString());
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const shownNotificationsRef = useRef<Set<string>>(new Set());
+  
+  // Initialize shown notifications from localStorage
+  const getShownNotificationsKey = () => `shown-notifications-${usuario?.id || 'guest'}`;
+  
+  const [shownNotifications, setShownNotifications] = useState<Set<string>>(() => {
+    const saved = localStorage.getItem(getShownNotificationsKey());
+    return saved ? new Set(JSON.parse(saved)) : new Set();
+  });
+  
+  // Persist shown notifications to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem(getShownNotificationsKey(), JSON.stringify([...shownNotifications]));
+  }, [shownNotifications, usuario]);
   const { configuracaoNotificacoes } = useSupabaseConfiguracoes();
 
   const buildSoundUrl = useCallback((filename: string) => {
@@ -117,11 +129,11 @@ export const useNotifications = () => {
     if (!usuario || !settings.visualEnabled) return;
 
     // Verificar se já foi mostrada
-    if (shownNotificationsRef.current.has(agendamento.id)) return;
+    if (shownNotifications.has(agendamento.id)) return;
 
     const newNotification = { ...agendamento, shown: false };
     setNotifications(prev => [newNotification, ...prev.slice(0, 2)]); // Máximo 3 notificações
-    shownNotificationsRef.current.add(agendamento.id);
+    setShownNotifications(prev => new Set([...prev, agendamento.id]));
 
     // Tocar som
     playNotificationSound();
@@ -163,7 +175,7 @@ export const useNotifications = () => {
       const criadoEm = new Date(agendamento.createdAt);
       const ultimaVerificacao = new Date(lastChecked);
       
-      return criadoEm > ultimaVerificacao && !shownNotificationsRef.current.has(agendamento.id);
+      return criadoEm > ultimaVerificacao && !shownNotifications.has(agendamento.id);
     });
 
     if (newAgendamentos.length > 0) {

@@ -75,20 +75,35 @@ self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
   // URL para abrir ao clicar
-  const urlToOpen = event.notification.data?.url || '/';
+  let urlToOpen = '/';
+  
+  // If notification has data with appointment date, use that
+  if (event.notification.data?.data) {
+    const notificationData = event.notification.data.data;
+    if (notificationData.data) { // agendamento.data is the date
+      urlToOpen = `/minha-agenda?data=${notificationData.data}`;
+    }
+  }
+  
+  // Fallback to url if provided
+  if (event.notification.data?.url) {
+    urlToOpen = event.notification.data.url;
+  }
 
   event.waitUntil(
     clients.matchAll({
       type: 'window',
       includeUncontrolled: true
     }).then((windowClients) => {
-      // Se já houver uma aba aberta com essa URL, foca nela
+      // Check if we have any open client
       for (let client of windowClients) {
-        if (client.url === urlToOpen && 'focus' in client) {
+        if ('focus' in client) {
+          // Navigate to the correct URL in existing client
+          client.navigate(urlToOpen);
           return client.focus();
         }
       }
-      // Senão, abre uma nova aba
+      // If no open clients, open new one
       if (clients.openWindow) {
         return clients.openWindow(urlToOpen);
       }

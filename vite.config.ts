@@ -64,7 +64,7 @@ export default defineConfig(({ mode }) => ({
         ]
       },
       devOptions: {
-        enabled: false, // Desativar PWA em desenvolvimento para evitar reloads constantes
+        enabled: true,
         type: 'module',
       },
     }),

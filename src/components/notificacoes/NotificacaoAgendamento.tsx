@@ -14,6 +14,13 @@ export function NotificacaoAgendamento() {
   const navigate = (path: string) => {
     navigateRouter(path);
   };
+  
+  const handleNotificationClick = (notificacao: any) => {
+    // Navigate to agenda page with the specific date
+    navigate(`/minha-agenda?data=${notificacao.data}`);
+    // Remove this specific notification
+    removeNotification(notificacao.id);
+  };
 
   const getOrigemBadge = (origem: string) => {
     const badges = {
@@ -66,7 +73,11 @@ export function NotificacaoAgendamento() {
           {notifications.map((notificacao) => {
             const origemBadge = getOrigemBadge(notificacao.origem);
             return (
-              <Card key={notificacao.id} className="border-primary/20 hover:bg-primary/5 transition-colors">
+              <Card 
+              key={notificacao.id} 
+              className="border-primary/20 hover:bg-primary/5 transition-colors cursor-pointer"
+              onClick={() => handleNotificationClick(notificacao)}
+            >
                 <CardContent className="p-3">
                   <div className="flex items-start justify-between">
                     <div className="space-y-2 flex-1">
@@ -96,7 +107,10 @@ export function NotificacaoAgendamento() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => removeNotification(notificacao.id)}
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent card click when clicking the X
+                        removeNotification(notificacao.id);
+                      }}
                       className="h-6 w-6 p-0 ml-2"
                     >
                       <X className="h-3 w-3" />

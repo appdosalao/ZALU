@@ -1,4 +1,4 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -23,14 +23,15 @@ interface PushRequest {
   notification: NotificationPayload;
 }
 
-serve(async (req) => {
+Deno.serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    // Verify authentication token
     const authHeader = req.headers.get('Authorization');
+    
     if (!authHeader) {
       return new Response(
         JSON.stringify({ error: 'Missing authorization header' }),
@@ -38,17 +39,21 @@ serve(async (req) => {
       );
     }
 
-    const token = authHeader.replace('Bearer ', '');
-    
-    // Importar Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     
-    const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    // Create Supabase client with service role for admin operations
+    const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    });
 
     // Validate token and get authenticated user
+    const token = authHeader.replace('Bearer ', '');
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+
     if (authError || !user) {
       return new Response(
         JSON.stringify({ error: 'Invalid or expired token' }),
@@ -58,7 +63,7 @@ serve(async (req) => {
 
     const { userId, tipo, notification }: PushRequest = await req.json();
 
-    // Ensure user can only send notifications to themselves, unless it's a service role (admin/trigger)
+    // Ensure user can only send notifications to themselves, unless it's a service role
     const isServiceRole = user.role === 'service_role';
     
     if (userId && userId !== user.id && !isServiceRole) {
@@ -115,6 +120,20 @@ serve(async (req) => {
       );
     }
 
+    // Dynamically import web-push only when needed
+    const webpush = await import('https://esm.sh/web-push@3.6.7');
+    
+    // Configure VAPID
+    const vapidPublicKey = Deno.env.get('VAPID_PUBLIC_KEY');
+    const vapidPrivateKey = Deno.env.get('VAPID_PRIVATE_KEY');
+    if (vapidPublicKey && vapidPrivateKey) {
+      webpush.setVapidDetails(
+        'mailto:contato@salaoapp.com',
+        vapidPublicKey,
+        vapidPrivateKey
+      );
+    }
+
     // Preparar payload da notificação
     const pushPayload = {
       title: notification.title,
@@ -135,15 +154,6 @@ serve(async (req) => {
     const results = await Promise.allSettled(
       subscriptions.map(async (sub) => {
         try {
-          const webpush = await import('npm:web-push@3.6.6');
-          
-          // Configurar VAPID (usar chaves do ambiente)
-          webpush.setVapidDetails(
-            'mailto:contato@salaoapp.com',
-            Deno.env.get('VAPID_PUBLIC_KEY')!,
-            Deno.env.get('VAPID_PRIVATE_KEY')!
-          );
-
           const subscription = {
             endpoint: sub.endpoint,
             keys: {
@@ -158,7 +168,7 @@ serve(async (req) => {
           );
 
           return { success: true, endpoint: sub.endpoint };
-        } catch (error) {
+        } catch (error: any) {
           console.error(`Erro ao enviar para ${sub.endpoint}:`, error);
           
           // Se a subscription expirou, marcar como inativa
@@ -177,7 +187,7 @@ serve(async (req) => {
     const successCount = results.filter(r => r.status === 'fulfilled' && r.value.success).length;
     const failureCount = results.length - successCount;
 
-    console.log(`Notificações enviadas: ${successCount} sucesso, ${failureCount} falhas`);
+    console.log(`Notificações enviadas: ${successCount} sucesso, ${failureCount} falhas');
 
     return new Response(
       JSON.stringify({
@@ -192,7 +202,7 @@ serve(async (req) => {
       }
     );
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Erro ao processar notificação push:', error);
     return new Response(
       JSON.stringify({ error: error.message }),

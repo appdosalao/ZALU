@@ -172,8 +172,14 @@ export const usePWA = (): PWAState & PWAActions => {
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.getRegistration().then((registration) => {
           if (registration && registration.waiting) {
+            // Listen for when the new service worker becomes active
+            registration.addEventListener('controllerchange', () => {
+              // Refresh the page to use the new service worker
+              window.location.reload();
+            });
+            
+            // Send message to skip waiting
             registration.waiting.postMessage({ type: 'SKIP_WAITING' });
-            // window.location.reload(); // Removido reload automático ao atualizar
           }
         });
       }
