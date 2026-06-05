@@ -241,11 +241,23 @@ serve(async (req: Request) => {
   }
 
   const cleaned = Object.fromEntries(Object.entries(payload).filter(([, v]) => v !== undefined));
-  const updateRes = await supabaseAdmin.from("usuarios").update(cleaned).eq("id", userId);
+      
+  // Try to update assinaturas first
+  let updateRes = await supabaseAdmin.from('assinaturas').upsert({
+    usuario_id: userId,
+    ...cleaned
+  }).select().single();
+  
   if (updateRes.error) {
-    console.log("cakto-webhook: update error", updateRes.error);
+    console.log('cakto-webhook: error updating assinaturas, falling back to usuarios', updateRes.error);
+    // Fallback to usuarios table for backward compatibility
+    updateRes = await supabaseAdmin.from('usuarios').update(cleaned).eq('id', userId);
+  }
+  
+  if (updateRes.error) {
+    console.log('cakto-webhook: update error', updateRes.error);
   } else {
-    console.log("cakto-webhook: updated", { userId, subscriptionStatus, planType });
+    console.log('cakto-webhook: updated', { userId, subscriptionStatus, planType });
   }
 
   return new Response(JSON.stringify({ ok: true }), {

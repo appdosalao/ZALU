@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import type { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import type { Usuario, UsuarioCadastro } from '@/types/usuario';
+import type { Assinatura } from '@/types/assinatura';
 import { updateManifest } from '@/utils/manifestUtils';
 
 export interface AuthContextType {
@@ -38,7 +39,8 @@ const withTimeout = async <T,>(promise: PromiseLike<T>, ms: number): Promise<T> 
   });
 };
 
-const normalizeUsuario = (profile: any): Usuario => {
+const normalizeUsuario = (profile: any, assinatura?: any): Usuario => {
+  const subscriptionData = assinatura ?? profile;
   return {
     id: String(profile?.id ?? ''),
     nome_completo: String(profile?.nome_completo ?? ''),
@@ -48,22 +50,22 @@ const normalizeUsuario = (profile: any): Usuario => {
     tema_preferencia: (profile?.tema_preferencia ?? 'feminino') as Usuario['tema_preferencia'],
     created_at: String(profile?.created_at ?? new Date().toISOString()),
     updated_at: String(profile?.updated_at ?? new Date().toISOString()),
-    plan_type: (profile?.plan_type ?? null) as Usuario['plan_type'],
-    subscription_status: (profile?.subscription_status ?? null) as Usuario['subscription_status'],
-    trial_start_date: (profile?.trial_start_date ?? null) as Usuario['trial_start_date'],
-    trial_used: (profile?.trial_used ?? null) as Usuario['trial_used'],
-    payment_provider: (profile?.payment_provider ?? null) as Usuario['payment_provider'],
-    cakto_order_id: (profile?.cakto_order_id ?? null) as Usuario['cakto_order_id'],
-    cakto_order_ref_id: (profile?.cakto_order_ref_id ?? null) as Usuario['cakto_order_ref_id'],
-    cakto_product_id: (profile?.cakto_product_id ?? null) as Usuario['cakto_product_id'],
-    cakto_offer_id: (profile?.cakto_offer_id ?? null) as Usuario['cakto_offer_id'],
-    cakto_subscription_id: (profile?.cakto_subscription_id ?? null) as Usuario['cakto_subscription_id'],
-    cakto_last_event: (profile?.cakto_last_event ?? null) as Usuario['cakto_last_event'],
-    cakto_last_status: (profile?.cakto_last_status ?? null) as Usuario['cakto_last_status'],
-    cakto_customer_email: (profile?.cakto_customer_email ?? null) as Usuario['cakto_customer_email'],
-    subscription_updated_at: (profile?.subscription_updated_at ?? null) as Usuario['subscription_updated_at'],
-    paid_access: Boolean(profile?.paid_access ?? false),
-    paid_at: (profile?.paid_at ?? null) as Usuario['paid_at'],
+    plan_type: (subscriptionData?.plan_type ?? null) as Usuario['plan_type'],
+    subscription_status: (subscriptionData?.subscription_status ?? null) as Usuario['subscription_status'],
+    trial_start_date: (subscriptionData?.trial_start_date ?? null) as Usuario['trial_start_date'],
+    trial_used: (subscriptionData?.trial_used ?? null) as Usuario['trial_used'],
+    payment_provider: (subscriptionData?.payment_provider ?? null) as Usuario['payment_provider'],
+    cakto_order_id: (subscriptionData?.cakto_order_id ?? null) as Usuario['cakto_order_id'],
+    cakto_order_ref_id: (subscriptionData?.cakto_order_ref_id ?? null) as Usuario['cakto_order_ref_id'],
+    cakto_product_id: (subscriptionData?.cakto_product_id ?? null) as Usuario['cakto_product_id'],
+    cakto_offer_id: (subscriptionData?.cakto_offer_id ?? null) as Usuario['cakto_offer_id'],
+    cakto_subscription_id: (subscriptionData?.cakto_subscription_id ?? null) as Usuario['cakto_subscription_id'],
+    cakto_last_event: (subscriptionData?.cakto_last_event ?? null) as Usuario['cakto_last_event'],
+    cakto_last_status: (subscriptionData?.cakto_last_status ?? null) as Usuario['cakto_last_status'],
+    cakto_customer_email: (subscriptionData?.cakto_customer_email ?? null) as Usuario['cakto_customer_email'],
+    subscription_updated_at: (subscriptionData?.subscription_updated_at ?? null) as Usuario['subscription_updated_at'],
+    paid_access: Boolean(subscriptionData?.paid_access ?? false),
+    paid_at: (subscriptionData?.paid_at ?? null) as Usuario['paid_at'],
   };
 };
 
@@ -125,6 +127,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     try {
       let profile: any = null;
+      let assinaturaData: any = null;
       let profileError: any = null;
       let attempts = 0;
       const maxAttempts = 4; // Aumentado para 4 tentativas
@@ -137,14 +140,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           console.log(`[Auth] Tentativa ${attempts + 1}/${maxAttempts} para carregar perfil de ${nextSession.user.id}... (Online: ${navigator.onLine})`);
           const startTime = Date.now();
           
-          const res = await withTimeout(
-            supabase.from('usuarios').select('*').eq('id', nextSession.user.id).single(),
-            timeouts[attempts]
-          );
+          // Busca perfil do usuário e assinatura em paralelo
+          const [profileRes, assinaturaRes] = await Promise.all([
+            withTimeout(
+              supabase.from('usuarios').select('*').eq('id', nextSession.user.id).single(),
+              timeouts[attempts]
+            ),
+            withTimeout(
+              supabase.from('assinaturas').select('*').eq('usuario_id', nextSession.user.id).maybeSingle(),
+              timeouts[attempts]
+            )
+          ]);
           
           const duration = Date.now() - startTime;
-          profile = (res as any).data;
-          profileError = (res as any).error;
+          profile = (profileRes as any).data;
+          assinaturaData = (assinaturaRes as any).data;
+          profileError = (profileRes as any).error;
           
           if (!profileError && profile) {
             console.log(`[Auth] Perfil carregado com sucesso em ${duration}ms.`);
@@ -228,7 +239,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      const nextUsuario = normalizeUsuario(profile);
+      const nextUsuario = normalizeUsuario(profile, assinaturaData);
       setUsuario(nextUsuario);
       setSessionError(false);
       applyTheme(nextUsuario.tema_preferencia);
@@ -314,6 +325,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     try {
       let profile: any = null;
+      let assinaturaData: any = null;
       let profileError: any = null;
       let attempts = 0;
       const maxAttempts = 3;
@@ -322,12 +334,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       while (attempts < maxAttempts) {
         try {
           console.log(`[Auth] Refresh: Tentativa ${attempts + 1}/${maxAttempts} para ${currentUserId}...`);
-          const res = await withTimeout(
-            supabase.from('usuarios').select('*').eq('id', currentUserId).single(),
-            timeouts[attempts]
-          );
-          profile = (res as any).data;
-          profileError = (res as any).error;
+          const [profileRes, assinaturaRes] = await Promise.all([
+            withTimeout(
+              supabase.from('usuarios').select('*').eq('id', currentUserId).single(),
+              timeouts[attempts]
+            ),
+            withTimeout(
+              supabase.from('assinaturas').select('*').eq('usuario_id', currentUserId).maybeSingle(),
+              timeouts[attempts]
+            )
+          ]);
+          profile = (profileRes as any).data;
+          assinaturaData = (assinaturaRes as any).data;
+          profileError = (profileRes as any).error;
 
           if (!profileError && profile) break;
           if (profileError?.code === 'PGRST116') break;
@@ -347,7 +366,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      const nextUsuario = normalizeUsuario(profile);
+      const nextUsuario = normalizeUsuario(profile, assinaturaData);
       setUsuario(nextUsuario);
       setSessionError(false);
       applyTheme(nextUsuario.tema_preferencia);

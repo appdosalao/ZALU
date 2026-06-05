@@ -50,13 +50,24 @@ export const usePaidAccess = () => {
     queryFn: async () => {
       if (!userId) return false;
       const { data, error } = await (supabase
-        .from('usuarios') as any)
+        .from('assinaturas') as any)
         .select('paid_access')
-        .eq('id', userId)
+        .eq('usuario_id', userId)
         .maybeSingle();
 
       if (error) {
-        return false;
+        // Fallback to usuarios table for backward compatibility
+        const { data: fallbackData, error: fallbackError } = await (supabase
+          .from('usuarios') as any)
+          .select('paid_access')
+          .eq('id', userId)
+          .maybeSingle();
+        if (fallbackError) return false;
+        const isPaid = !!fallbackData?.paid_access;
+        if (userId) {
+          writeCache({ userId, isPaid, cachedAt: Date.now() });
+        }
+        return isPaid;
       }
 
       const isPaid = !!data?.paid_access;
