@@ -218,7 +218,7 @@ export function ConfiguracaoIntervalos() {
                   
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
+                      <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" aria-label="Remover intervalo" title="Remover intervalo">
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </AlertDialogTrigger>

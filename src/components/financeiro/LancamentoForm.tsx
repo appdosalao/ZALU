@@ -114,7 +114,7 @@ export default function LancamentoForm({
     <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
       <CardHeader>
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" onClick={onCancel}>
+          <Button variant="ghost" size="sm" onClick={onCancel} aria-label="Voltar" title="Voltar">
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <CardTitle>
