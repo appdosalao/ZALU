@@ -15,22 +15,20 @@ permissions:
 jobs:
   analyze:
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
       - uses: actions/checkout@v4
-        env:
-          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
         with:
           fetch-depth: 2
 
-      - uses: github/codeql-action/init@v4
-        env:
-          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+      - uses: github/codeql-action/init@v3
         with:
           languages: javascript-typescript
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/setup-node@v4
-        env:
-          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
         with:
           node-version: 18
           cache: npm
@@ -39,7 +37,6 @@ jobs:
 
       - run: npm run build
 
-      - uses: github/codeql-action/analyze@v4
+      - uses: github/codeql-action/analyze@v3
         env:
-          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
