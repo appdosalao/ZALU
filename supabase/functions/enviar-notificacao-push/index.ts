@@ -187,7 +187,7 @@ Deno.serve(async (req) => {
     const successCount = results.filter(r => r.status === 'fulfilled' && r.value.success).length;
     const failureCount = results.length - successCount;
 
-    console.log(`Notificações enviadas: ${successCount} sucesso, ${failureCount} falhas');
+    console.log(`Notificações enviadas: ${successCount} sucesso, ${failureCount} falhas`);
 
     return new Response(
       JSON.stringify({
