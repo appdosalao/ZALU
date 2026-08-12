@@ -25,7 +25,7 @@ const Sobre = () => {
           '@context': 'https://schema.org',
           '@type': 'Organization',
           name: 'ZALU',
-          url: 'https://www.zalu.app.shop/',
+          url: 'https://zalusalao.online/',
           description: 'Sistema de gestão para salões de beleza e profissionais autônomos.'
         }}
       />

@@ -20,6 +20,7 @@ type FormValues = z.infer<typeof esqueceuSenhaSchema>;
 const EsqueciSenha = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const { register, handleSubmit, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(esqueceuSenhaSchema),
@@ -27,14 +28,23 @@ const EsqueciSenha = () => {
 
   const onSubmit = async (data: FormValues) => {
     setIsLoading(true);
-    
+    setErrorMessage('');
+
     try {
       const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent('/redefinir-senha')}`;
       const { error } = await supabase.auth.resetPasswordForEmail(data.email, { redirectTo });
       if (error) throw error;
       setSuccess(true);
     } catch (err) {
-      toast.error('Não foi possível enviar o e-mail de recuperação. Tente novamente.');
+      const raw = err instanceof Error ? err.message : 'Ocorreu um erro inesperado.';
+      if (/rate limit/i.test(raw)) {
+        setErrorMessage('Limite de envio de e-mails atingido. Aguarde alguns minutos e tente novamente.');
+      } else if (/smtp|email (provider|sending)/i.test(raw) || /unable to validate email/i.test(raw)) {
+        setErrorMessage(`O serviço de e-mail não respondeu (configuração de SMTP no Supabase): ${raw}`);
+      } else {
+        setErrorMessage(raw);
+      }
+      toast.error('Não foi possível enviar o e-mail de recuperação. Verifique a mensagem abaixo.');
     } finally {
       setIsLoading(false);
     }
@@ -52,6 +62,9 @@ const EsqueciSenha = () => {
             <CardDescription>
               Se o e-mail estiver cadastrado, você receberá as instruções para redefinir sua senha
             </CardDescription>
+            <p className="text-xs text-muted-foreground pt-2">
+              Não recebeu? Verifique a caixa de spam/lixeira. Se enviou várias vezes seguidas, pode ser limite de segurança — aguarde alguns minutos.
+            </p>
           </CardHeader>
           <CardContent>
             <div className="text-center">
@@ -75,9 +88,9 @@ const EsqueciSenha = () => {
       />
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1 text-center">
-<div className="flex justify-center mb-2">
-              <img src="/images/zalu-wordmark.png" alt="ZALU" className="h-12 w-auto object-contain" />
-            </div>
+          <div className="flex justify-center mb-2">
+            <img src="/images/zalu-wordmark.png" alt="ZALU" className="h-12 w-auto object-contain" />
+          </div>
           <CardTitle className="text-2xl font-bold">Esqueci Minha Senha</CardTitle>
           <CardDescription>
             Digite seu e-mail para receber as instruções de recuperação
@@ -85,6 +98,11 @@ const EsqueciSenha = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            {errorMessage && (
+              <div className="rounded-md bg-destructive/10 border border-destructive/30 p-3 text-sm text-destructive font-medium">
+                {errorMessage}
+              </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="email">E-mail</Label>
               <Input

@@ -23,7 +23,7 @@ export default function AgendamentoOnline() {
           '@type': 'Service',
           name: 'Agendamento Online para Salões de Beleza',
           provider: { '@type': 'Organization', name: 'ZALU' },
-          url: 'https://www.zalu.app.shop/agendamento-online',
+          url: 'https://zalusalao.online/agendamento-online',
           areaServed: 'BR',
           description: 'Agendamento online de serviços de beleza: corte, coloração, manicure, pedicure, escova e muito mais.',
         }}
