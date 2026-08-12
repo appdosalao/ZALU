@@ -1,0 +1,1 @@
+{"version":3,"file":"usePushNotifications.d.ts","sourceRoot":"","sources":["../../../../src/hooks/usePushNotifications.ts"],"names":[],"mappings":"AAKA,UAAU,oBAAoB;IAC5B,QAAQ,EAAE,MAAM,CAAC;IACjB,IAAI,EAAE;QACJ,MAAM,EAAE,MAAM,CAAC;QACf,IAAI,EAAE,MAAM,CAAC;KACd,CAAC;CACH;AAED,eAAO,MAAM,oBAAoB;;;;;;;;;CAmMhC,CAAC"}

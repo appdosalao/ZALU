@@ -1,0 +1,1 @@
+{"version":3,"file":"AppLogo.d.ts","sourceRoot":"","sources":["../../../../../src/components/branding/AppLogo.tsx"],"names":[],"mappings":"AAIA,UAAU,YAAY;IACpB,IAAI,CAAC,EAAE,MAAM,CAAC;IACd,OAAO,CAAC,EAAE,MAAM,GAAG,IAAI,GAAG,IAAI,GAAG,IAAI,GAAG,IAAI,GAAG,MAAM,CAAC;IACtD,SAAS,CAAC,EAAE,MAAM,CAAC;CACpB;AAWD,wBAAgB,OAAO,CAAC,EAAE,IAAS,EAAE,OAAc,EAAE,SAAc,EAAE,EAAE,YAAY,2CA+BlF"}

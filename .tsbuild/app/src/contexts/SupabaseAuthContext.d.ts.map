@@ -1,0 +1,1 @@
+{"version":3,"file":"SupabaseAuthContext.d.ts","sourceRoot":"","sources":["../../../../src/contexts/SupabaseAuthContext.tsx"],"names":[],"mappings":"AAAA,YAAY,EAAE,eAAe,IAAI,uBAAuB,EAAE,MAAM,eAAe,CAAC;AAChF,OAAO,EAAE,YAAY,IAAI,oBAAoB,EAAE,OAAO,IAAI,eAAe,EAAE,MAAM,eAAe,CAAC"}

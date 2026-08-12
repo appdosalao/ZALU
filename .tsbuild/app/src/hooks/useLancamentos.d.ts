@@ -1,0 +1,51 @@
+import { LancamentoFiltros } from '@/types/lancamento';
+export declare function useLancamentos(): {
+    lancamentos: import("@/types/lancamento").Lancamento[];
+    filtros: LancamentoFiltros;
+    setFiltros: import("react").Dispatch<import("react").SetStateAction<LancamentoFiltros>>;
+    resumoFinanceiro: import("@/types/lancamento").ResumoFinanceiro;
+    categorias: import("../types/contaFixa").CategoriaFinanceira[];
+    criarLancamento: (lancamento: import("@/types/lancamento").NovoLancamento) => Promise<boolean>;
+    atualizarLancamento: (id: string, updates: Partial<import("@/types/lancamento").Lancamento>) => Promise<boolean>;
+    removerLancamento: (id: string) => Promise<void>;
+    adicionarLancamento: (lancamento: import("@/types/lancamento").NovoLancamento) => Promise<boolean>;
+    calcularResumo: () => import("@/types/lancamento").ResumoFinanceiro;
+    recarregar: (dataInicioParam?: string, dataFimParam?: string) => Promise<void>;
+    loading: boolean;
+    error: string;
+    createLancamento: (lancamento: import("@/types/lancamento").NovoLancamento) => Promise<boolean>;
+    updateLancamento: (id: string, updates: Partial<import("@/types/lancamento").Lancamento>) => Promise<boolean>;
+    deleteLancamento: (id: string) => Promise<void>;
+    filterLancamentos: (filtros: LancamentoFiltros) => import("@/types/lancamento").Lancamento[];
+    calculateResumoFinanceiro: () => import("@/types/lancamento").ResumoFinanceiro;
+    createLancamentoFromAgendamento: (agendamento: any) => Promise<{
+        categoria: string | null;
+        cliente_id: string | null;
+        created_at: string;
+        data: string;
+        descricao: string;
+        id: string;
+        origem_id: string | null;
+        origem_tipo: string | null;
+        tipo: string;
+        updated_at: string;
+        user_id: string;
+        valor: number;
+    }>;
+    createLancamentoFromContaFixa: (contaFixa: any, valorPago: number, dataPagamento: Date) => Promise<{
+        categoria: string | null;
+        cliente_id: string | null;
+        created_at: string;
+        data: string;
+        descricao: string;
+        id: string;
+        origem_id: string | null;
+        origem_tipo: string | null;
+        tipo: string;
+        updated_at: string;
+        user_id: string;
+        valor: number;
+    }>;
+    loadLancamentos: (dataInicioParam?: string, dataFimParam?: string) => Promise<void>;
+};
+//# sourceMappingURL=useLancamentos.d.ts.map

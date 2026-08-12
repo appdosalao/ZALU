@@ -1,0 +1,143 @@
+import { useNavigate } from 'react-router-dom';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Check, Crown, Scissors, Zap } from 'lucide-react';
+import { usePaidAccess } from '@/hooks/usePaidAccess';
+import { PageMeta } from '@/components/seo/PageMeta';
+
+export default function Planos() {
+  const navigate = useNavigate();
+  const { isPaid } = usePaidAccess();
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+      <PageMeta
+        title="Planos e Preços — ZALU"
+        description="Conheça os planos do ZALU para salões de beleza: teste grátis de 7 dias e plano mensal a partir de R$ 7,90 com todos os recursos."
+        path="/planos"
+        keywords="preço sistema salão de beleza, plano sistema gestão salão, sistema salão beleza barato, assinatura software salão"
+      />
+      <div className="container mx-auto py-12 px-4 max-w-6xl">
+        <div className="text-center mb-10">
+          <div className="flex justify-center mb-3">
+            <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center">
+              <Scissors className="h-7 w-7 text-primary" />
+            </div>
+          </div>
+          <h1 className="text-4xl font-bold mb-2">Escolha seu plano</h1>
+          <p className="text-muted-foreground text-lg">
+            Opções flexíveis para profissionalizar o seu salão
+          </p>
+        </div>
+
+        <div className="grid gap-8 md:grid-cols-2 items-start">
+          {/* Plano Mensal */}
+          <Card className="shadow-xl border-2 border-primary/40 bg-gradient-to-b from-primary/5 to-background relative overflow-hidden">
+            {isPaid && (
+              <div className="absolute top-4 right-4">
+                <Badge className="bg-green-600 hover:bg-green-700 text-white border-none shadow-sm">
+                  Ativa
+                </Badge>
+              </div>
+            )}
+            
+            <CardHeader className="text-center pb-2">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <Zap className="h-5 w-5 text-primary" />
+                <CardTitle className="text-3xl">Plano Mensal</CardTitle>
+              </div>
+              <CardDescription>Assinatura recorrente com cobrança mensal</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6 pt-4">
+              <div className="text-center">
+                <div className="text-5xl font-extrabold text-primary leading-none">R$ 7,90</div>
+                <p className="text-sm font-medium mt-2 uppercase tracking-wider text-muted-foreground">por mês • checkout via Cakto</p>
+              </div>
+
+              <div className="space-y-3 bg-white/50 dark:bg-black/20 p-5 rounded-xl border border-border/50">
+                {[
+                  'Acesso completo ao app enquanto a assinatura estiver ativa',
+                  'Agendamentos e clientes ilimitados',
+                  'Controle financeiro e relatórios',
+                  'Atualizações futuras inclusas',
+                  'Suporte e melhorias contínuas',
+                ].map((text) => (
+                  <div key={text} className="flex items-start gap-3">
+                    <div className="mt-0.5 bg-green-100 dark:bg-green-900/30 rounded-full p-0.5">
+                      <Check className="h-3 w-3 text-green-600 dark:text-green-400" strokeWidth={3} />
+                    </div>
+                    <span className="text-sm font-medium">{text}</span>
+                  </div>
+                ))}
+              </div>
+
+              <Button
+                onClick={() => navigate('/checkout?plan=mensal')}
+                className="w-full h-14 text-lg font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] transition-transform"
+                disabled={isPaid}
+              >
+                {isPaid ? 'Assinatura ativa' : 'Assinar por R$ 7,90/mês'}
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Plano Vitalício */}
+          <Card className="shadow-xl border-2 border-amber-500/50 bg-gradient-to-b from-amber-500/10 to-background relative overflow-hidden">
+            <div className="absolute top-4 right-4">
+              <Badge className="bg-amber-500 hover:bg-amber-600 text-white border-none shadow-sm">
+                Mais Popular
+              </Badge>
+            </div>
+            
+            <CardHeader className="text-center pb-2">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <Crown className="h-5 w-5 text-amber-500" />
+                <CardTitle className="text-3xl">Plano Vitalício</CardTitle>
+              </div>
+              <CardDescription>Pagamento único, acesso permanente</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6 pt-4">
+              <div className="text-center">
+                <div className="text-5xl font-extrabold text-amber-500 leading-none">R$ 197,00</div>
+                <p className="text-sm font-medium mt-2 uppercase tracking-wider text-muted-foreground">uma vez • checkout via Cakto</p>
+              </div>
+
+              <div className="space-y-3 bg-white/50 dark:bg-black/20 p-5 rounded-xl border border-border/50">
+                {[
+                  'Acesso PERMANENTE ao app, sem mensalidades',
+                  'Agendamentos e clientes ilimitados',
+                  'Controle financeiro e relatórios',
+                  'Todas as atualizações futuras inclusas',
+                  'Suporte e melhorias contínuas',
+                  'Prioridade no atendimento',
+                ].map((text) => (
+                  <div key={text} className="flex items-start gap-3">
+                    <div className="mt-0.5 bg-green-100 dark:bg-green-900/30 rounded-full p-0.5">
+                      <Check className="h-3 w-3 text-green-600 dark:text-green-400" strokeWidth={3} />
+                    </div>
+                    <span className="text-sm font-medium">{text}</span>
+                  </div>
+                ))}
+              </div>
+
+              <Button
+                onClick={() => navigate('/checkout?plan=vitalicio')}
+                className="w-full h-14 text-lg font-bold shadow-lg shadow-amber-500/20 hover:scale-[1.02] transition-transform bg-amber-500 hover:bg-amber-600"
+                disabled={isPaid}
+              >
+                {isPaid ? 'Assinatura ativa' : 'Comprar por R$ 197,00'}
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="mt-12 max-w-2xl mx-auto">
+          <div className="text-center text-sm text-muted-foreground mt-4">
+            🔒 Pagamento 100% seguro processado via Cakto.
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

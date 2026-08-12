@@ -1,0 +1,1 @@
+{"version":3,"file":"usePWAUpdate.d.ts","sourceRoot":"","sources":["../../../../src/hooks/usePWAUpdate.ts"],"names":[],"mappings":"AAGA,KAAK,eAAe,GAAG;IACrB,WAAW,EAAE,OAAO,CAAC;IACrB,mBAAmB,EAAE,MAAM,IAAI,CAAC;IAChC,YAAY,EAAE,OAAO,CAAC;CACvB,CAAC;AAEF,wBAAgB,YAAY,IAAI,eAAe,CA+B9C"}

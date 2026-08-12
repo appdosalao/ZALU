@@ -1,0 +1,1 @@
+{"version":3,"file":"useShare.d.ts","sourceRoot":"","sources":["../../../../src/hooks/useShare.ts"],"names":[],"mappings":"AAGA,MAAM,WAAW,SAAS;IACxB,KAAK,CAAC,EAAE,MAAM,CAAC;IACf,IAAI,CAAC,EAAE,MAAM,CAAC;IACd,GAAG,CAAC,EAAE,MAAM,CAAC;CACd;AAED,eAAO,MAAM,QAAQ;;;yBAOe,SAAS,KAAG,OAAO,CAAC,OAAO,CAAC;4BA6BzB,MAAM,KAAG,OAAO,CAAC,OAAO,CAAC;CAiB/D,CAAC"}

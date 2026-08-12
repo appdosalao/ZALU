@@ -1,0 +1,97 @@
+import type { ProgramaFidelidade, Recompensa, SaldoPontos, EstatisticasFidelidade, RankingFidelidade, NivelFidelidade, PontoFidelidade, ClasseFidelidade, RecompensaFormData, ProgramaFidelidadeFormData, ClasseFidelidadeFormData } from '@/types/fidelidade';
+export declare const useSupabaseFidelidade: () => {
+    loading: boolean;
+    programa: ProgramaFidelidade;
+    recompensas: Recompensa[];
+    estatisticas: EstatisticasFidelidade;
+    ranking: RankingFidelidade[];
+    classes: ClasseFidelidade[];
+    salvarPrograma: (dados: ProgramaFidelidadeFormData) => Promise<{
+        ativo: boolean | null;
+        created_at: string | null;
+        data_inicio: string | null;
+        expiracao_pontos_dias: number | null;
+        id: string;
+        nome: string;
+        pontos_por_real: number | null;
+        updated_at: string | null;
+        user_id: string;
+    }>;
+    togglePrograma: () => Promise<void>;
+    criarRecompensa: (dados: RecompensaFormData) => Promise<{
+        ativo: boolean | null;
+        classe_id: string | null;
+        created_at: string | null;
+        descricao: string | null;
+        id: string;
+        nome: string;
+        pontos_necessarios: number;
+        servico_id: string | null;
+        tipo: string;
+        updated_at: string | null;
+        user_id: string;
+        validade_dias: number | null;
+        valor_desconto: number | null;
+    }>;
+    atualizarRecompensa: (id: string, dados: Partial<RecompensaFormData>) => Promise<{
+        ativo: boolean | null;
+        classe_id: string | null;
+        created_at: string | null;
+        descricao: string | null;
+        id: string;
+        nome: string;
+        pontos_necessarios: number;
+        servico_id: string | null;
+        tipo: string;
+        updated_at: string | null;
+        user_id: string;
+        validade_dias: number | null;
+        valor_desconto: number | null;
+    }>;
+    excluirRecompensa: (id: string) => Promise<void>;
+    criarClasse: (dados: ClasseFidelidadeFormData) => Promise<{
+        ativo: boolean | null;
+        beneficios: string | null;
+        cor: string | null;
+        created_at: string | null;
+        id: string;
+        nome: string;
+        ordem: number;
+        pontos_minimos: number;
+        updated_at: string | null;
+        user_id: string;
+    }>;
+    atualizarClasse: (id: string, dados: Partial<ClasseFidelidadeFormData>) => Promise<{
+        ativo: boolean | null;
+        beneficios: string | null;
+        cor: string | null;
+        created_at: string | null;
+        id: string;
+        nome: string;
+        ordem: number;
+        pontos_minimos: number;
+        updated_at: string | null;
+        user_id: string;
+    }>;
+    excluirClasse: (id: string) => Promise<void>;
+    buscarSaldoCliente: (clienteId: string) => Promise<SaldoPontos | null>;
+    buscarNivelCliente: (clienteId: string) => Promise<NivelFidelidade | null>;
+    buscarHistoricoPontos: (clienteId: string) => Promise<PontoFidelidade[]>;
+    adicionarPontosManual: (clienteId: string, pontos: number, descricao: string) => Promise<{
+        cliente_id: string;
+        created_at: string | null;
+        data_expiracao: string | null;
+        data_ganho: string | null;
+        descricao: string | null;
+        expirado: boolean | null;
+        id: string;
+        origem: string;
+        origem_id: string | null;
+        pontos: number;
+        user_id: string;
+    }>;
+    sincronizarDoHistorico: () => Promise<boolean>;
+    carregarRanking: (limite?: number) => Promise<void>;
+    recarregar: () => void;
+};
+//# sourceMappingURL=useSupabaseFidelidade.d.ts.map

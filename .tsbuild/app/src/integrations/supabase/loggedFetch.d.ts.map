@@ -1,0 +1,1 @@
+{"version":3,"file":"loggedFetch.d.ts","sourceRoot":"","sources":["../../../../../src/integrations/supabase/loggedFetch.ts"],"names":[],"mappings":"AAAA,KAAK,kBAAkB,GAAG;IACxB,KAAK,EAAE,MAAM,CAAC;IACd,SAAS,EAAE,MAAM,CAAC;CACnB,CAAC;AAaF,wBAAgB,iBAAiB,CAAC,EAAE,KAAK,EAAE,SAAS,EAAE,EAAE,kBAAkB,WACnD,WAAW,GAAG,GAAG,SAAS,WAAW,uBAoC3D"}
