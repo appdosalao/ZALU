@@ -5,7 +5,7 @@ import type { Database } from './types';
 import { createLoggedFetch } from './loggedFetch';
 
 const VITE_SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://dfwepnzwktjyhvfmpuxo.supabase.co';
-const VITE_SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRmd2Vwbnp3a3RqeWh2Zm1wdXhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1NzE4NzQsImV4cCI6MjA3MTE0Nzg3NH0.9BR-N9tSzHetSL50Dsalwb-q_dNHfdQBp32Y9qIXlag';
+const VITE_SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRmd2Vwbnp3a3RqeWh2Zm1wdXhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1NzE4NzQsImV4cCI6MjA3MTE0Nzg3NH0.9BR-N9tSzHetSL50Dsalwb-q_dNHfdQBp32Y9qIXlag'; // gitleaks:allow chave anon publica do Supabase
 
 const SUPABASE_URL = VITE_SUPABASE_URL;
 const SUPABASE_PUBLISHABLE_KEY = VITE_SUPABASE_ANON_KEY;

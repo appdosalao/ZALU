@@ -42,7 +42,7 @@ https://xxxxxxxxxxx.supabase.co
 
 **🔑 Anon/Public Key:**
 ```
-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh4eHh4eHh4eHgiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTY5ODM0NTY3OCwiZXhwIjoyMDEzOTIxNjc4fQ.xxxxxxxxxxxxxxxxxxxxxxxxxxxx
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh4eHh4eHh4eHgiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTY5ODM0NTY3OCwiZXhwIjoyMDEzOTIxNjc4fQ.xxxxxxxxxxxxxxxxxxxxxxxxxxxx <!-- gitleaks:allow exemplo ficticio -->
 ```
 
 > ⚠️ **IMPORTANTE**: A `anon key` é segura para usar no frontend. A `service_role key` NUNCA deve ser exposta publicamente!
