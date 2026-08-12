@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { PageMeta } from '@/components/seo/PageMeta';
 
 type CallbackStatus = 'loading' | 'error';
 type OtpType = 'signup' | 'invite' | 'magiclink' | 'recovery' | 'email_change';
@@ -102,10 +103,16 @@ export default function AuthCallback() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted p-4">
+      <PageMeta
+        title="Confirmando acesso — ZALU"
+        description="Validando seu acesso ao ZALU."
+        path="/auth/callback"
+        noindex
+      />
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1 text-center">
           <div className="flex justify-center mb-2">
-            <AppLogo size={48} rounded="xl" />
+            <img src="/images/zalu-wordmark.png" alt="ZALU" className="h-12 w-auto object-contain" />
           </div>
           <CardTitle className="text-2xl font-bold">Processando…</CardTitle>
           <CardDescription>Estamos validando seu acesso.</CardDescription>

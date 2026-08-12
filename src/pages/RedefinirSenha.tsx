@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Eye, EyeOff } from 'lucide-react';
+import { PageMeta } from '@/components/seo/PageMeta';
 
 const schema = z.object({
   senha: z.string().min(6, 'A senha deve ter pelo menos 6 caracteres'),
@@ -29,6 +31,7 @@ export default function RedefinirSenha() {
   const { register, handleSubmit, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),
   });
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     const run = async () => {
@@ -98,10 +101,16 @@ export default function RedefinirSenha() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted p-4">
+      <PageMeta
+        title="Redefinir Senha — ZALU"
+        description="Defina uma nova senha para sua conta no ZALU."
+        path="/redefinir-senha"
+        noindex
+      />
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1 text-center">
           <div className="flex justify-center mb-2">
-            <AppLogo size={48} rounded="xl" />
+            <img src="/images/zalu-wordmark.png" alt="ZALU" className="h-12 w-auto object-contain" />
           </div>
           <CardTitle className="text-2xl font-bold">Redefinir Senha</CardTitle>
           <CardDescription>Escolha uma nova senha para sua conta</CardDescription>
@@ -110,7 +119,22 @@ export default function RedefinirSenha() {
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="senha">Nova senha</Label>
-              <Input id="senha" type="password" {...register('senha')} disabled={isLoading} />
+              <div className="relative">
+                <Input
+                  id="senha"
+                  type={showPassword ? 'text' : 'password'}
+                  {...register('senha')}
+                  disabled={isLoading}
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  onClick={() => setShowPassword(v => !v)}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
               {errors.senha && <p className="text-sm text-destructive">{errors.senha.message}</p>}
             </div>
             <div className="space-y-2">
