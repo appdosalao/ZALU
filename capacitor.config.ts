@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'app.lovable.b77ccd54a2cf492789743a06dd2758b1',
-  appName: 'salao-de-bolso',
+  appName: 'bellagest',
   webDir: 'dist',
   server: {
     url: 'https://b77ccd54-a2cf-4927-8974-3a06dd2758b1.lovableproject.com?forceHideBadge=true',
