@@ -39,7 +39,14 @@ export const updateManifest = (usuario: Usuario | null) => {
     appName.substring(0, 12).trim() + '...' : 
     appName;
 
-  const logo = (usuario as any)?.logo_url || '/icons/icon-192x192.png';
+  const appIcons = [
+    { src: '/icons/icon-48x48.png',  sizes: '48x48',  type: 'image/png', purpose: 'any' },
+    { src: '/icons/icon-72x72.png',  sizes: '72x72',  type: 'image/png', purpose: 'any' },
+    { src: '/icons/icon-96x96.png',  sizes: '96x96',  type: 'image/png', purpose: 'any' },
+    { src: '/icons/icon-144x144.png', sizes: '144x144', type: 'image/png', purpose: 'any' },
+    { src: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
+    { src: '/icons/icon-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' },
+  ];
   const manifest: CustomManifest = {
     name: appName,
     short_name: shortName,
@@ -47,19 +54,12 @@ export const updateManifest = (usuario: Usuario | null) => {
     start_url: "/",
     display: "standalone",
     orientation: "portrait-primary",
-    theme_color: "#a813ecff",
+    theme_color: "#D6B2E7",
     background_color: "#FFFFFF",
     scope: "/",
     lang: "pt-BR",
     categories: ["business", "productivity"],
-    icons: [
-      { src: logo, sizes: "48x48",  type: "image/png", purpose: "any" },
-      { src: logo, sizes: "72x72",  type: "image/png", purpose: "any" },
-      { src: logo, sizes: "96x96",  type: "image/png", purpose: "any" },
-      { src: logo, sizes: "144x144",type: "image/png", purpose: "any" },
-      { src: logo, sizes: "192x192",type: "image/png", purpose: "any maskable" },
-      { src: logo, sizes: "512x512",type: "image/png", purpose: "any maskable" },
-    ],
+    icons: appIcons,
     shortcuts: [
       {
         name: "Agendamentos",
@@ -121,10 +121,10 @@ export const updateManifest = (usuario: Usuario | null) => {
   manifestLink.href = manifestURL;
   
   // Atualizar meta tags relacionadas
-  updateMetaTags(appName, logo);
+  updateMetaTags(appName);
 };
 
-const updateMetaTags = (appName: string, logo: string) => {
+const updateMetaTags = (appName: string) => {
   // Atualizar título da página
   document.title = appName;
   
@@ -171,9 +171,19 @@ const updateMetaTags = (appName: string, logo: string) => {
   appleStatusMeta.content = 'default';
   
   // Adicionar ícones para iOS
-  const iosIconSizes = ['57x57', '60x60', '72x72', '76x76', '114x114', '120x120', '144x144', '152x152', '180x180'];
-  
-  iosIconSizes.forEach(size => {
+  const iosIconMap: Record<string, string> = {
+    '57x57': '/icons/icon-72x72.png',
+    '60x60': '/icons/icon-72x72.png',
+    '72x72': '/icons/icon-72x72.png',
+    '76x76': '/icons/icon-96x96.png',
+    '114x114': '/icons/icon-144x144.png',
+    '120x120': '/icons/icon-144x144.png',
+    '144x144': '/icons/icon-144x144.png',
+    '152x152': '/icons/icon-152x152.png',
+    '180x180': '/icons/icon-180x180.png',
+  };
+
+  Object.entries(iosIconMap).forEach(([size, src]) => {
     let iosIconLink = document.querySelector(`link[rel="apple-touch-icon"][sizes="${size}"]`) as HTMLLinkElement;
     if (!iosIconLink) {
       iosIconLink = document.createElement('link');
@@ -181,6 +191,6 @@ const updateMetaTags = (appName: string, logo: string) => {
       iosIconLink.setAttribute('sizes', size);
       document.head.appendChild(iosIconLink);
     }
-    iosIconLink.href = logo;
+    iosIconLink.href = src;
   });
 };
