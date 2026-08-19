@@ -8,6 +8,13 @@ export interface LocalStorageKeys {
   LANCAMENTOS: 'lancamentos';
   NOTIFICATION_SETTINGS: 'notification-settings';
   CONFIGURACOES: 'configuracoes';
+  APP_THEME: 'app-theme';
+  MINHA_AGENDA_TAB: 'minhaAgenda.tab';
+  ONBOARDING_COMPLETED: 'onboarding-completed';
+  SCHEDULED_NOTIF_PREFIX: 'scheduled-notifications-';
+  NOTIFICATION_SHOWN_PREFIX: 'notification-shown-';
+  SUBSCRIPTION_CHECK: 'subscription-check-timestamp';
+  CUSTOM_SOUND_LIB: 'sound-library-urls';
 }
 
 export const LOCAL_STORAGE_KEYS: LocalStorageKeys = {
@@ -19,6 +26,13 @@ export const LOCAL_STORAGE_KEYS: LocalStorageKeys = {
   LANCAMENTOS: 'lancamentos',
   NOTIFICATION_SETTINGS: 'notification-settings',
   CONFIGURACOES: 'configuracoes',
+  APP_THEME: 'app-theme',
+  MINHA_AGENDA_TAB: 'minhaAgenda.tab',
+  ONBOARDING_COMPLETED: 'onboarding-completed',
+  SCHEDULED_NOTIF_PREFIX: 'scheduled-notifications-',
+  NOTIFICATION_SHOWN_PREFIX: 'notification-shown-',
+  SUBSCRIPTION_CHECK: 'subscription-check-timestamp',
+  CUSTOM_SOUND_LIB: 'sound-library-urls',
 };
 
 // Eventos customizados para sincronização entre abas/contextos
@@ -29,11 +43,79 @@ export const STORAGE_EVENTS = {
   DATA_UPDATED: 'data-updated',
 } as const;
 
-// Utilitários para localStorage
+function hasWindow(): boolean {
+  return typeof window !== 'undefined' && window.localStorage != null;
+}
+
+export function getString(key: string): string | null {
+  try {
+    if (!hasWindow()) return null;
+    return window.localStorage.getItem(key);
+  } catch (error) {
+    console.error(`Erro ao ler ${key} do localStorage:`, error);
+    return null;
+  }
+}
+
+export function setString(key: string, value: string): void {
+  try {
+    if (!hasWindow()) return;
+    window.localStorage.setItem(key, value);
+  } catch (error) {
+    console.error(`Erro ao salvar ${key} no localStorage:`, error);
+  }
+}
+
+export function removeItem(key: string): void {
+  try {
+    if (!hasWindow()) return;
+    window.localStorage.removeItem(key);
+  } catch (error) {
+    console.error(`Erro ao remover ${key} do localStorage:`, error);
+  }
+}
+
+export function getData<T = unknown>(key: string): T | null {
+  try {
+    const raw = getString(key);
+    return raw != null ? (JSON.parse(raw) as T) : null;
+  } catch (error) {
+    console.error(`Erro ao fazer parse de ${key} do localStorage:`, error);
+    return null;
+  }
+}
+
+export function saveData<T>(key: string, data: T): void {
+  try {
+    setString(key, JSON.stringify(data));
+  } catch (error) {
+    console.error(`Erro ao serializar ${key} no localStorage:`, error);
+  }
+}
+
+export function getScheduledNotificationKey(id: string | number): string {
+  return LOCAL_STORAGE_KEYS.SCHEDULED_NOTIF_PREFIX + String(id);
+}
+
+export function getNotificationShownKey(id: string | number): string {
+  return LOCAL_STORAGE_KEYS.NOTIFICATION_SHOWN_PREFIX + String(id);
+}
+
+export const storage = {
+  getString,
+  setString,
+  removeItem,
+  getData,
+  saveData,
+  getScheduledNotificationKey,
+  getNotificationShownKey,
+};
+
+// Utilitários para localStorage (classe original mantida para compatibilidade)
 export class LocalStorageManager {
   static get<T>(key: keyof LocalStorageKeys): T[] {
     try {
-      const data = localStorage.getItem(LOCAL_STORAGE_KEYS[key]);
+      const data = getString(LOCAL_STORAGE_KEYS[key]);
       return data ? JSON.parse(data) : [];
     } catch (error) {
       console.error(`Erro ao ler ${key} do localStorage:`, error);
@@ -43,11 +125,13 @@ export class LocalStorageManager {
 
   static set<T>(key: keyof LocalStorageKeys, data: T[]): void {
     try {
-      localStorage.setItem(LOCAL_STORAGE_KEYS[key], JSON.stringify(data));
+      setString(LOCAL_STORAGE_KEYS[key], JSON.stringify(data));
       // Disparar evento customizado para sincronização
-      window.dispatchEvent(new CustomEvent(STORAGE_EVENTS.DATA_UPDATED, { 
-        detail: { key, data } 
-      }));
+      if (hasWindow()) {
+        window.dispatchEvent(new CustomEvent(STORAGE_EVENTS.DATA_UPDATED, {
+          detail: { key, data }
+        }));
+      }
     } catch (error) {
       console.error(`Erro ao salvar ${key} no localStorage:`, error);
     }
@@ -57,10 +141,10 @@ export class LocalStorageManager {
     const items = this.get<T>(key);
     const newItems = [...items, item];
     this.set(key, newItems);
-    
+
     // Disparar evento específico
     const eventType = this.getEventTypeForKey(key);
-    if (eventType) {
+    if (eventType && hasWindow()) {
       window.dispatchEvent(new CustomEvent(eventType, { detail: item }));
     }
   }
@@ -94,10 +178,12 @@ export class LocalStorageManager {
   }
 
   static clear(key: keyof LocalStorageKeys): void {
-    localStorage.removeItem(LOCAL_STORAGE_KEYS[key]);
-    window.dispatchEvent(new CustomEvent(STORAGE_EVENTS.DATA_UPDATED, { 
-      detail: { key, data: [] } 
-    }));
+    removeItem(LOCAL_STORAGE_KEYS[key]);
+    if (hasWindow()) {
+      window.dispatchEvent(new CustomEvent(STORAGE_EVENTS.DATA_UPDATED, {
+        detail: { key, data: [] }
+      }));
+    }
   }
 
   private static getEventTypeForKey(key: keyof LocalStorageKeys): string | null {
@@ -115,6 +201,7 @@ export class LocalStorageManager {
 
   // Método para sincronizar dados entre abas
   static setupCrossTabSync(): void {
+    if (!hasWindow()) return;
     window.addEventListener('storage', (e) => {
       if (Object.values(LOCAL_STORAGE_KEYS).includes(e.key as any)) {
         window.dispatchEvent(new CustomEvent(STORAGE_EVENTS.DATA_UPDATED, {
