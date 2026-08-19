@@ -2,9 +2,11 @@ import { createClient } from '@supabase/supabase-js';
 import { Database } from '../integrations/supabase/types.js';
 import dotenv from 'dotenv';
 
-dotenv.config();
+if (process.env.NODE_ENV !== 'test') {
+  dotenv.config();
+}
 
-const supabaseUrl = "https://dfwepnzwktjyhvfmpuxo.supabase.co";
+const supabaseUrl = process.env.SUPABASE_URL || "https://dfwepnzwktjyhvfmpuxo.supabase.co";
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
 if (!supabaseServiceRoleKey) {

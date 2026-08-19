@@ -13,6 +13,15 @@ const isOtpType = (value: string | null): value is OtpType => {
   return value === 'signup' || value === 'invite' || value === 'magiclink' || value === 'recovery' || value === 'email_change';
 };
 
+// Apenas permite redirecionar para rotas internas (evita open redirect via query string).
+const sanitizeNextPath = (next: string | null): string | undefined => {
+  if (!next) return undefined;
+  if (!next.startsWith('/') || next.startsWith('//') || next.includes('\\') || /^[a-z]+:/i.test(next)) {
+    return undefined;
+  }
+  return next;
+};
+
 export default function AuthCallback() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -30,6 +39,12 @@ export default function AuthCallback() {
 
   useEffect(() => {
     const run = async () => {
+      // Remove token/code sensíveis da URL o mais cedo possível para reduzir a exposição
+      // (o valor já foi lido via useMemo acima e webbrowser history não é recarregado).
+      window.history.replaceState(null, '', window.location.pathname);
+
+      const next = sanitizeNextPath(params.next);
+
       try {
         if (params.code) {
           const { error } = await supabase.auth.exchangeCodeForSession(params.code);
@@ -44,7 +59,6 @@ export default function AuthCallback() {
 
         const { data } = await supabase.auth.getSession();
         const hasSession = !!data.session;
-        const next = params.next || undefined;
 
         if (params.type === 'recovery') {
           toast.success('Link verificado. Defina sua nova senha.');

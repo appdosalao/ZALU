@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -59,13 +59,6 @@ export default function Checkout() {
   const [isRedirecting, setIsRedirecting] = useState(false);
   const { isAuthenticated, session, usuario } = useSupabaseAuth();
 
-  // Log variables on mount
-  useEffect(() => {
-    console.log('=== Checkout Component Mounted ===');
-    console.log('VITE_CAKTO_CHECKOUT_MENSAL_URL:', import.meta.env.VITE_CAKTO_CHECKOUT_MENSAL_URL);
-    console.log('VITE_CAKTO_CHECKOUT_VITALICIO_URL:', import.meta.env.VITE_CAKTO_CHECKOUT_VITALICIO_URL);
-  }, []);
-
   // Read plan from URL on initial load
   useEffect(() => {
     const planFromUrl = searchParams.get('plan');
@@ -82,13 +75,6 @@ export default function Checkout() {
   const redirectToCakto = async () => {
     const userId = session?.user?.id ?? null;
     const baseUrl = planDetails.getEnvUrl();
-
-    // Debug logs
-    console.log('=== Debug Checkout ===');
-    console.log('Plano selecionado:', planType);
-    console.log('VITE_CAKTO_CHECKOUT_MENSAL_URL:', import.meta.env.VITE_CAKTO_CHECKOUT_MENSAL_URL);
-    console.log('VITE_CAKTO_CHECKOUT_VITALICIO_URL:', import.meta.env.VITE_CAKTO_CHECKOUT_VITALICIO_URL);
-    console.log('URL base obtida:', baseUrl);
 
     if (!isAuthenticated || !userId || !usuario) {
       toast.error('Faça login para continuar');
