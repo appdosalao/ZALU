@@ -28,8 +28,8 @@ const Privacidade = () => {
               Este aplicativo é operado pelo responsável pelo suporte e desenvolvimento. Para exercer seus direitos e tratar questões de privacidade:
             </p>
             <ul className="list-disc pl-6 text-muted-foreground">
-              <li>E-mail: <span className="text-foreground font-medium">resellr7@gmail.com</span></li>
-              <li>WhatsApp: <span className="text-foreground font-medium">+55 33 99854-2100</span></li>
+              <li>E-mail: <span className="text-foreground font-medium">zalusaloes@gmail.com</span></li>
+              <li>WhatsApp: <span className="text-foreground font-medium">+55 33 9714-0859</span></li>
             </ul>
           </section>
 

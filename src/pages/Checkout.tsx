@@ -206,8 +206,8 @@ export default function Checkout() {
                   Garantia legal de arrependimento: em até 7 dias você pode solicitar suporte.
                 </span>
                 <div className="mt-1">
-                  Contato: <span className="font-medium">resellr7@gmail.com</span> |{' '}
-                  <span className="font-medium">(33) 99854-2100</span>
+                  Contato: <span className="font-medium">zalusaloes@gmail.com</span> |{' '}
+                  <span className="font-medium">(33) 9714-0859</span>
                 </div>
               </AlertDescription>
             </Alert>

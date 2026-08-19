@@ -29,7 +29,7 @@ provedor. **Nunca** deixe o domínio sem SPF ou com `~all` sem provar o envio.
 
 | Tipo | Nome (host) | Valor |
 | ---- | ----------- | ----- |
-| TXT  | `_dmarc` (ou `_dmarc.zalusalao.online.`) | `v=DMARC1; p=reject; adkim=s; aspf=s; fo=1; rua=mailto:resellr7@gmail.com` |
+| TXT  | `_dmarc` (ou `_dmarc.zalusalao.online.`) | `v=DMARC1; p=reject; adkim=s; aspf=s; fo=1; rua=mailto:zalusaloes@gmail.com` |
 
 Obs.: em produção com nenhum envio a partir do domínio, `p=reject` é o valor seguro.
 Se um dia o domínio passar a enviar e-mail, inicie com `p=none` + `rua` para

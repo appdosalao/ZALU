@@ -128,7 +128,7 @@ Deno.serve(async (req) => {
     const vapidPrivateKey = Deno.env.get('VAPID_PRIVATE_KEY');
     if (vapidPublicKey && vapidPrivateKey) {
       webpush.setVapidDetails(
-        'mailto:contato@zalu.app',
+        'mailto:zalusaloes@gmail.com',
         vapidPublicKey,
         vapidPrivateKey
       );

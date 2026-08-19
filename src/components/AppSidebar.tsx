@@ -13,7 +13,6 @@ import {
   ExternalLink,
   Instagram,
   Facebook,
-  Video,
   Megaphone,
   Package,
   Download,
@@ -272,7 +271,7 @@ export function AppSidebar() {
                   className="group h-12 rounded-xl px-3 py-2 transition-all duration-200 ease-in-out hover:bg-white/40 hover:-translate-y-px active:translate-y-0 dark:hover:bg-white/10"
                 >
                   <a
-                    href="https://www.instagram.com/zalu.app/"
+                    href="https://www.instagram.com/zalu_saloes/"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-2 text-primary"
@@ -293,7 +292,7 @@ export function AppSidebar() {
                   className="group h-12 rounded-xl px-3 py-2 transition-all duration-200 ease-in-out hover:bg-white/40 hover:-translate-y-px active:translate-y-0 dark:hover:bg-white/10"
                 >
                   <a
-                    href="https://www.facebook.com/profile.php?id=61588465179526&locale=pt_BR"
+                    href="https://www.facebook.com/BELLAGEST/"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-2 text-primary"
@@ -303,27 +302,6 @@ export function AppSidebar() {
                       <Facebook className="h-4 w-4 flex-shrink-0" />
                     </div>
                     <span className="truncate group-data-[collapsible=icon]:sr-only">Facebook</span>
-                  </a>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  size="lg"
-                  tooltip="TikTok"
-                  className="group h-12 rounded-xl px-3 py-2 transition-all duration-200 ease-in-out hover:bg-white/40 hover:-translate-y-px active:translate-y-0 dark:hover:bg-white/10"
-                >
-                  <a
-                    href="https://www.tiktok.com/@zalu"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-primary"
-                    onClick={handleNavClick}
-                  >
-                    <div className={iconWrapClass(false, "from-slate-600 to-slate-400")}>
-                      <Video className="h-4 w-4 flex-shrink-0" />
-                    </div>
-                    <span className="truncate group-data-[collapsible=icon]:sr-only">TikTok</span>
                   </a>
                 </SidebarMenuButton>
               </SidebarMenuItem>
