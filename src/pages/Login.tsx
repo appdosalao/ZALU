@@ -11,10 +11,18 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { UsuarioLogin } from '@/types/usuario';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Eye, EyeOff, Lock, Mail, Sparkles, ArrowRight, ShieldCheck, Zap } from 'lucide-react';
+import { Eye, EyeOff, Sparkles, ArrowRight, ShieldCheck, Zap } from 'lucide-react';
 import { AuthFooter } from '@/components/branding/AuthFooter';
 import { Badge } from '@/components/ui/badge';
 import { PageMeta } from '@/components/seo/PageMeta';
+import { storage, LOCAL_STORAGE_KEYS } from '@/lib/localStorage';
+import {
+  getLoginLockRemainingMs,
+  getRemainingLoginAttempts,
+  recordLoginFailure,
+  recordLoginSuccess,
+  formatLockCountdown,
+} from '@/lib/passwordPolicy';
 
 const loginSchema = z.object({
   email: z.string().email('E-mail inválido'),
@@ -28,6 +36,24 @@ const Login = () => {
   const { login, isAuthenticated, isLoading: authLoading } = useSupabaseAuth();
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [lockRemainingMs, setLockRemainingMs] = useState(0);
+
+  const isBlocked = lockRemainingMs > 0;
+
+  // Ticker do countdown do bloqueio
+  useEffect(() => {
+    if (!isBlocked) return;
+    const interval = window.setInterval(() => {
+      setLockRemainingMs((prev) => {
+        if (prev <= 1000) {
+          setError('');
+          return 0;
+        }
+        return prev - 1000;
+      });
+    }, 1000);
+    return () => window.clearInterval(interval);
+  }, [isBlocked]);
 
   const { register, handleSubmit, formState: { errors } } = useForm<UsuarioLogin>({
     resolver: zodResolver(loginSchema),
@@ -37,7 +63,7 @@ const Login = () => {
 
   // Apply theme if exists in localStorage
   useEffect(() => {
-    const savedTheme = localStorage.getItem('app-theme');
+    const savedTheme = storage.getString(LOCAL_STORAGE_KEYS.APP_THEME);
     if (savedTheme) {
       document.documentElement.setAttribute('data-theme', savedTheme);
     }
@@ -57,15 +83,37 @@ const Login = () => {
   }, [searchParams]);
 
   const onSubmit = async (data: UsuarioLogin) => {
+    const email = data.email.trim();
+
+    // Bloqueio ativo: não faz nem a chamada de autenticação
+    const lockMs = getLoginLockRemainingMs(email);
+    if (lockMs > 0) {
+      setLockRemainingMs(lockMs);
+      setError(`Muitas tentativas de login. Tente novamente em ${formatLockCountdown(lockMs)}.`);
+      return;
+    }
+
     setIsLoading(true);
     setError('');
 
     try {
-      const ok = await login(data.email, data.senha);
+      const ok = await login(email, data.senha);
       if (ok) {
+        recordLoginSuccess(email);
         navigate(redirect);
       } else {
-        setError('E-mail ou senha incorretos. Verifique suas credenciais.');
+        const nextLockMs = recordLoginFailure(email);
+        if (nextLockMs > 0) {
+          setLockRemainingMs(nextLockMs);
+          setError(`Muitas tentativas de login. Tente novamente em ${formatLockCountdown(nextLockMs)}.`);
+        } else {
+          const remaining = getRemainingLoginAttempts(email);
+          setError(
+            remaining > 0
+              ? `E-mail ou senha incorretos. Mais ${remaining} tentativa(s) antes do bloqueio temporário.`
+              : 'E-mail ou senha incorretos. Verifique suas credenciais.'
+          );
+        }
       }
     } catch (err) {
       setError('Ocorreu um erro ao tentar entrar. Por favor, tente novamente.');
@@ -168,7 +216,7 @@ const Login = () => {
                         type="email"
                         placeholder="seu@email.com"
                         {...register('email')}
-                        disabled={isLoading}
+                        disabled={isLoading || isBlocked}
                         className="h-12 bg-muted/30 border-border/50 focus:bg-background transition-all"
                       />
                     </div>
@@ -193,7 +241,7 @@ const Login = () => {
                         type={showPassword ? 'text' : 'password'}
                         placeholder="••••••••"
                         {...register('senha')}
-                        disabled={isLoading}
+                        disabled={isLoading || isBlocked}
                         className="h-12 bg-muted/30 border-border/50 focus:bg-background transition-all"
                       />
                       <button
@@ -225,9 +273,11 @@ const Login = () => {
                 <Button 
                   type="submit" 
                   className="w-full h-14 text-lg font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all bg-primary hover:bg-primary/90 btn-3d" 
-                  disabled={isLoading}
+                  disabled={isLoading || isBlocked}
                 >
-                  {isLoading ? (
+                  {isBlocked ? (
+                    <span className="flex items-center gap-2 text-white">Aguardar {formatLockCountdown(lockRemainingMs)}</span>
+                  ) : isLoading ? (
                     <span className="flex items-center gap-2">Acessando...</span>
                   ) : (
                     <span className="flex items-center gap-2 text-white">Entrar no Sistema <ArrowRight className="h-5 w-5 ml-1" /></span>

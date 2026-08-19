@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { UsuarioCadastro } from '@/types/usuario';
-import { Eye, EyeOff, CheckCircle2, ShieldCheck, Sparkles, CreditCard, Clock, Scissors, Star } from 'lucide-react';
+import { Eye, EyeOff, CheckCircle2, ShieldCheck, Sparkles, CreditCard, Clock, Star, Check } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { Checkbox } from '@/components/ui/checkbox';
 import { AuthFooter } from '@/components/branding/AuthFooter';
@@ -18,6 +18,14 @@ import { PageMeta } from '@/components/seo/PageMeta';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { storage, LOCAL_STORAGE_KEYS } from '@/lib/localStorage';
+import {
+  PASSWORD_POLICY,
+  PASSWORD_RULES,
+  isStrongPassword,
+  passwordStrength,
+  strongPasswordSchema,
+} from '@/lib/passwordPolicy';
 
 const cadastroSchema = z.object({
   nome_personalizado_app: z.string().min(1, 'Nome da profissional/salão é obrigatório'),
@@ -25,7 +33,7 @@ const cadastroSchema = z.object({
   email: z.string().email('E-mail inválido'),
   telefone: z.string().min(10, 'Telefone deve ter pelo menos 10 dígitos'),
   tema_preferencia: z.enum(['feminino', 'masculino']),
-  senha: z.string().min(6, 'Senha deve ter pelo menos 6 caracteres'),
+  senha: strongPasswordSchema(),
   confirmar_senha: z.string().min(1, 'Confirmação de senha é obrigatória'),
 }).refine((data) => data.senha === data.confirmar_senha, {
   message: "Senhas não coincidem",
@@ -53,19 +61,16 @@ const Cadastro = () => {
   const [termsAccepted, setTermsAccepted] = useState(false);
 
   const calcStrength = (s: string) => {
-    let score = 0;
-    if (s.length >= 6) score += 25;
-    if (/[A-Z]/.test(s)) score += 25;
-    if (/[0-9]/.test(s)) score += 25;
-    if (/[^A-Za-z0-9]/.test(s)) score += 25;
-    return score;
+    return passwordStrength(s).score;
   };
   const strength = calcStrength(senhaValor);
+  const strengthLabel = passwordStrength(senhaValor).label;
+  const rulesOk = senhaValor ? isStrongPassword(senhaValor) : false;
 
   useEffect(() => {
     if (temaEscolhido) {
       document.documentElement.setAttribute('data-theme', temaEscolhido);
-      localStorage.setItem('app-theme', temaEscolhido);
+      storage.setString(LOCAL_STORAGE_KEYS.APP_THEME, temaEscolhido);
     }
   }, [temaEscolhido]);
 
@@ -318,7 +323,7 @@ const Cadastro = () => {
                       <Input
                         id="senha"
                         type={showSenha ? 'text' : 'password'}
-                        placeholder="Mínimo 6 caracteres"
+                        placeholder={`Mínimo ${PASSWORD_POLICY.minLength} caracteres`}
                         {...register('senha')}
                         disabled={isLoading}
                         className="pr-10"
@@ -332,6 +337,27 @@ const Cadastro = () => {
                       </button>
                     </div>
                     <Progress value={strength} className="h-1.5 mt-2" />
+                    {senhaValor ? (
+                      <p className={`text-xs font-semibold mt-1 ${rulesOk ? 'text-green-600' : 'text-amber-600'}`}>
+                        Força: {strengthLabel}
+                      </p>
+                    ) : null}
+                    <ul className="space-y-1 mt-1">
+                      {PASSWORD_RULES.map((rule) => {
+                        const ok = rule.test(senhaValor);
+                        return (
+                          <li
+                            key={rule.key}
+                            className={`flex items-center gap-1.5 text-xs ${ok ? 'text-green-600' : senhaValor ? 'text-destructive' : 'text-muted-foreground'}`}
+                          >
+                            {ok ? <Check className="h-3.5 w-3.5" /> : (
+                              <span className="inline-block w-3.5 h-3.5 rounded-full border border-current" />
+                            )}
+                            {rule.label}
+                          </li>
+                        );
+                      })}
+                    </ul>
                     {errors.senha && (
                       <p className="text-xs text-destructive mt-1 font-medium">{errors.senha.message}</p>
                     )}

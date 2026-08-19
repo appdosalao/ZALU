@@ -9,12 +9,19 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Eye, EyeOff } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { Eye, EyeOff, Check } from 'lucide-react';
 import { PageMeta } from '@/components/seo/PageMeta';
+import {
+  PASSWORD_RULES,
+  isStrongPassword,
+  passwordStrength,
+  strongPasswordSchema,
+} from '@/lib/passwordPolicy';
 
 const schema = z.object({
-  senha: z.string().min(6, 'A senha deve ter pelo menos 6 caracteres'),
-  confirmar_senha: z.string().min(6, 'A confirmação deve ter pelo menos 6 caracteres'),
+  senha: strongPasswordSchema(),
+  confirmar_senha: z.string().min(1, 'A confirmação é obrigatória'),
 }).refine((data) => data.senha === data.confirmar_senha, {
   message: 'As senhas não coincidem',
   path: ['confirmar_senha'],
@@ -28,10 +35,12 @@ export default function RedefinirSenha() {
   const [hasSession, setHasSession] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const { register, handleSubmit, formState: { errors } } = useForm<FormValues>({
+  const { register, handleSubmit, formState: { errors }, watch } = useForm<FormValues>({
     resolver: zodResolver(schema),
   });
   const [showPassword, setShowPassword] = useState(false);
+  const senhaValor = watch('senha') || '';
+  const strength = passwordStrength(senhaValor);
 
   useEffect(() => {
     const run = async () => {
@@ -135,6 +144,30 @@ export default function RedefinirSenha() {
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
+              {senhaValor ? (
+                <>
+                  <Progress value={strength.score} className="h-1.5 mt-2" />
+                  <p className={`text-xs font-semibold mt-1 ${isStrongPassword(senhaValor) ? 'text-green-600' : 'text-amber-600'}`}>
+                    Força: {strength.label}
+                  </p>
+                </>
+              ) : null}
+              <ul className="space-y-1 mt-1">
+                {PASSWORD_RULES.map((rule) => {
+                  const ok = rule.test(senhaValor);
+                  return (
+                    <li
+                      key={rule.key}
+                      className={`flex items-center gap-1.5 text-xs ${ok ? 'text-green-600' : senhaValor ? 'text-destructive' : 'text-muted-foreground'}`}
+                    >
+                      {ok ? <Check className="h-3.5 w-3.5" /> : (
+                        <span className="inline-block w-3.5 h-3.5 rounded-full border border-current" />
+                      )}
+                      {rule.label}
+                    </li>
+                  );
+                })}
+              </ul>
               {errors.senha && <p className="text-sm text-destructive">{errors.senha.message}</p>}
             </div>
             <div className="space-y-2">
