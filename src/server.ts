@@ -210,7 +210,7 @@ const webhookLimiter = rateLimit({
   standardHeaders: 'draft-7',
   legacyHeaders: false,
   keyGenerator: (req) => (req.ip || 'unknown'),
-  handler: (req, res) => {
+  handler: (_req, res) => {
     res.status(429).json({ error: 'rate_limited_webhook' });
   },
 });
@@ -223,7 +223,7 @@ app.use(generalLimiter);
 
 app.use('/api/payment', paymentRoutes);
 
-app.get('/health', (req, res) => {
+app.get('/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 

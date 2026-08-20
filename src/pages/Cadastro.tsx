@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import type { Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -35,7 +34,7 @@ const Cadastro = () => {
   const [isBuying, setIsBuying] = useState(false);
 
   const { register, handleSubmit, formState: { errors }, watch, setValue } = useForm<UsuarioCadastro>({
-    resolver: zodResolver(cadastroSchema) as unknown as Resolver<UsuarioCadastro>,
+    resolver: zodResolver(cadastroSchema) as any,
     defaultValues: {
       tema_preferencia: 'feminino',
     },

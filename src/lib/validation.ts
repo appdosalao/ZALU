@@ -176,6 +176,8 @@ export const cadastroSchema = z
     path: ['confirmar_senha'],
   });
 
+export type CadastroSchemaData = z.infer<typeof cadastroSchema>;
+
 export const sanitize = {
   plain: sanitizePlain,
   rich: sanitizeRich,
