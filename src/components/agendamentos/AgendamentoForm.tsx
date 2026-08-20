@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+import type { Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Calendar, Clock, User, Scissors, DollarSign, Save, X, CreditCard } from 'lucide-react';
@@ -62,7 +63,7 @@ export default function AgendamentoForm({
   const [horariosDisponiveis, setHorariosDisponiveis] = useState<string[]>([]);
 
   const form = useForm<AgendamentoFormData>({
-    resolver: zodResolver(agendamentoSchema),
+    resolver: zodResolver(agendamentoSchema) as unknown as Resolver<AgendamentoFormData>,
     defaultValues: {
       clienteId: agendamento?.clienteId || initial?.clienteId || '',
       servicoId: agendamento?.servicoId || initial?.servicoId || '',
@@ -74,7 +75,7 @@ export default function AgendamentoForm({
       valorDevido: agendamento?.valorDevido || initial?.valorDevido || 0,
       formaPagamento: agendamento?.formaPagamento || initial?.formaPagamento || 'dinheiro',
       statusPagamento: agendamento?.statusPagamento || initial?.statusPagamento || 'em_aberto',
-      status: agendamento?.status || initial?.status || 'agendado',
+      status: agendamento?.status === 'excluido' ? 'cancelado' : (agendamento?.status || initial?.status || 'agendado'),
       observacoes: agendamento?.observacoes || initial?.observacoes || '',
       dataPrevistaPagamento: agendamento?.dataPrevistaPagamento || initial?.dataPrevistaPagamento || '',
     },

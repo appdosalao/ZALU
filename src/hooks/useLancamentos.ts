@@ -40,7 +40,6 @@ export function useLancamentos() {
     criarLancamento: supabaseHook.createLancamento,
     atualizarLancamento: supabaseHook.updateLancamento,
     removerLancamento: supabaseHook.deleteLancamento,
-    adicionarLancamento: supabaseHook.createLancamento, // Alias para compatibilidade
     calcularResumo: supabaseHook.calculateResumoFinanceiro,
     recarregar: supabaseHook.loadLancamentos,
   };

@@ -12,6 +12,7 @@ import { DadosRelatorio } from "@/types/relatorio";
 import { Lancamento } from "@/types/lancamento";
 import { ContaFixa } from "@/types/contaFixa";
 import { Agendamento } from "@/types/agendamento";
+import { formatBRL } from '@/lib/formatters';
 
 interface TabelaDetalhadaProps {
   dados: DadosRelatorio;
@@ -29,12 +30,7 @@ export default function TabelaDetalhada({ dados, dadosDetalhados }: TabelaDetalh
   
   const itensPorPagina = 10;
 
-  const formatarValor = (valor: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(valor);
-  };
+
 
   const formatarData = (data: string | Date) => {
     return format(new Date(data), 'dd/MM/yyyy', { locale: ptBR });
@@ -121,13 +117,13 @@ export default function TabelaDetalhada({ dados, dadosDetalhados }: TabelaDetalh
                 <TableRow key={index}>
                   <TableCell className="font-medium">{categoria.categoria}</TableCell>
                   <TableCell className="text-right text-green-600">
-                    {formatarValor(categoria.entradas)}
+                    {formatBRL(categoria.entradas)}
                   </TableCell>
                   <TableCell className="text-right text-red-600">
-                    {formatarValor(categoria.saidas)}
+                    {formatBRL(categoria.saidas)}
                   </TableCell>
                   <TableCell className={`text-right ${categoria.lucro >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {formatarValor(categoria.lucro)}
+                    {formatBRL(categoria.lucro)}
                   </TableCell>
                   <TableCell className="text-right">
                     {categoria.percentual.toFixed(1)}%
@@ -160,7 +156,7 @@ export default function TabelaDetalhada({ dados, dadosDetalhados }: TabelaDetalh
                   <TableCell className="font-medium">{servico.nome}</TableCell>
                   <TableCell className="text-right">{servico.quantidade}</TableCell>
                   <TableCell className="text-right text-green-600">
-                    {formatarValor(servico.valorTotal)}
+                    {formatBRL(servico.valorTotal)}
                   </TableCell>
                   <TableCell className="text-right">
                     {servico.percentual.toFixed(1)}%
@@ -214,7 +210,7 @@ export default function TabelaDetalhada({ dados, dadosDetalhados }: TabelaDetalh
                         </Badge>
                       </TableCell>
                       <TableCell className={`text-right ${lancamento.tipo === 'entrada' ? 'text-green-600' : 'text-red-600'}`}>
-                        {formatarValor(lancamento.valor)}
+                        {formatBRL(lancamento.valor)}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -242,10 +238,10 @@ export default function TabelaDetalhada({ dados, dadosDetalhados }: TabelaDetalh
                       <TableCell>{getStatusBadge(agendamento.status || 'agendado')}</TableCell>
                       <TableCell>{getStatusBadge(agendamento.statusPagamento || 'em_aberto')}</TableCell>
                       <TableCell className="text-right">
-                        {formatarValor(agendamento.valor)}
+                        {formatBRL(agendamento.valor)}
                       </TableCell>
                       <TableCell className="text-right text-green-600">
-                        {formatarValor(agendamento.valorPago || 0)}
+                        {formatBRL(agendamento.valorPago || 0)}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -274,7 +270,7 @@ export default function TabelaDetalhada({ dados, dadosDetalhados }: TabelaDetalh
                       </TableCell>
                       <TableCell>{getStatusBadge(conta.status)}</TableCell>
                       <TableCell className="text-right text-red-600">
-                        {formatarValor(conta.valor)}
+                        {formatBRL(conta.valor)}
                       </TableCell>
                     </TableRow>
                   ))}

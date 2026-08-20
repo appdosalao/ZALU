@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useSupabaseConfiguracoes } from '@/hooks/useSupabaseConfiguracoes';
 import { toast } from 'sonner';
+import { storage, LOCAL_STORAGE_KEYS, getNotificationShownKey } from '@/lib/localStorage';
 
 interface NotificationSettings {
   soundEnabled: boolean;
@@ -26,7 +27,7 @@ const DEFAULT_SETTINGS: NotificationSettings = {
   soundEnabled: true,
   visualEnabled: true,
   autoHide: true,
-  hideDelay: 10000, // 10 segundos
+  hideDelay: 10000,
   soundType: 'notification',
 };
 
@@ -39,41 +40,35 @@ const DEFAULT_SOUND_FILES: Record<NotificationSettings['soundType'], string> = {
 export const useNotifications = () => {
   const { usuario } = useSupabaseAuth();
   const [settings, setSettings] = useState<NotificationSettings>(() => {
-    const saved = localStorage.getItem('notification-settings');
+    const saved = storage.getData<NotificationSettings>(LOCAL_STORAGE_KEYS.NOTIFICATION_SETTINGS);
     if (saved) {
-      const parsedSettings = JSON.parse(saved);
-      // Garantir que todas as propriedades existem (migração de versões antigas)
       return {
         ...DEFAULT_SETTINGS,
-        ...parsedSettings,
+        ...saved,
       };
     }
     return DEFAULT_SETTINGS;
   });
-  
+
   const [notifications, setNotifications] = useState<AgendamentoNotification[]>([]);
   const [lastChecked, setLastChecked] = useState<string>(new Date().toISOString());
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  
-  // Initialize shown notifications from localStorage
-  const getShownNotificationsKey = () => `shown-notifications-${usuario?.id || 'guest'}`;
-  
+
   const [shownNotifications, setShownNotifications] = useState<Set<string>>(() => {
-    const saved = localStorage.getItem(getShownNotificationsKey());
-    return saved ? new Set(JSON.parse(saved)) : new Set();
+    const saved = storage.getData<string[]>(getNotificationShownKey(usuario?.id || 'guest'));
+    return saved ? new Set(saved) : new Set();
   });
-  
-  // Persist shown notifications to localStorage whenever they change
+
   useEffect(() => {
-    localStorage.setItem(getShownNotificationsKey(), JSON.stringify([...shownNotifications]));
+    storage.saveData(getNotificationShownKey(usuario?.id || 'guest'), [...shownNotifications]);
   }, [shownNotifications, usuario]);
+
   const { configuracaoNotificacoes } = useSupabaseConfiguracoes();
 
   const buildSoundUrl = useCallback((filename: string) => {
     return `/sounds/${encodeURIComponent(filename)}`;
   }, []);
 
-  // Inicializar áudio
   useEffect(() => {
     if (settings.soundEnabled) {
       const custom = configuracaoNotificacoes?.som_personalizado;
@@ -97,12 +92,10 @@ export const useNotifications = () => {
     };
   }, [buildSoundUrl, settings.soundEnabled, settings.soundType, configuracaoNotificacoes?.som_personalizado]);
 
-  // Salvar configurações
   useEffect(() => {
-    localStorage.setItem('notification-settings', JSON.stringify(settings));
+    storage.saveData(LOCAL_STORAGE_KEYS.NOTIFICATION_SETTINGS, settings);
   }, [settings]);
 
-  // Função para tocar som de notificação
   const playNotificationSound = useCallback(async () => {
     if (!settings.soundEnabled) return;
 
@@ -124,23 +117,19 @@ export const useNotifications = () => {
     } catch {}
   }, [buildSoundUrl, configuracaoNotificacoes?.som_personalizado, settings.soundEnabled, settings.soundType]);
 
-  // Função para adicionar nova notificação
   const addNotification = useCallback((agendamento: Omit<AgendamentoNotification, 'shown'>) => {
     if (!usuario || !settings.visualEnabled) return;
 
-    // Verificar se já foi mostrada
     if (shownNotifications.has(agendamento.id)) return;
 
     const newNotification = { ...agendamento, shown: false };
-    setNotifications(prev => [newNotification, ...prev.slice(0, 2)]); // Máximo 3 notificações
+    setNotifications(prev => [newNotification, ...prev.slice(0, 2)]);
     setShownNotifications(prev => new Set([...prev, agendamento.id]));
 
-    // Tocar som
     playNotificationSound();
 
     toast.success(`Novo Agendamento! ${agendamento.clienteNome} - ${agendamento.servicoNome}`);
 
-    // Auto-hide se habilitado
     if (settings.autoHide) {
       setTimeout(() => {
         removeNotification(agendamento.id);
@@ -148,42 +137,33 @@ export const useNotifications = () => {
     }
   }, [usuario, settings, playNotificationSound]);
 
-  // Função para remover notificação
   const removeNotification = useCallback((id: string) => {
     setNotifications(prev => prev.filter(n => n.id !== id));
   }, []);
 
-  // Função para limpar todas as notificações
   const clearAllNotifications = useCallback(() => {
     setNotifications([]);
   }, []);
 
-  // Função para atualizar configurações
   const updateSettings = useCallback((newSettings: Partial<NotificationSettings>) => {
     setSettings(prev => ({ ...prev, ...newSettings }));
   }, []);
 
-  // Função para verificar novos agendamentos (simula real-time)
   const checkForNewAgendamentos = useCallback((agendamentos: any[]) => {
     if (!usuario) return;
 
     const newAgendamentos = agendamentos.filter(agendamento => {
-      // Filtrar apenas agendamentos do usuário logado
       if (agendamento.userId !== usuario.id) return false;
-      
-      // Verificar se foi criado após última verificação
+
       const criadoEm = new Date(agendamento.createdAt);
       const ultimaVerificacao = new Date(lastChecked);
-      
+
       return criadoEm > ultimaVerificacao && !shownNotifications.has(agendamento.id);
     });
 
     if (newAgendamentos.length > 0) {
       newAgendamentos.forEach(agendamento => {
         const origem = agendamento.origem || 'manual';
-        const origemText = origem === 'online' ? 'Agendamento Online' : 
-                          origem === 'cronograma' ? 'Agendamento Automático' : 
-                          'Agendamento Manual';
 
         addNotification({
           id: agendamento.id,
@@ -200,7 +180,6 @@ export const useNotifications = () => {
     }
   }, [usuario, lastChecked, addNotification]);
 
-  // Função para solicitar permissão de notificação
   const requestNotificationPermission = useCallback(async () => {
     if ('Notification' in window) {
       const permission = await Notification.requestPermission();

@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Users, UserPlus, TrendingUp } from "lucide-react";
 import { Cliente, ClienteFormData } from "@/types/cliente";
 import { useSupabaseClientes } from "@/hooks/useSupabaseClientes";
@@ -9,7 +8,7 @@ import ClientesList from "@/components/clientes/ClientesList";
 import ClienteDetalhes from "@/components/clientes/ClienteDetalhes";
 
 export default function Clientes() {
-  const { clientes, criarCliente, atualizarCliente, excluirCliente, loading, carregarEstatisticasCliente } = useSupabaseClientes();
+  const { clientes, criarCliente, atualizarCliente, excluirCliente, carregarEstatisticasCliente } = useSupabaseClientes();
   const [clienteSelecionada, setClienteSelecionada] = useState<Cliente | null>(null);
   const [detalhesOpen, setDetalhesOpen] = useState(false);
 

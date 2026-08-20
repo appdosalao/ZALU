@@ -33,7 +33,8 @@ import { Edit2, Trash2, TrendingUp, TrendingDown, Search, Filter, Receipt } from
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Lancamento, LancamentoFiltros } from "@/types/lancamento";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
+import { formatBRL } from '@/lib/formatters';
 
 interface LancamentosListProps {
   lancamentos: Lancamento[];
@@ -61,8 +62,7 @@ export default function LancamentosList({
 
   const handleDelete = (id: string) => {
     onDelete(id);
-    toast({
-      title: "Lançamento excluído",
+    toast("Lançamento excluído", {
       description: "O lançamento foi removido com sucesso.",
     });
   };
@@ -230,7 +230,7 @@ export default function LancamentosList({
                     <TableCell className={`font-semibold ${
                       lancamento.tipo === "entrada" ? "text-green-600" : "text-red-600"
                     }`}>
-                      {formatarValor(lancamento.valor)}
+                      {formatBRL(lancamento.valor)}
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">

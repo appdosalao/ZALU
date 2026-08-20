@@ -6,6 +6,7 @@ import { useSupabaseCompras } from "@/hooks/useSupabaseCompras";
 import { useSupabaseVendas } from "@/hooks/useSupabaseVendas";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { formatBRL } from '@/lib/formatters';
 
 interface GraficoFinanceiroProps {
   lancamentos: Lancamento[];
@@ -94,14 +95,7 @@ export default function GraficoFinanceiro({ lancamentos }: GraficoFinanceiroProp
     saidas: dados.saidas,
   }));
 
-  const formatarValor = (valor: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(valor);
-  };
+
 
   const temDados = totalEntradas > 0 || totalSaidas > 0;
 
@@ -169,7 +163,7 @@ export default function GraficoFinanceiro({ lancamentos }: GraficoFinanceiroProp
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={({ name, value }) => `${name}: ${formatarValor(value)}`}
+                  label={({ name, value }) => `${name}: ${formatBRL(value)}`}
                   outerRadius={80}
                   fill="#8884d8"
                   dataKey="value"
@@ -179,7 +173,7 @@ export default function GraficoFinanceiro({ lancamentos }: GraficoFinanceiroProp
                     <Cell key={`cell-${index}`} fill={entry.fill} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value) => formatarValor(Number(value))} />
+                <Tooltip formatter={(value) => formatBRL(Number(value))} />
               </PieChart>
             </ResponsiveContainer>
           )}
@@ -217,7 +211,7 @@ export default function GraficoFinanceiro({ lancamentos }: GraficoFinanceiroProp
                   height={60}
                 />
                 <YAxis tick={{ fontSize: 12 }} />
-                <Tooltip formatter={(value) => formatarValor(Number(value))} />
+                <Tooltip formatter={(value) => formatBRL(Number(value))} />
                 <Legend />
                 <Bar dataKey="entradas" fill="#22c55e" name="Entradas" animationDuration={800} />
                 <Bar dataKey="saidas" fill="#ef4444" name="Saídas" animationDuration={800} />
@@ -249,7 +243,7 @@ export default function GraficoFinanceiro({ lancamentos }: GraficoFinanceiroProp
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="produto" tick={{ fontSize: 12 }} />
                 <YAxis tick={{ fontSize: 12 }} />
-                <Tooltip formatter={(value, name) => name === 'valor' ? formatarValor(Number(value)) : value} />
+                <Tooltip formatter={(value, name) => name === 'valor' ? formatBRL(Number(value)) : value} />
                 <Legend />
                 <Bar dataKey="valor" fill="#7c3aed" name="Valor" animationDuration={800} />
                 <Bar dataKey="quantidade" fill="#06b6d4" name="Quantidade" animationDuration={800} />

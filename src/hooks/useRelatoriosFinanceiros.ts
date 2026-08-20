@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfQuarter, endOfQuarter, startOfYear, endOfYear, subMonths, isWithinInterval } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { FiltrosRelatorio, DadosRelatorio, PeriodoRelatorio, ServicoVendido, CategoriaLucro, EvolucaoFinanceira } from '@/types/relatorio';
+import { FiltrosRelatorio, DadosRelatorio, ServicoVendido, CategoriaLucro, EvolucaoFinanceira } from '@/types/relatorio';
 import { Lancamento } from '@/types/lancamento';
 import { ContaFixa } from '@/types/contaFixa';
 import { Agendamento } from '@/types/agendamento';

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Lancamento, NovoLancamento, LancamentoFiltros, ResumoFinanceiro } from '@/types/lancamento';
+import { lancamentoFromSupabase, lancamentoToSupabase } from '@/lib/mappers';
 
 export const useSupabaseLancamentos = () => {
   const [lancamentos, setLancamentos] = useState<Lancamento[]>([]);
@@ -38,19 +39,7 @@ export const useSupabaseLancamentos = () => {
 
       if (error) throw error;
 
-      const formattedLancamentos: Lancamento[] = (data || []).map(item => ({
-        id: item.id,
-        tipo: item.tipo as 'entrada' | 'saida',
-        valor: Number(item.valor),
-        data: new Date(item.data),
-        descricao: item.descricao,
-        categoria: item.categoria,
-        origemId: item.origem_id,
-        origemTipo: item.origem_tipo as 'agendamento' | 'conta_fixa' | 'manual',
-        clienteId: item.cliente_id,
-        created_at: new Date(item.created_at),
-        updated_at: new Date(item.updated_at),
-      }));
+      const formattedLancamentos: Lancamento[] = (data || []).map(item => lancamentoFromSupabase(item));
 
       setLancamentos(formattedLancamentos);
     } catch (err) {
@@ -66,19 +55,13 @@ export const useSupabaseLancamentos = () => {
       const { data: user } = await supabase.auth.getUser();
       if (!user.user) throw new Error('Usuário não autenticado');
 
+      const insertPayload = {
+        user_id: user.user.id,
+        ...lancamentoToSupabase(lancamento)
+      };
       const { data, error } = await supabase
         .from('lancamentos')
-        .insert({
-          user_id: user.user.id,
-          tipo: lancamento.tipo,
-          valor: lancamento.valor,
-          data: lancamento.data.toISOString().split('T')[0],
-          descricao: lancamento.descricao,
-          categoria: lancamento.categoria,
-          origem_id: lancamento.origemId,
-          origem_tipo: lancamento.origemTipo,
-          cliente_id: lancamento.clienteId,
-        })
+        .insert(insertPayload as any)
         .select()
         .single();
 
@@ -97,16 +80,7 @@ export const useSupabaseLancamentos = () => {
       const { data: user } = await supabase.auth.getUser();
       if (!user.user) throw new Error('Usuário não autenticado');
 
-      const updateData: any = {};
-      
-      if (updates.tipo) updateData.tipo = updates.tipo;
-      if (updates.valor !== undefined) updateData.valor = updates.valor;
-      if (updates.data) updateData.data = updates.data.toISOString().split('T')[0];
-      if (updates.descricao) updateData.descricao = updates.descricao;
-      if (updates.categoria !== undefined) updateData.categoria = updates.categoria;
-      if (updates.origemId !== undefined) updateData.origem_id = updates.origemId;
-      if (updates.origemTipo !== undefined) updateData.origem_tipo = updates.origemTipo;
-      if (updates.clienteId !== undefined) updateData.cliente_id = updates.clienteId;
+      const updateData = lancamentoToSupabase(updates);
 
       const { error } = await supabase
         .from('lancamentos')

@@ -3,6 +3,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { Cliente, ClienteFormData } from '@/types/cliente';
 import { toast } from 'sonner';
+import { validateUniqueName } from '@/lib/validators';
+import { clienteFromSupabase, clienteToSupabase } from '@/lib/mappers';
 
 export function useSupabaseClientes() {
   const { user } = useSupabaseAuth();
@@ -124,21 +126,7 @@ export function useSupabaseClientes() {
         return;
       }
 
-      const clientesBase: Cliente[] = (data || []).map(item => ({
-        id: item.id,
-        nome: item.nome,
-        nomeCompleto: item.nome,
-        telefone: item.telefone,
-        email: item.email || undefined,
-        endereco: item.endereco || undefined,
-        dataNascimento: item.data_nascimento || undefined,
-        observacoes: item.observacoes || undefined,
-        historicoServicos: [], // Inicialmente vazio
-        servicoFrequente: undefined,
-        ultimaVisita: undefined,
-        createdAt: item.created_at,
-        updatedAt: item.updated_at
-      }));
+      const clientesBase: Cliente[] = (data || []).map(item => clienteFromSupabase(item));
 
       setClientes(clientesBase);
     } catch (error) {
@@ -171,30 +159,20 @@ export function useSupabaseClientes() {
       return false;
     }
 
-    // Verificar se já existe cliente com o mesmo nome
-    const clienteExistente = clientes.find((c: any) => 
-      c.nome?.toLowerCase() === nome.toLowerCase()
-    );
-
-    if (clienteExistente) {
-      toast.error('Já existe um cliente com este nome');
+    if (!validateUniqueName(clientes, nome, 'Cliente')) {
       return false;
     }
 
     setLoading(true);
     try {
+      const insertPayload = {
+        user_id: user.id,
+        historico_servicos: [],
+        ...clienteToSupabase({ ...clienteData, nome })
+      };
       const { data, error } = await supabase
         .from('clientes')
-        .insert({
-          user_id: user.id,
-          nome: nome,
-          telefone: clienteData.telefone,
-          email: clienteData.email || null,
-          endereco: clienteData.endereco || null,
-          data_nascimento: clienteData.dataNascimento || null,
-          observacoes: clienteData.observacoes || null,
-          historico_servicos: []
-        })
+        .insert(insertPayload as any)
         .select()
         .single();
 
@@ -204,22 +182,7 @@ export function useSupabaseClientes() {
         return false;
       }
 
-      // Atualizar lista local
-      const novoCliente: any = {
-        id: data.id,
-        nome: data.nome,
-        nomeCompleto: data.nome,
-        telefone: data.telefone,
-        email: data.email || undefined,
-        endereco: data.endereco || undefined,
-        dataNascimento: data.data_nascimento || undefined,
-        observacoes: data.observacoes || undefined,
-        historicoServicos: data.historico_servicos || [],
-        servicoFrequente: undefined,
-        ultimaVisita: undefined,
-        createdAt: data.created_at,
-        updatedAt: data.updated_at
-      };
+      const novoCliente = clienteFromSupabase(data);
 
       setClientes(prev => [...prev, novoCliente]);
       toast.success('Cliente criado com sucesso!');
@@ -239,17 +202,19 @@ export function useSupabaseClientes() {
       return false;
     }
 
+    const nome = updates.nome !== undefined ? updates.nome : updates.nomeCompleto;
+    if (nome !== undefined && nome !== null && nome.trim() !== '') {
+      if (!validateUniqueName(clientes, nome, 'Cliente', id)) {
+        return false;
+      }
+    }
+
     setLoading(true);
     try {
-      const updateData: any = {};
-      if (updates.nome !== undefined) updateData.nome = updates.nome;
-      if (updates.nomeCompleto !== undefined) updateData.nome = updates.nomeCompleto;
-      if (updates.telefone !== undefined) updateData.telefone = updates.telefone;
-      if (updates.email !== undefined) updateData.email = updates.email || null;
-      if (updates.endereco !== undefined) updateData.endereco = updates.endereco || null;
-      if (updates.dataNascimento !== undefined) updateData.data_nascimento = updates.dataNascimento || null;
-      if (updates.observacoes !== undefined) updateData.observacoes = updates.observacoes || null;
-      if (updates.historicoServicos !== undefined) updateData.historico_servicos = updates.historicoServicos;
+      const updateData = clienteToSupabase(updates);
+      if (updates.nomeCompleto !== undefined && updates.nome === undefined) {
+        updateData.nome = updates.nomeCompleto;
+      }
 
       const { data, error } = await supabase
         .from('clientes')
@@ -265,22 +230,7 @@ export function useSupabaseClientes() {
         return false;
       }
 
-      // Atualizar lista local
-      const clienteAtualizado: any = {
-        id: data.id,
-        nome: data.nome,
-        nomeCompleto: data.nome,
-        telefone: data.telefone,
-        email: data.email || undefined,
-        endereco: data.endereco || undefined,
-        dataNascimento: data.data_nascimento || undefined,
-        observacoes: data.observacoes || undefined,
-        historicoServicos: data.historico_servicos || [],
-        servicoFrequente: undefined,
-        ultimaVisita: undefined,
-        createdAt: data.created_at,
-        updatedAt: data.updated_at
-      };
+      const clienteAtualizado = clienteFromSupabase(data);
 
       setClientes(prev => prev.map((c: any) => c.id === id ? clienteAtualizado : c));
       toast.success('Cliente atualizado com sucesso!');

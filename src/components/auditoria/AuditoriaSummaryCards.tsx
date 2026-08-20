@@ -11,6 +11,7 @@ import {
   TrendingDown
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { formatBRL } from '@/lib/formatters';
 
 interface SummaryCardsProps {
   porcentagemSaude: number;
@@ -125,19 +126,19 @@ export function AuditoriaSummaryCards({
             "text-2xl font-bold",
             lucro >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
           )}>
-            R$ {lucro.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+            {formatBRL(lucro)}
           </div>
           <div className="flex flex-col gap-1 mt-2 text-xs text-muted-foreground">
             <div className="flex justify-between">
               <span>Receitas:</span>
               <span className="text-green-600 dark:text-green-400">
-                R$ {valorTotalReceitas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                {formatBRL(valorTotalReceitas)}
               </span>
             </div>
             <div className="flex justify-between">
               <span>Despesas:</span>
               <span className="text-red-600 dark:text-red-400">
-                R$ {valorTotalDespesas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                {formatBRL(valorTotalDespesas)}
               </span>
             </div>
           </div>

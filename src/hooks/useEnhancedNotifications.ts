@@ -55,8 +55,7 @@ export const useEnhancedNotifications = () => {
 
     // Notificação visual (toast)
     if (config.visual) {
-      toast({
-        title: "Novo Agendamento!",
+      toast("Novo Agendamento!", {
         description: `${agendamento.clienteNome} agendou ${agendamento.servicoNome} para ${agendamento.data} às ${agendamento.hora}`,
         duration: 5000,
       });
@@ -86,8 +85,7 @@ export const useEnhancedNotifications = () => {
     const config = configuracoes.notificacoes.servicoFinalizado;
 
     // Toast
-    toast({
-      title: "Serviço Finalizado",
+    toast("Serviço Finalizado", {
       description: `${agendamento.servicoNome} para ${agendamento.clienteNome} foi concluído`,
       duration: 3000,
     });
@@ -111,8 +109,7 @@ export const useEnhancedNotifications = () => {
     const diasRestantes = Math.ceil((new Date(despesa.dataVencimento).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
 
     // Toast
-    toast({
-      title: "Lembrete de Despesa",
+    toast("Lembrete de Despesa", {
       description: `${despesa.descricao} vence em ${diasRestantes} dias - R$ ${despesa.valor.toFixed(2)}`,
       duration: 8000,
     });

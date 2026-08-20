@@ -21,21 +21,13 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Agendamento } from '@/types/agendamento';
 import { Cliente } from '@/types/cliente';
+import { normalizeText } from '@/lib/formatters';
 
 interface ClienteHistoricoProps {
   cliente: Cliente;
   agendamentos: Agendamento[];
   onClose: () => void;
 }
-
-// Normalizar texto para busca
-const normalizeText = (text: string): string => {
-  return text
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .trim();
-};
 
 export function ClienteHistorico({ cliente, agendamentos, onClose }: ClienteHistoricoProps) {
   // Calcular estatísticas do cliente

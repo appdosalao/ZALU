@@ -1,4 +1,26 @@
 import type { Agendamento } from '@/types/agendamento';
+import { formatBRL } from '@/lib/formatters';
+import DOMPurify from 'dompurify';
+
+const escapeHTML = (value: unknown): string => {
+  if (value == null) return '';
+  const str = String(value);
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+    .replace(/`/g, '&#96;');
+};
+
+const safeAttribute = (value: unknown): string => {
+  if (value == null) return '';
+  const str = String(value);
+  if (/^https?:\/\//i.test(str) || /^\/[^\\]*/.test(str)) return escapeHTML(str);
+  if (str.startsWith('data:image/')) return escapeHTML(str);
+  return '';
+};
 
 export function printAgendamentoRecibo(params: {
   agendamento: Agendamento;
@@ -11,27 +33,32 @@ export function printAgendamentoRecibo(params: {
   const dataBR = new Date(`${agendamento.data}T${agendamento.hora}`);
   const dataStr = dataBR.toLocaleDateString('pt-BR');
   const horaStr = agendamento.hora.slice(0, 5);
-  const valor = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(agendamento.valor);
-  const valorPago = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(agendamento.valorPago || 0);
-  const valorDevido = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(agendamento.valorDevido || 0);
+  const valor = formatBRL(agendamento.valor);
+  const valorPago = formatBRL(agendamento.valorPago || 0);
+  const valorDevido = formatBRL(agendamento.valorDevido || 0);
   const forma = agendamento.formaPagamento === 'cartao' ? 'Cartão' :
                 agendamento.formaPagamento === 'pix' ? 'PIX' :
                 agendamento.formaPagamento === 'dinheiro' ? 'Dinheiro' : 'Fiado';
   const statusPagamento = agendamento.statusPagamento === 'pago' ? 'Pago' :
                           agendamento.statusPagamento === 'parcial' ? 'Parcial' : 'Em aberto';
 
-  // Extrair produto das observações (Agendamento Online)
   const produtoAgendamentoOnline = (() => {
     if (!agendamento.observacoes || !agendamento.observacoes.includes('Compra de produto:')) return null;
     try {
       const jsonStr = agendamento.observacoes.split('Compra de produto:')[1].trim();
-      return JSON.parse(jsonStr);
+      const parsed = JSON.parse(jsonStr);
+      return {
+        produto_nome: escapeHTML(parsed?.produto_nome ?? ''),
+        valor_total: formatBRL(parsed?.valor_total ?? 0),
+        quantidade: escapeHTML(String(parsed?.quantidade ?? 0)),
+        forma_pagamento_produto: escapeHTML(parsed?.forma_pagamento_produto ?? ''),
+      };
     } catch {
       return null;
     }
   })();
 
-  const win = window.open('', '_blank');
+  const win = window.open('', '_blank', 'noopener,noreferrer');
   if (!win) return;
 
   const style = `
@@ -57,33 +84,38 @@ export function printAgendamentoRecibo(params: {
     @media print { body { padding: 0; } .container { box-shadow: none; border: none; } }
   `;
 
+  const safeLogo = safeAttribute(logoUrl);
+  const servicoValor = produtoAgendamentoOnline
+    ? formatBRL(Math.max(0, Number(agendamento.valor) - Number((agendamento.valor - (produtoAgendamentoOnline ? 0 : 0)))))
+    : null;
   const html = `
     <html>
       <head>
         <meta charset="utf-8" />
-        <title>Recibo - ${salonName || 'ZALU'}</title>
+        <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' data:; img-src 'self' data: https:; script-src 'unsafe-inline'"/>
+        <title>Recibo - ${escapeHTML(salonName || 'ZALU')}</title>
         <style>${style}</style>
       </head>
       <body>
         <div class="container">
           <div class="header">
-            ${logoUrl ? `<img class="logo" src="${logoUrl}" alt="Logo" />` : ''}
+            ${safeLogo ? `<img class="logo" src="${safeLogo}" alt="" />` : ''}
             <div>
-              <div class="title">${salonName || 'ZALU'}</div>
+              <div class="title">${escapeHTML(salonName || 'ZALU')}</div>
               <div class="subtitle">Comprovante de Atendimento</div>
             </div>
           </div>
 
           <div class="section">
             <h3>Cliente</h3>
-            <div class="row"><div>Nome</div><div>${cliente.nome}</div></div>
-            <div class="row"><div>Telefone</div><div>${cliente.telefone}</div></div>
+            <div class="row"><div>Nome</div><div>${escapeHTML(cliente.nome)}</div></div>
+            <div class="row"><div>Telefone</div><div>${escapeHTML(cliente.telefone)}</div></div>
           </div>
 
           <div class="section">
             <h3>Detalhes do Serviço</h3>
-            <div class="row"><div>Procedimento</div><div>${servico.nome}</div></div>
-            <div class="row"><div>Data e Hora</div><div>${dataStr} às ${horaStr}</div></div>
+            <div class="row"><div>Procedimento</div><div>${escapeHTML(servico.nome)}</div></div>
+            <div class="row"><div>Data e Hora</div><div>${escapeHTML(dataStr)} às ${escapeHTML(horaStr)}</div></div>
           </div>
 
           ${produtoAgendamentoOnline ? `
@@ -92,7 +124,7 @@ export function printAgendamentoRecibo(params: {
             <div class="product-box">
               <div class="product-title">
                 <span>${produtoAgendamentoOnline.produto_nome}</span>
-                <span>${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(produtoAgendamentoOnline.valor_total || 0)}</span>
+                <span>${produtoAgendamentoOnline.valor_total}</span>
               </div>
               <div class="product-info">Quantidade: ${produtoAgendamentoOnline.quantidade}x • Pagamento: ${produtoAgendamentoOnline.forma_pagamento_produto}</div>
             </div>
@@ -101,38 +133,33 @@ export function printAgendamentoRecibo(params: {
 
           <div class="section">
             <h3>Resumo Financeiro</h3>
-            ${produtoAgendamentoOnline ? `
-              <div class="row detail"><div>Valor do Serviço</div><div>${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(agendamento.valor - (produtoAgendamentoOnline.valor_total || 0))}</div></div>
-              <div class="row detail"><div>Valor dos Produtos</div><div>+ ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(produtoAgendamentoOnline.valor_total || 0)}</div></div>
-            ` : ''}
-            <div class="row total"><div>Total Geral</div><div>${valor}</div></div>
-            <div class="row"><div>Valor Pago</div><div>${valorPago}</div></div>
-            <div class="row"><div>Pendente</div><div style="color: ${agendamento.valorDevido > 0 ? '#ef4444' : '#22c55e'}">${valorDevido}</div></div>
+            <div class="row total"><div>Total Geral</div><div>${escapeHTML(valor)}</div></div>
+            <div class="row"><div>Valor Pago</div><div>${escapeHTML(valorPago)}</div></div>
+            <div class="row"><div>Pendente</div><div style="color: ${agendamento.valorDevido > 0 ? '#ef4444' : '#22c55e'}">${escapeHTML(valorDevido)}</div></div>
             <div class="row">
               <div>Status</div>
-              <div><span class="badge ${agendamento.statusPagamento === 'pago' ? 'badge-success' : 'badge-pending'}">${statusPagamento}</span></div>
+              <div><span class="badge ${agendamento.statusPagamento === 'pago' ? 'badge-success' : 'badge-pending'}">${escapeHTML(statusPagamento)}</span></div>
             </div>
           </div>
 
           <div class="footer">
-            Obrigado pela preferência! ✨<br>
-            Documento gerado em ${new Date().toLocaleString('pt-BR')}<br>
-            ${window.location.origin}
+            Obrigado pela preferência!<br>
+            Documento gerado em ${escapeHTML(new Date().toLocaleString('pt-BR'))}<br>
+            ${escapeHTML(window.location.origin)}
           </div>
         </div>
-        <script>
-          window.onload = () => {
-            setTimeout(() => {
-              window.print();
-              setTimeout(() => window.close(), 500);
-            }, 500);
-          };
-        </script>
       </body>
     </html>
   `;
 
+  const safeHtml = DOMPurify.sanitize(html, { USE_PROFILES: { html: true } });
   win.document.open();
-  win.document.write(html);
+  win.document.write(safeHtml);
   win.document.close();
+  try { win.focus(); } catch {}
+  const t1 = window.setTimeout(() => {
+    try { win.print(); } catch {}
+    const t2 = window.setTimeout(() => { try { win.close(); } catch {} }, 600);
+    try { win.addEventListener && win.addEventListener('afterprint', () => { try { clearTimeout(t2); win.close(); } catch {} }); } catch {}
+  }, 500);
 }

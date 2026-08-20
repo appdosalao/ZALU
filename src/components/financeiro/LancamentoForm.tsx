@@ -32,7 +32,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { Lancamento, NovoLancamento } from "@/types/lancamento";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 const formSchema = z.object({
   tipo: z.enum(["entrada", "saida"], {
@@ -94,16 +94,13 @@ export default function LancamentoForm({
       const success = await onSubmit(novoLancamento);
       
       if (success) {
-        toast({
-          title: lancamento ? "Lançamento atualizado" : "Lançamento criado",
+        toast(lancamento ? "Lançamento atualizado" : "Lançamento criado", {
           description: `${lancamento ? "Alterações salvas" : "Novo lançamento adicionado"} com sucesso.`,
         });
       }
     } catch (error) {
-      toast({
-        title: "Erro",
+      toast.error("Erro", {
         description: "Ocorreu um erro ao salvar o lançamento.",
-        variant: "destructive",
       });
     } finally {
       setIsSubmitting(false);

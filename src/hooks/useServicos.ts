@@ -1,8 +1,10 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { ServicoFiltros, NovoServico, Servico } from '@/types/servico';
 import { supabase } from '@/integrations/supabase/client';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { toast } from 'sonner';
+import { validateUniqueName } from '@/lib/validators';
+import { servicoFromSupabase, servicoToSupabase } from '@/lib/mappers';
 
 export function useServicos() {
   const { user } = useSupabaseAuth();
@@ -32,17 +34,7 @@ export function useServicos() {
         return;
       }
 
-      // Mapear dados do Supabase para o formato da aplicação
-      const servicosFormatados = (data || []).map(item => ({
-        id: item.id,
-        nome: item.nome,
-        valor: parseFloat(item.valor.toString()),
-        duracao: item.duracao,
-        descricao: item.descricao || undefined,
-        observacoes: item.observacoes || undefined,
-        createdAt: item.created_at,
-        updatedAt: item.updated_at
-      }));
+      const servicosFormatados = (data || []).map(item => servicoFromSupabase(item));
 
       setServicos(servicosFormatados);
     } catch (error) {
@@ -110,28 +102,19 @@ export function useServicos() {
       return false;
     }
 
-    // Verificar se já existe serviço com o mesmo nome
-    const servicoExistente = servicos.find(s => 
-      s.nome.toLowerCase() === novoServico.nome.toLowerCase()
-    );
-
-    if (servicoExistente) {
-      toast.error('Já existe um serviço com este nome');
+    if (!validateUniqueName(servicos, novoServico.nome, 'Serviço')) {
       return false;
     }
 
     setLoading(true);
     try {
+      const insertPayload = {
+        user_id: user.id,
+        ...servicoToSupabase(novoServico)
+      };
       const { data, error } = await supabase
         .from('servicos')
-        .insert({
-          user_id: user.id,
-          nome: novoServico.nome,
-          valor: novoServico.valor,
-          duracao: novoServico.duracao,
-          descricao: novoServico.descricao || null,
-          observacoes: novoServico.observacoes || null
-        })
+        .insert(insertPayload as any)
         .select()
         .single();
 
@@ -141,17 +124,7 @@ export function useServicos() {
         return false;
       }
 
-      // Atualizar lista local
-      const novoServicoFormatado = {
-        id: data.id,
-        nome: data.nome,
-        valor: parseFloat(data.valor.toString()),
-        duracao: data.duracao,
-        descricao: data.descricao || undefined,
-        observacoes: data.observacoes || undefined,
-        createdAt: data.created_at,
-        updatedAt: data.updated_at
-      };
+      const novoServicoFormatado = servicoFromSupabase(data);
 
       setServicos(prev => [...prev, novoServicoFormatado]);
       toast.success('Serviço criado com sucesso!');
@@ -169,6 +142,13 @@ export function useServicos() {
     if (!user) {
       toast.error('Usuário não autenticado');
       return false;
+    }
+
+    const nome = dadosAtualizados.nome;
+    if (nome !== undefined && nome !== null && nome.trim() !== '') {
+      if (!validateUniqueName(servicos, nome, 'Serviço', id)) {
+        return false;
+      }
     }
 
     // Validações básicas
@@ -189,12 +169,7 @@ export function useServicos() {
 
     setLoading(true);
     try {
-      const updates: any = {};
-      if (dadosAtualizados.nome !== undefined) updates.nome = dadosAtualizados.nome;
-      if (dadosAtualizados.valor !== undefined) updates.valor = dadosAtualizados.valor;
-      if (dadosAtualizados.duracao !== undefined) updates.duracao = dadosAtualizados.duracao;
-      if (dadosAtualizados.descricao !== undefined) updates.descricao = dadosAtualizados.descricao || null;
-      if (dadosAtualizados.observacoes !== undefined) updates.observacoes = dadosAtualizados.observacoes || null;
+      const updates = servicoToSupabase(dadosAtualizados);
 
       const { data, error } = await supabase
         .from('servicos')
@@ -210,17 +185,7 @@ export function useServicos() {
         return false;
       }
 
-      // Atualizar lista local
-      const servicoAtualizado = {
-        id: data.id,
-        nome: data.nome,
-        valor: parseFloat(data.valor.toString()),
-        duracao: data.duracao,
-        descricao: data.descricao || undefined,
-        observacoes: data.observacoes || undefined,
-        createdAt: data.created_at,
-        updatedAt: data.updated_at
-      };
+      const servicoAtualizado = servicoFromSupabase(data);
 
       setServicos(prev => prev.map(s => s.id === id ? servicoAtualizado : s));
       toast.success('Serviço atualizado com sucesso!');

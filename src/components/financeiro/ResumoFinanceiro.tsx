@@ -1,19 +1,13 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { DollarSign, TrendingUp, TrendingDown, PiggyBank, Clock, AlertCircle } from "lucide-react";
 import { ResumoFinanceiro as ResumoType } from "@/types/lancamento";
+import { formatBRL } from '@/lib/formatters';
 
 interface ResumoFinanceiroProps {
   resumo: ResumoType;
 }
 
 export default function ResumoFinanceiro({ resumo }: ResumoFinanceiroProps) {
-  const formatarValor = (valor: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(valor);
-  };
-
   return (
     <div className="grid grid-cols-2 gap-2 sm:gap-4 sm:grid-cols-3 lg:grid-cols-5 animate-fade-in">
       <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover-scale transition-all">
@@ -23,7 +17,7 @@ export default function ResumoFinanceiro({ resumo }: ResumoFinanceiroProps) {
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-lg sm:text-xl font-bold text-success truncate">
-              {formatarValor(resumo.totalEntradas)}
+              {formatBRL(resumo.totalEntradas)}
             </p>
             <p className="text-[10px] sm:text-sm text-muted-foreground">Entradas</p>
           </div>
@@ -37,7 +31,7 @@ export default function ResumoFinanceiro({ resumo }: ResumoFinanceiroProps) {
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-lg sm:text-xl font-bold text-destructive truncate">
-              {formatarValor(resumo.totalSaidas)}
+              {formatBRL(resumo.totalSaidas)}
             </p>
             <p className="text-[10px] sm:text-sm text-muted-foreground">Saídas</p>
           </div>
@@ -61,7 +55,7 @@ export default function ResumoFinanceiro({ resumo }: ResumoFinanceiroProps) {
             <p className={`text-lg sm:text-xl font-bold truncate ${
               resumo.lucro >= 0 ? 'text-primary' : 'text-destructive'
             }`}>
-              {formatarValor(resumo.lucro)}
+              {formatBRL(resumo.lucro)}
             </p>
             <p className="text-[10px] sm:text-sm text-muted-foreground">
               {resumo.lucro >= 0 ? 'Lucro' : 'Prejuízo'}
@@ -78,7 +72,7 @@ export default function ResumoFinanceiro({ resumo }: ResumoFinanceiroProps) {
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-lg sm:text-xl font-bold text-warning truncate">
-              {formatarValor(resumo.valorEmAberto)}
+              {formatBRL(resumo.valorEmAberto)}
             </p>
             <p className="text-[10px] sm:text-sm text-muted-foreground">Em Aberto</p>
           </div>
@@ -93,7 +87,7 @@ export default function ResumoFinanceiro({ resumo }: ResumoFinanceiroProps) {
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-lg sm:text-xl font-bold text-destructive truncate">
-              {formatarValor(resumo.contasAPagar)}
+              {formatBRL(resumo.contasAPagar)}
             </p>
             <p className="text-[10px] sm:text-sm text-muted-foreground">A Pagar</p>
           </div>

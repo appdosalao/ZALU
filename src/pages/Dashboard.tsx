@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, useState } from "react";
+import { useMemo, useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from 'react-router-dom';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,7 +10,6 @@ import {
   DollarSign, 
   Plus, 
   Users, 
-  UserPlus, 
   TrendingUp, 
   Sparkles, 
   PiggyBank,
@@ -29,6 +28,7 @@ import { InstallPrompt } from "@/components/pwa/InstallPrompt";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { AppLogo } from "@/components/branding/AppLogo";
+import { formatBRL } from '@/lib/formatters';
 
 export default function Dashboard() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -186,13 +186,6 @@ export default function Dashboard() {
     [dadosPeriodo, dataHoje]
   );
 
-  const formatarMoeda = (valor: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(valor);
-  };
-
   const concluidosHoje = useMemo(() => {
     return agendamentosFiltrados.filter(ag => ag.data === dataHoje && ag.status === 'concluido');
   }, [agendamentosFiltrados, dataHoje]);
@@ -303,7 +296,7 @@ export default function Dashboard() {
             {carregandoDados ? (
               <Skeleton className="h-6 w-20 rounded-md" />
             ) : (
-              <div className="text-lg sm:text-2xl font-bold text-green-600">{formatarMoeda(totalRecebidoHoje)}</div>
+              <div className="text-lg sm:text-2xl font-bold text-green-600">{formatBRL(totalRecebidoHoje)}</div>
             )}
             <p className="text-[10px] sm:text-xs text-muted-foreground">
               Hoje
@@ -354,7 +347,7 @@ export default function Dashboard() {
             {carregandoDados ? (
               <Skeleton className="h-6 w-20 rounded-md" />
             ) : (
-              <div className="text-lg sm:text-2xl font-bold">{formatarMoeda(ticketMedioHoje)}</div>
+              <div className="text-lg sm:text-2xl font-bold">{formatBRL(ticketMedioHoje)}</div>
             )}
             <p className="text-[10px] sm:text-xs text-muted-foreground truncate">Por atendimento</p>
           </CardContent>
@@ -369,7 +362,7 @@ export default function Dashboard() {
             {carregandoDados ? (
               <Skeleton className="h-6 w-24 rounded-md" />
             ) : (
-              <div className="text-lg sm:text-2xl font-bold text-green-600">{formatarMoeda(entradasMes)}</div>
+              <div className="text-lg sm:text-2xl font-bold text-green-600">{formatBRL(entradasMes)}</div>
             )}
             <p className="text-[10px] sm:text-xs text-muted-foreground truncate">Receitas totais</p>
           </CardContent>
@@ -384,7 +377,7 @@ export default function Dashboard() {
             {carregandoDados ? (
               <Skeleton className="h-6 w-24 rounded-md" />
             ) : (
-              <div className="text-lg sm:text-2xl font-bold">{formatarMoeda(lucroMes)}</div>
+              <div className="text-lg sm:text-2xl font-bold">{formatBRL(lucroMes)}</div>
             )}
             <p className="text-[10px] sm:text-xs text-muted-foreground truncate">Entradas – Saídas</p>
           </CardContent>
@@ -410,7 +403,7 @@ export default function Dashboard() {
             <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 text-destructive flex-shrink-0" />
           </CardHeader>
           <CardContent className="p-3 pt-0 sm:p-4 sm:pt-0">
-            <div className="text-lg sm:text-2xl font-bold text-destructive">{formatarMoeda(saidasMes)}</div>
+            <div className="text-lg sm:text-2xl font-bold text-destructive">{formatBRL(saidasMes)}</div>
             <p className="text-[10px] sm:text-xs text-muted-foreground truncate">Despesas totais</p>
           </CardContent>
           <div className="absolute -right-2 -top-2 h-8 w-8 sm:h-12 sm:w-12 rounded-full bg-gradient-to-br from-red-500/10 to-transparent" />
@@ -510,9 +503,9 @@ export default function Dashboard() {
             Acompanhe seu desempenho semanal
           </CardDescription>
           <div className="mt-2 text-muted-foreground text-xs sm:text-sm">
-            <span>Total: {formatarMoeda(totalPeriodo)}</span>
+            <span>Total: {formatBRL(totalPeriodo)}</span>
             <span className="mx-2">•</span>
-            <span>Média diária: {formatarMoeda(mediaPeriodo)}</span>
+            <span>Média diária: {formatBRL(mediaPeriodo)}</span>
           </div>
         </CardHeader>
         <CardContent className="p-responsive pt-0">
@@ -547,7 +540,7 @@ export default function Dashboard() {
                     const v = Number(value);
                     const delta = mediaPeriodo > 0 ? ((v - mediaPeriodo) / mediaPeriodo) * 100 : 0;
                     const sinal = delta >= 0 ? '+' : '';
-                    return [formatarMoeda(v), `Faturamento (${sinal}${delta.toFixed(0)}% vs média)`];
+                    return [formatBRL(v), `Faturamento (${sinal}${delta.toFixed(0)}% vs média)`];
                   }}
                   labelStyle={{ color: 'hsl(var(--foreground))' }}
                   contentStyle={{
@@ -614,7 +607,7 @@ export default function Dashboard() {
                   {proximoCliente.hora} - {proximoCliente.servicoNome}
                 </p>
                 <p className="text-responsive-xs text-muted-foreground">
-                  Valor: {formatarMoeda(proximoCliente.valor)}
+                  Valor: {formatBRL(proximoCliente.valor)}
                 </p>
               </div>
             </div>

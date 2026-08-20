@@ -3,13 +3,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { useRetornos } from '@/hooks/useCronogramas';
 import { useAgendamentos } from '@/hooks/useAgendamentos';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { CheckCircle, XCircle, Calendar } from 'lucide-react';
 
 export default function ResolverRetornos() {
   const { retornos, marcarRetornoRealizado, cancelarRetorno } = useRetornos();
   const { clientes } = useAgendamentos();
-  const { toast } = useToast();
 
   const retornosAtrasados = retornos.filter(retorno => {
     if (retorno.status !== 'Pendente') return false;
@@ -27,15 +26,12 @@ export default function ResolverRetornos() {
   const handleMarcarRealizado = async (idRetorno: string) => {
     try {
       await marcarRetornoRealizado(idRetorno);
-      toast({
-        title: "Retorno marcado como realizado",
+      toast("Retorno marcado como realizado", {
         description: "O retorno foi atualizado com sucesso.",
       });
     } catch (error) {
-      toast({
-        title: "Erro ao marcar retorno",
+      toast.error("Erro ao marcar retorno", {
         description: "Não foi possível atualizar o retorno.",
-        variant: "destructive"
       });
     }
   };
@@ -43,15 +39,12 @@ export default function ResolverRetornos() {
   const handleCancelar = async (idRetorno: string) => {
     try {
       await cancelarRetorno(idRetorno);
-      toast({
-        title: "Retorno cancelado",
+      toast("Retorno cancelado", {
         description: "O retorno foi cancelado com sucesso.",
       });
     } catch (error) {
-      toast({
-        title: "Erro ao cancelar retorno",
+      toast.error("Erro ao cancelar retorno", {
         description: "Não foi possível cancelar o retorno.",
-        variant: "destructive"
       });
     }
   };

@@ -1,10 +1,8 @@
 import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Plus, Receipt, AlertTriangle, FileText, Users, TrendingUp, Package, BadgeDollarSign } from "lucide-react";
-import { Link } from "react-router-dom";
 import { useLancamentos } from "@/hooks/useLancamentos";
 import { useContasFixas } from "@/hooks/useContasFixas";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
@@ -45,27 +43,25 @@ export default function Financeiro() {
     categorias,
     filtros,
     setFiltros,
-    adicionarLancamento,
+    criarLancamento,
     atualizarLancamento,
     removerLancamento,
   } = useLancamentos();
 
-  const { agendamentosFiltrados: agendamentosRaw } = useSupabaseAgendamentos();
+  useSupabaseAgendamentos();
   const { todosAgendamentos: agendamentosEnriquecidos } = useAgendamentos();
-  
-  // Usamos os enriquecidos para as listas e o raw filtrado para os contadores se necessário
+
   const agendamentos = useMemo(() => agendamentosEnriquecidos || [], [agendamentosEnriquecidos]);
 
-  const { 
-    contasFixas, 
-    categorias: categoriasContasFixas, 
-    criarContaFixa, 
-    atualizarContaFixa, 
-    removerContaFixa, 
-    pagarContaFixa,
+  const {
+    contasFixas,
+    categorias: categoriasContasFixas,
+    criarContaFixa,
+    atualizarContaFixa,
+    removerContaFixa,
+    marcarComoPaga,
     toggleAtiva,
     criarCategoria,
-    estatisticas: estatisticasContasFixas 
   } = useContasFixas();
 
   // Contadores dinâmicos para as abas
@@ -117,7 +113,7 @@ export default function Financeiro() {
     if (lancamentoEditando) {
       sucesso = await atualizarLancamento(lancamentoEditando.id, data);
     } else {
-      sucesso = await adicionarLancamento(data);
+      sucesso = await criarLancamento(data);
     }
     
     if (sucesso) {
@@ -187,7 +183,7 @@ export default function Financeiro() {
       {/* Avisos de Vencimento */}
       <AvisosVencimento 
         contasFixas={contasFixas} 
-        onPagarConta={(contaId: string) => pagarContaFixa(contaId)}
+        onPagarConta={(contaId: string) => marcarComoPaga(contaId)}
       />
 
       {/* Resumo Financeiro */}
@@ -345,7 +341,7 @@ export default function Financeiro() {
                 setViewMode('form');
               }}
               onDelete={removerContaFixa}
-              onPagar={pagarContaFixa}
+              onPagar={marcarComoPaga}
               onToggleAtiva={toggleAtiva}
             />
           ) : (
@@ -358,7 +354,7 @@ export default function Financeiro() {
                 setViewMode('form');
               }}
               onDelete={removerContaFixa}
-              onPagar={pagarContaFixa}
+              onPagar={marcarComoPaga}
               onToggleAtiva={toggleAtiva}
             />
           )}

@@ -1,9 +1,9 @@
 import { useEffect, useState, useCallback } from 'react';
+import { storage, LOCAL_STORAGE_KEYS } from '@/lib/localStorage';
 
 type SoundItem = { name: string; src: string };
 
 const DEFAULTS = ['Mensagem de Texto 1.mp3', 'Mensagem de Texto 2.mp3', 'Mensagem de Texto 3.mp3'];
-const CUSTOM_STORAGE_KEY = 'custom-sound-library';
 
 export function useSoundLibrary() {
   const [sounds, setSounds] = useState<SoundItem[]>([]);
@@ -43,9 +43,8 @@ export function useSoundLibrary() {
 
   const loadCustomStorage = useCallback(() => {
     try {
-      const raw = localStorage.getItem(CUSTOM_STORAGE_KEY);
-      if (raw) {
-        const list: string[] = JSON.parse(raw);
+      const list = storage.getData<string[]>(LOCAL_STORAGE_KEYS.CUSTOM_SOUND_LIB);
+      if (list && Array.isArray(list)) {
         addUnique(list.map(n => ({ name: n, src: fileToUrl(n) })));
       }
     } catch { /* ignore */ }
@@ -70,11 +69,11 @@ export function useSoundLibrary() {
       if (res.ok) {
         addUnique([{ name: clean, src: url }]);
         try {
-          const raw = localStorage.getItem(CUSTOM_STORAGE_KEY);
-          const list: string[] = raw ? JSON.parse(raw) : [];
+          const existing = storage.getData<string[]>(LOCAL_STORAGE_KEYS.CUSTOM_SOUND_LIB) || [];
+          const list: string[] = Array.isArray(existing) ? existing : [];
           if (!list.includes(clean)) {
             list.push(clean);
-            localStorage.setItem(CUSTOM_STORAGE_KEY, JSON.stringify(list));
+            storage.saveData(LOCAL_STORAGE_KEYS.CUSTOM_SOUND_LIB, list);
           }
         } catch { /* ignore */ }
         return true;

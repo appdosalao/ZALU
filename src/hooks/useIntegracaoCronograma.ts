@@ -15,7 +15,7 @@ interface AgendamentoCronograma {
 }
 
 export const useIntegracaoCronograma = () => {
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
 
   // Função para encontrar horário disponível
   const encontrarHorarioDisponivel = useCallback((
@@ -112,7 +112,7 @@ export const useIntegracaoCronograma = () => {
   // Processar conclusão de agendamento de cronograma
   const processarConclusaoAgendamento = useCallback((
     agendamento: Agendamento,
-    onUpdateRetorno: (idRetorno: string, updates: any) => void
+    _onUpdateRetorno: (idRetorno: string, updates: any) => void
   ) => {
     if (agendamento.origem === 'cronograma' && agendamento.cronogramaId) {
       // Encontrar e atualizar o retorno correspondente
@@ -124,7 +124,7 @@ export const useIntegracaoCronograma = () => {
   // Processar cancelamento de agendamento de cronograma
   const processarCancelamentoAgendamento = useCallback((
     agendamento: Agendamento,
-    onUpdateRetorno: (idRetorno: string, updates: any) => void
+    _onUpdateRetorno: (idRetorno: string, updates: any) => void
   ) => {
     if (agendamento.origem === 'cronograma' && agendamento.cronogramaId) {
       // Cancelar o retorno correspondente

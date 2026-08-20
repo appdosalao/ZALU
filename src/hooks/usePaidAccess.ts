@@ -1,6 +1,7 @@
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { storage } from '@/lib/localStorage';
 
 type PaidAccessCache = {
   userId: string;
@@ -13,9 +14,8 @@ const CACHE_TTL_MS = 5 * 60 * 1000;
 
 const readCache = (userId: string): boolean | undefined => {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return undefined;
-    const parsed = JSON.parse(raw) as PaidAccessCache;
+    const parsed = storage.getData<PaidAccessCache>(STORAGE_KEY);
+    if (!parsed) return undefined;
     if (parsed.userId !== userId) return undefined;
     if (!Number.isFinite(parsed.cachedAt)) return undefined;
     if (Date.now() - parsed.cachedAt > CACHE_TTL_MS) return undefined;
@@ -27,7 +27,7 @@ const readCache = (userId: string): boolean | undefined => {
 
 const writeCache = (value: PaidAccessCache) => {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(value));
+    storage.saveData(STORAGE_KEY, value);
   } catch {
   }
 };
@@ -39,7 +39,7 @@ export const usePaidAccess = () => {
 
   const paidFromProfile = typeof usuario?.paid_access === 'boolean' ? usuario.paid_access : undefined;
 
-  const query = useQuery({
+  const query = useQuery<boolean>({
     queryKey: ['paidAccess', userId],
     enabled: !!userId && paidFromProfile === undefined,
     initialData: userId ? readCache(userId) : undefined,
@@ -49,16 +49,16 @@ export const usePaidAccess = () => {
     retry: 1,
     queryFn: async () => {
       if (!userId) return false;
-      const { data, error } = await (supabase
-        .from('assinaturas') as any)
+      const { data, error } = await (supabase as any)
+        .from('assinaturas')
         .select('paid_access')
         .eq('usuario_id', userId)
         .maybeSingle();
 
       if (error) {
         // Fallback to usuarios table for backward compatibility
-        const { data: fallbackData, error: fallbackError } = await (supabase
-          .from('usuarios') as any)
+        const { data: fallbackData, error: fallbackError } = await (supabase as any)
+          .from('usuarios')
           .select('paid_access')
           .eq('id', userId)
           .maybeSingle();

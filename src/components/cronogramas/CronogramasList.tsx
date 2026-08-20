@@ -9,7 +9,7 @@ import { useCronogramas } from "@/hooks/useCronogramas";
 import { useSupabaseClientes } from "@/hooks/useSupabaseClientes";
 import { useServicos } from "@/hooks/useServicos";
 import { useSupabaseAgendamentos } from "@/hooks/useSupabaseAgendamentos";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import CronogramaForm from "./CronogramaForm";
 import CronogramaComAgendamentos from "./CronogramaComAgendamentos";
 
@@ -23,20 +23,16 @@ export default function CronogramasList() {
   const { clientes } = useSupabaseClientes();
   const { servicos } = useServicos();
   const { agendamentos, criarAgendamento } = useSupabaseAgendamentos();
-  const { toast } = useToast();
 
   const handleDelete = async (id: string) => {
     try {
       await deleteCronograma(id);
-      toast({
-        title: "Cronograma removido",
+      toast("Cronograma removido", {
         description: "O cronograma foi removido com sucesso.",
       });
     } catch (error) {
-      toast({
-        title: "Erro",
+      toast.error("Erro", {
         description: "Erro ao remover cronograma.",
-        variant: "destructive",
       });
     }
   };
@@ -66,15 +62,12 @@ export default function CronogramasList() {
       setShowActivationDialog(false);
       setActivatingCronograma(null);
       
-      toast({
-        title: "Cronograma ativado",
+      toast("Cronograma ativado", {
         description: `${agendamentos.length} agendamentos foram criados com sucesso.`,
       });
     } catch (error) {
-      toast({
-        title: "Erro",
+      toast.error("Erro", {
         description: "Erro ao gerar agendamentos.",
-        variant: "destructive",
       });
     }
   };

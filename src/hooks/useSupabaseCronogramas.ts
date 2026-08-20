@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Cronograma, Retorno } from '@/types/cronograma';
+import { cronogramaFromSupabase, cronogramaToSupabase, retornoFromSupabase, retornoToSupabase } from '@/lib/mappers';
 
 // Interface estendida para cronogramas com dados relacionados
 interface CronogramaCompleto extends Cronograma {
@@ -46,21 +47,7 @@ export const useSupabaseCronogramas = () => {
       if (error) throw error;
 
       const formattedCronogramas: CronogramaCompleto[] = (data || []).map(item => ({
-        id_cronograma: item.id_cronograma,
-        cliente_id: item.cliente_id,
-        cliente_nome: item.cliente_nome,
-        servico_id: item.servico_id,
-        tipo_servico: item.tipo_servico,
-        data_inicio: item.data_inicio,
-        hora_inicio: item.hora_inicio,
-        duracao_minutos: item.duracao_minutos,
-        recorrencia: item.recorrencia as 'Semanal' | 'Quinzenal' | 'Mensal' | 'Personalizada',
-        intervalo_dias: item.intervalo_dias,
-        observacoes: item.observacoes,
-        status: item.status as 'ativo' | 'cancelado' | 'concluido',
-        created_at: item.created_at,
-        updated_at: item.updated_at,
-        // Dados relacionados
+        ...cronogramaFromSupabase(item),
         cliente_nome_real: item.cliente_nome_real,
         cliente_telefone: item.cliente_telefone,
         cliente_email: item.cliente_email,
@@ -92,15 +79,7 @@ export const useSupabaseCronogramas = () => {
       if (error) throw error;
 
       const formattedRetornos: RetornoCompleto[] = (data || []).map(item => ({
-        id_retorno: item.id_retorno,
-        id_cliente: item.id_cliente,
-        id_cronograma: item.id_cronograma,
-        data_retorno: item.data_retorno,
-        status: item.status as 'Pendente' | 'Realizado' | 'Cancelado',
-        id_agendamento_retorno: item.id_agendamento_retorno,
-        created_at: item.created_at,
-        updated_at: item.updated_at,
-        // Dados relacionados
+        ...retornoFromSupabase(item),
         cliente_nome: item.cliente_nome,
         cliente_telefone: item.cliente_telefone,
         tipo_servico: item.tipo_servico,
@@ -123,22 +102,13 @@ export const useSupabaseCronogramas = () => {
       const { data: user } = await supabase.auth.getUser();
       if (!user.user) throw new Error('Usuário não autenticado');
 
+      const insertPayload = {
+        user_id: user.user.id,
+        ...cronogramaToSupabase(cronograma)
+      };
       const { data, error } = await supabase
         .from('cronogramas_novos')
-        .insert({
-          user_id: user.user.id,
-          cliente_id: cronograma.cliente_id,
-          cliente_nome: cronograma.cliente_nome,
-          servico_id: cronograma.servico_id,
-          tipo_servico: cronograma.tipo_servico,
-          data_inicio: cronograma.data_inicio,
-          hora_inicio: cronograma.hora_inicio,
-          duracao_minutos: cronograma.duracao_minutos,
-          recorrencia: cronograma.recorrencia,
-          intervalo_dias: cronograma.intervalo_dias,
-          observacoes: cronograma.observacoes,
-          status: cronograma.status,
-        })
+        .insert(insertPayload as any)
         .select()
         .single();
 
@@ -154,9 +124,10 @@ export const useSupabaseCronogramas = () => {
   // Atualizar cronograma
   const updateCronograma = async (id: string, updates: Partial<Cronograma>) => {
     try {
+      const updateData = cronogramaToSupabase(updates);
       const { error } = await supabase
         .from('cronogramas_novos')
-        .update(updates)
+        .update(updateData)
         .eq('id_cronograma', id);
 
       if (error) throw error;
@@ -189,16 +160,13 @@ export const useSupabaseCronogramas = () => {
       const { data: user } = await supabase.auth.getUser();
       if (!user.user) throw new Error('Usuário não autenticado');
 
+      const insertPayload = {
+        user_id: user.user.id,
+        ...retornoToSupabase(retorno)
+      };
       const { data, error } = await supabase
         .from('retornos_novos')
-        .insert({
-          user_id: user.user.id,
-          id_cliente: retorno.id_cliente,
-          id_cronograma: retorno.id_cronograma,
-          data_retorno: retorno.data_retorno,
-          status: retorno.status,
-          id_agendamento_retorno: retorno.id_agendamento_retorno,
-        })
+        .insert(insertPayload as any)
         .select()
         .single();
 
@@ -214,9 +182,10 @@ export const useSupabaseCronogramas = () => {
   // Atualizar retorno
   const updateRetorno = async (id: string, updates: Partial<Retorno>) => {
     try {
+      const updateData = retornoToSupabase(updates);
       const { error } = await supabase
         .from('retornos_novos')
-        .update(updates)
+        .update(updateData)
         .eq('id_retorno', id);
 
       if (error) throw error;

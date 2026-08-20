@@ -14,13 +14,7 @@ interface MovimentacaoEstoqueDialogProps {
   onSuccess: () => void;
 }
 
-export function MovimentacaoEstoqueDialog({
-  produto,
-  tipo,
-  open,
-  onOpenChange,
-  onSuccess
-}: MovimentacaoEstoqueDialogProps) {
+export function MovimentacaoEstoqueDialog({ produto, tipo, open, onOpenChange, onSuccess }: MovimentacaoEstoqueDialogProps) {
   const { movimentarEstoque } = useSupabaseProdutos();
   const [quantidade, setQuantidade] = useState('1');
   const [motivo, setMotivo] = useState('');
@@ -29,19 +23,16 @@ export function MovimentacaoEstoqueDialog({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    
     try {
       const qtd = parseFloat(quantidade);
-      if (isNaN(qtd) || qtd <= 0) {
-        throw new Error('Quantidade inválida');
-      }
+      if (isNaN(qtd) || qtd <= 0) throw new Error('Quantidade inválida');
 
       const success = await movimentarEstoque({
         produto_id: produto.id,
         tipo,
         quantidade: qtd,
         motivo: motivo || undefined,
-        valor_unitario: tipo === 'entrada' ? produto.preco_custo : produto.preco_venda
+        valor_unitario: tipo === 'entrada' ? produto.preco_custo : produto.preco_venda,
       });
 
       if (success) {
@@ -61,45 +52,18 @@ export function MovimentacaoEstoqueDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <form onSubmit={handleSubmit}>
-          <DialogHeader>
-            <DialogTitle>
-              {tipo === 'entrada' ? 'Entrada de Estoque' : 'Saída de Estoque'}
-            </DialogTitle>
-          </DialogHeader>
+          <DialogHeader><DialogTitle>{tipo === 'entrada' ? 'Entrada de Estoque' : 'Saída de Estoque'}</DialogTitle></DialogHeader>
           <div className="grid gap-4 py-4">
-            <div className="space-y-2">
-              <Label>Produto</Label>
-              <Input value={produto?.nome} disabled />
-            </div>
+            <div className="space-y-2"><Label>Produto</Label><Input value={produto?.nome} disabled /></div>
             <div className="space-y-2">
               <Label htmlFor="quantidade">Quantidade ({produto?.unidade_medida})</Label>
-              <Input
-                id="quantidade"
-                type="number"
-                step="0.01"
-                min="0.01"
-                value={quantidade}
-                onChange={(e) => setQuantidade(e.target.value)}
-                required
-              />
+              <Input id="quantidade" type="number" step="0.01" min="0.01" value={quantidade} onChange={(e) => setQuantidade(e.target.value)} required />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="motivo">Motivo (Opcional)</Label>
-              <Textarea
-                id="motivo"
-                placeholder="Ex: Ajuste de inventário, perda, brinde..."
-                value={motivo}
-                onChange={(e) => setMotivo(e.target.value)}
-              />
-            </div>
+            <div className="space-y-2"><Label htmlFor="motivo">Motivo (Opcional)</Label><Textarea id="motivo" placeholder="Ex: Ajuste de inventário, perda, brinde..." value={motivo} onChange={(e) => setMotivo(e.target.value)} /></div>
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancelar
-            </Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? 'Processando...' : 'Confirmar'}
-            </Button>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
+            <Button type="submit" disabled={loading}>{loading ? 'Processando...' : 'Confirmar'}</Button>
           </DialogFooter>
         </form>
       </DialogContent>

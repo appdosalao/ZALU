@@ -39,8 +39,9 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Cliente } from "@/types/cliente";
 import ClienteForm from "./ClienteForm";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { useConfigAgendamentoOnline } from "@/hooks/useConfigAgendamentoOnline";
+import { normalizeText } from '@/lib/formatters';
 
 interface ClientesListProps {
   clientes: Cliente[];
@@ -48,15 +49,6 @@ interface ClientesListProps {
   onDelete: (id: string) => void;
   onViewDetails: (cliente: Cliente) => void;
 }
-
-// Função para normalizar texto (remover acentos e converter para minúsculas)
-const normalizeText = (text: string): string => {
-  return text
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .trim();
-};
 
 // Função para verificar se todos os termos de busca estão presentes
 const matchesAllTerms = (text: string, searchTerms: string[]): boolean => {
@@ -185,8 +177,7 @@ export default function ClientesList({ clientes, onEdit, onDelete, onViewDetails
 
   const handleDelete = (id: string, nome: string) => {
     onDelete(id);
-    toast({
-      title: "Cliente removida",
+    toast("Cliente removida", {
       description: `${nome} foi removida com sucesso.`,
     });
   };

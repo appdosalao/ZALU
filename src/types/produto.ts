@@ -8,6 +8,7 @@ export interface Produto {
   descricao?: string | null;
   codigo_barras?: string | null;
   categoria: string;
+  categoria_id?: string | null;
   estoque_atual: number;
   estoque_minimo: number;
   unidade_medida: string;

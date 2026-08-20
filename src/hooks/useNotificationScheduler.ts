@@ -1,8 +1,9 @@
 import { useCallback, useEffect } from 'react';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { usePushNotifications } from './usePushNotifications';
-import { toast } from 'sonner';
+
 import { TipoNotificacao } from '@/types/notificacao';
+import { storage, getScheduledNotificationKey } from '@/lib/localStorage';
 
 interface ScheduledNotification {
   id: string;
@@ -44,7 +45,7 @@ export const useNotificationScheduler = () => {
           ...notification,
           programadaPara: notification.programadaPara.toISOString()
         });
-        localStorage.setItem(`scheduled-notifications-${usuario.id}`, JSON.stringify(scheduledNotifications));
+        storage.saveData(getScheduledNotificationKey(usuario.id), scheduledNotifications);
       } else {
         // Para notificações mais distantes, apenas salvar no localStorage
         // e verificar periodicamente
@@ -53,7 +54,7 @@ export const useNotificationScheduler = () => {
           ...notification,
           programadaPara: notification.programadaPara.toISOString()
         });
-        localStorage.setItem(`scheduled-notifications-${usuario.id}`, JSON.stringify(scheduledNotifications));
+        storage.saveData(getScheduledNotificationKey(usuario.id), scheduledNotifications);
       }
     } catch (error) {
       console.error('Erro ao agendar notificação:', error);
@@ -63,9 +64,9 @@ export const useNotificationScheduler = () => {
   // Obter notificações agendadas
   const getScheduledNotifications = useCallback(() => {
     if (!usuario) return [];
-    
-    const stored = localStorage.getItem(`scheduled-notifications-${usuario.id}`);
-    return stored ? JSON.parse(stored) : [];
+
+    const stored = storage.getData<Array<Omit<ScheduledNotification, 'programadaPara'> & { programadaPara: string }>>(getScheduledNotificationKey(usuario.id));
+    return stored ? stored : [];
   }, [usuario]);
 
   // Enviar notificação imediata
@@ -75,12 +76,12 @@ export const useNotificationScheduler = () => {
     try {
       if ('serviceWorker' in navigator) {
         const registration = await navigator.serviceWorker.ready;
-        
+
         const options = {
           body: notification.mensagem,
           icon: '/icons/icon-192x192.png',
           badge: '/icons/icon-192x192.png',
-          
+
           tag: `${notification.tipo}-${notification.id}`,
           data: {
             ...notification.dados,
@@ -107,7 +108,7 @@ export const useNotificationScheduler = () => {
 
     const scheduledNotifications = getScheduledNotifications();
     const filtered = scheduledNotifications.filter((n: any) => n.id !== notificationId);
-    localStorage.setItem(`scheduled-notifications-${usuario.id}`, JSON.stringify(filtered));
+    storage.saveData(getScheduledNotificationKey(usuario.id), filtered);
   }, [usuario, getScheduledNotifications]);
 
   // Verificar notificações pendentes (executar periodicamente)
@@ -119,7 +120,7 @@ export const useNotificationScheduler = () => {
 
     for (const notification of scheduledNotifications) {
       const scheduledTime = new Date(notification.programadaPara);
-      
+
       if (scheduledTime <= now) {
         await sendImmediateNotification({
           ...notification,

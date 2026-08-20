@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useSupabaseConfiguracoes } from './useSupabaseConfiguracoes';
 import { toast } from 'sonner';
-import { Notificacao, TipoNotificacao } from '@/types/notificacao';
+import { TipoNotificacao } from '@/types/notificacao';
 
 export function useNotificacaoGlobal() {
   const { user } = useSupabaseAuth();
@@ -11,11 +11,11 @@ export function useNotificacaoGlobal() {
 
   // Função para criar notificação
   const criarNotificacao = async (
-    tipo: TipoNotificacao,
+    _tipo: TipoNotificacao,
     titulo: string,
     mensagem: string,
-    dados?: Record<string, any>,
-    programadaPara?: string
+    _dados?: Record<string, any>,
+    _programadaPara?: string
   ) => {
     if (!user?.id) return;
 

@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
+import type { Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -24,21 +24,8 @@ import {
   PASSWORD_RULES,
   isStrongPassword,
   passwordStrength,
-  strongPasswordSchema,
 } from '@/lib/passwordPolicy';
-
-const cadastroSchema = z.object({
-  nome_personalizado_app: z.string().min(1, 'Nome da profissional/salão é obrigatório'),
-  nome_completo: z.string().min(1, 'Nome completo é obrigatório'),
-  email: z.string().email('E-mail inválido'),
-  telefone: z.string().min(10, 'Telefone deve ter pelo menos 10 dígitos'),
-  tema_preferencia: z.enum(['feminino', 'masculino']),
-  senha: strongPasswordSchema(),
-  confirmar_senha: z.string().min(1, 'Confirmação de senha é obrigatória'),
-}).refine((data) => data.senha === data.confirmar_senha, {
-  message: "Senhas não coincidem",
-  path: ["confirmar_senha"],
-});
+import { cadastroSchema } from '@/lib/validation';
 
 const Cadastro = () => {
   const navigate = useNavigate();
@@ -48,7 +35,7 @@ const Cadastro = () => {
   const [isBuying, setIsBuying] = useState(false);
 
   const { register, handleSubmit, formState: { errors }, watch, setValue } = useForm<UsuarioCadastro>({
-    resolver: zodResolver(cadastroSchema),
+    resolver: zodResolver(cadastroSchema) as unknown as Resolver<UsuarioCadastro>,
     defaultValues: {
       tema_preferencia: 'feminino',
     },

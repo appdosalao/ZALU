@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ArrowLeft, Save, Repeat, Calendar, Plus } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
+import { toast } from "sonner";
 import { ContaFixa, NovaContaFixa, CategoriaFinanceira } from '@/types/contaFixa';
 
 const contaFixaSchema = z.object({
@@ -92,15 +92,12 @@ export default function ContaFixaForm({
       // Seleciona automaticamente a nova categoria
       form.setValue('categoria', data.nome);
       
-      toast({
-        title: "Categoria criada",
+      toast("Categoria criada", {
         description: `A categoria "${data.nome}" foi criada com sucesso.`,
       });
     } catch (error) {
-      toast({
-        title: "Erro ao criar categoria",
+      toast.error("Erro ao criar categoria", {
         description: "Não foi possível criar a categoria. Tente novamente.",
-        variant: "destructive",
       });
     } finally {
       setLoadingCategoria(false);

@@ -17,6 +17,7 @@ import type { RelatorioExportacao } from "@/types/relatorio";
 import { supabase } from "@/integrations/supabase/client";
 import { useConfigAgendamentoOnline } from "@/hooks/useConfigAgendamentoOnline";
 import { useEffect, useState } from "react";
+import { formatBRL } from '@/lib/formatters';
 
 export default function RelatoriosAvancados() {
   const { lancamentos } = useLancamentos();
@@ -189,7 +190,7 @@ export default function RelatoriosAvancados() {
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-2xl font-bold text-destructive">
-                {formatarValor(dadosRelatorio.totalSaidas)}
+                {formatBRL(dadosRelatorio.totalSaidas)}
               </p>
               <p className="text-sm text-muted-foreground">Total de Saídas</p>
             </div>
@@ -239,7 +240,7 @@ export default function RelatoriosAvancados() {
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-2xl font-bold text-primary">
-                {formatarValor(usoTotals.prof)}
+                {formatBRL(usoTotals.prof)}
               </p>
               <p className="text-sm text-muted-foreground">Uso Profissional</p>
             </div>
@@ -287,7 +288,7 @@ export default function RelatoriosAvancados() {
             
             <div className="text-center p-4 bg-muted/50 rounded-lg">
               <div className="text-lg font-semibold">
-                {formatarValor(dadosRelatorio.agendamentosAbertos)}
+                {formatBRL(dadosRelatorio.agendamentosAbertos)}
               </div>
               <div className="text-sm text-muted-foreground">Pendente Recebimento</div>
             </div>
@@ -362,7 +363,7 @@ export default function RelatoriosAvancados() {
                         </div>
                         <div className="text-right">
                           <div className="font-semibold text-success">
-                            {formatarValor(servico.valorTotal)}
+                            {formatBRL(servico.valorTotal)}
                           </div>
                           <div className="text-xs text-muted-foreground">
                             {servico.percentual.toFixed(1)}% do faturamento

@@ -2,6 +2,7 @@ import { useSupabaseAgendamentos } from './useSupabaseAgendamentos';
 import { useServicos } from './useServicos';
 import { useSupabaseClientes } from './useSupabaseClientes';
 import { useMemo } from 'react';
+import { normalizeText } from '@/lib/formatters';
 
 // Função utilitária para construção segura de datas
 const parseSafeDate = (data: string, hora: string): Date => {
@@ -36,15 +37,6 @@ export function useAgendamentos() {
       };
     });
   }, [agendamentosData.todosAgendamentos, clientes, servicos]);
-
-  // Normalizar texto para busca (remover acentos)
-  const normalizeText = (text: string): string => {
-    return text
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .trim();
-  };
 
   // Agendamentos filtrados também com nomes completos e busca por texto
   const agendamentosFiltradosEnriquecidos = useMemo(() => {
@@ -143,23 +135,14 @@ export function useAgendamentos() {
     return await agendamentosData.criarAgendamento(agendamentoCompleto);
   };
 
-  const adicionarAgendamentosCronograma = () => {
-    // Esta funcionalidade agora é gerenciada automaticamente pelo Supabase
-    console.log('Agendamentos de cronograma são criados automaticamente');
-  };
-
   return {
     ...agendamentosData,
-    // Substituir os dados originais pelos enriquecidos
     todosAgendamentos,
     agendamentosFiltrados: agendamentosFiltradosEnriquecidos,
-    // Dados auxiliares
     clientes,
     servicos,
-    // Funções
     verificarConflito,
     criarAgendamento,
-    adicionarAgendamentosCronograma,
     verificarHorarioDisponivel: agendamentosData.verificarHorarioDisponivel,
   };
 }

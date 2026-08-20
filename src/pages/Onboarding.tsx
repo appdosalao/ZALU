@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Progress } from '@/components/ui/progress';
 import { Check, Calendar, Users, DollarSign, Gift, Bell, Sparkles, ArrowRight, ArrowLeft } from 'lucide-react';
 import { AppLogo } from '@/components/branding/AppLogo';
+import { storage, LOCAL_STORAGE_KEYS } from '@/lib/localStorage';
 
 const onboardingSteps = [
   {
@@ -92,12 +93,12 @@ export default function Onboarding() {
   };
 
   const handleFinish = () => {
-    localStorage.setItem('onboarding-completed', 'true');
+    storage.setString(LOCAL_STORAGE_KEYS.ONBOARDING_COMPLETED, 'true');
     navigate('/');
   };
 
   const handleSkip = () => {
-    localStorage.setItem('onboarding-completed', 'true');
+    storage.setString(LOCAL_STORAGE_KEYS.ONBOARDING_COMPLETED, 'true');
     navigate('/');
   };
 

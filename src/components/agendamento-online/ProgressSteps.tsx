@@ -12,15 +12,13 @@ export function ProgressSteps({ currentStep, steps }: ProgressStepsProps) {
   return (
     <div className="w-full py-6 sm:py-8">
       <div className="flex items-center justify-between relative max-w-lg mx-auto px-4">
-        {/* Linha de progresso de fundo */}
         <div className="absolute top-[22px] sm:top-[26px] left-0 right-0 h-2 bg-primary/10 -translate-y-1/2 rounded-full overflow-hidden">
-          <div 
+          <div
             className="h-full bg-gradient-to-r from-primary to-primary/80 transition-all duration-1000 ease-out shadow-[0_0_15px_rgba(var(--primary),0.4)]"
             style={{ width: `${((currentStep - 1) / (steps.length - 1)) * 100}%` }}
           />
         </div>
 
-        {/* Steps */}
         {steps.map((step, index) => {
           const stepNumber = index + 1;
           const isCompleted = stepNumber < currentStep;
@@ -44,7 +42,7 @@ export function ProgressSteps({ currentStep, steps }: ProgressStepsProps) {
                   <StepIcon className={cn("w-6 h-6 sm:w-7 sm:h-7", isCurrent ? "animate-bounce" : "opacity-40")} />
                 )}
               </div>
-              
+
               <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-max">
                 <span
                   className={cn(

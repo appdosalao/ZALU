@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { AlertTriangle, Bell, Calendar, DollarSign } from 'lucide-react';
 import { ContaFixa } from '@/types/contaFixa';
+import { formatBRL } from '@/lib/formatters';
 
 interface AvisosVencimentoProps {
   contasFixas: ContaFixa[];
@@ -79,13 +80,6 @@ export default function AvisosVencimento({ contasFixas, onPagarConta }: AvisosVe
       }
     }
   }, [contasVencidas.length, contasVenceHoje.length]);
-
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    }).format(value);
-  };
 
   const formatDate = (date: Date) => {
     return date.toLocaleDateString('pt-BR');
@@ -192,7 +186,7 @@ export default function AvisosVencimento({ contasFixas, onPagarConta }: AvisosVe
                     </span>
                     <span className="flex items-center gap-1 font-medium text-foreground">
                       <DollarSign className="h-3.5 w-3.5" />
-                      {formatCurrency(conta.valor)}
+                      {formatBRL(conta.valor)}
                     </span>
                   </div>
                 </div>

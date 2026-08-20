@@ -9,7 +9,7 @@ import { Cronograma } from "@/types/cronograma";
 import { useCronogramas } from "@/hooks/useCronogramas";
 import { useSupabaseClientes } from "@/hooks/useSupabaseClientes";
 import { useServicos } from "@/hooks/useServicos";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 interface CronogramaFormProps {
   cronograma?: Cronograma;
@@ -32,16 +32,13 @@ export default function CronogramaForm({ cronograma, onSuccess, onCancel }: Cron
   const { createCronograma, updateCronograma, loading } = useCronogramas();
   const { clientes } = useSupabaseClientes();
   const { servicos } = useServicos();
-  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!formData.cliente_id || !formData.servico_id || !formData.data_inicio) {
-      toast({
-        title: "Campos obrigatórios",
+      toast.error("Campos obrigatórios", {
         description: "Preencha todos os campos obrigatórios.",
-        variant: "destructive",
       });
       return;
     }
@@ -50,10 +47,8 @@ export default function CronogramaForm({ cronograma, onSuccess, onCancel }: Cron
     const servico = servicos.find(s => s.id === formData.servico_id);
 
     if (!cliente || !servico) {
-      toast({
-        title: "Erro",
+      toast.error("Erro", {
         description: "Cliente ou serviço não encontrado.",
-        variant: "destructive",
       });
       return;
     }
@@ -81,23 +76,19 @@ export default function CronogramaForm({ cronograma, onSuccess, onCancel }: Cron
 
       if (cronograma) {
         await updateCronograma(cronograma.id_cronograma, cronogramaData);
-        toast({
-          title: "Cronograma atualizado",
+        toast("Cronograma atualizado", {
           description: "O cronograma foi atualizado com sucesso.",
         });
       } else {
         await createCronograma(cronogramaData);
-        toast({
-          title: "Cronograma criado",
+        toast("Cronograma criado", {
           description: "O cronograma foi criado com sucesso.",
         });
       }
       onSuccess?.();
     } catch (error) {
-      toast({
-        title: "Erro",
+      toast.error("Erro", {
         description: "Ocorreu um erro ao salvar o cronograma.",
-        variant: "destructive",
       });
     }
   };

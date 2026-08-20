@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CheckCircle, XCircle, Calendar, Clock, User, Filter } from "lucide-react";
 import { useRetornos } from "@/hooks/useCronogramas";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 // Mock data para clientes - será substituído pela integração Supabase
 const mockClientes = [
@@ -27,7 +27,6 @@ export default function RetornosList() {
   const [clienteFilter, setClienteFilter] = useState<string>('all');
   
   const { retornos, marcarRetornoRealizado, cancelarRetorno, loading } = useRetornos();
-  const { toast } = useToast();
 
   const getClienteNome = (idCliente: string) => {
     return mockClientes.find(c => c.id_cliente === idCliente)?.nome_completo || 'Cliente não encontrado';
@@ -40,15 +39,12 @@ export default function RetornosList() {
   const handleMarcarRealizado = async (idRetorno: string) => {
     try {
       await marcarRetornoRealizado(idRetorno);
-      toast({
-        title: "Retorno marcado como realizado",
+      toast("Retorno marcado como realizado", {
         description: "O próximo retorno será automaticamente agendado.",
       });
     } catch (error) {
-      toast({
-        title: "Erro",
+      toast.error("Erro", {
         description: "Ocorreu um erro ao marcar o retorno como realizado.",
-        variant: "destructive",
       });
     }
   };
@@ -56,15 +52,12 @@ export default function RetornosList() {
   const handleCancelarRetorno = async (idRetorno: string) => {
     try {
       await cancelarRetorno(idRetorno);
-      toast({
-        title: "Retorno cancelado",
+      toast("Retorno cancelado", {
         description: "O retorno foi cancelado com sucesso.",
       });
     } catch (error) {
-      toast({
-        title: "Erro",
+      toast.error("Erro", {
         description: "Ocorreu um erro ao cancelar o retorno.",
-        variant: "destructive",
       });
     }
   };

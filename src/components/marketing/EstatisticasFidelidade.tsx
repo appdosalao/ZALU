@@ -3,20 +3,21 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Award, TrendingUp, Users, Gift, RefreshCw } from 'lucide-react';
 import { useSupabaseFidelidade } from '@/hooks/useSupabaseFidelidade';
 import { Button } from '@/components/ui/button';
+import { storage } from '@/lib/localStorage';
 
 export const EstatisticasFidelidade = () => {
   const { estatisticas, sincronizarDoHistorico, recarregar, loading } = useSupabaseFidelidade();
 
   useEffect(() => {
     const key = 'fid_last_sync';
-    const last = localStorage.getItem(key);
+    const last = storage.getString(key);
     const now = Date.now();
     const dayMs = 24 * 60 * 60 * 1000;
     if (!last || now - parseInt(last) > dayMs) {
       (async () => {
         const ok = await sincronizarDoHistorico();
         if (ok) {
-          localStorage.setItem(key, String(now));
+          storage.setString(key, String(now));
           recarregar();
         }
       })();

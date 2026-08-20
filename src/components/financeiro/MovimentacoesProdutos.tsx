@@ -11,6 +11,7 @@ import { useBreakpoint } from "@/hooks/useBreakpoint";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { exportMovimentacoesEstoqueCSV, exportMovimentacoesEstoquePDF } from "@/lib/export";
+import { formatBRL } from '@/lib/formatters';
 
 type MovimentacaoTipo = 'compra' | 'venda';
 
@@ -88,12 +89,7 @@ export default function MovimentacoesProdutos() {
     };
   }, [movimentacoes]);
 
-  const formatarValor = (valor: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(valor);
-  };
+
 
   const getStatusColor = (status?: string) => {
     switch (status) {
@@ -144,7 +140,7 @@ export default function MovimentacoesProdutos() {
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-responsive-lg font-bold text-destructive truncate">
-                {formatarValor(totais.compras)}
+                {formatBRL(totais.compras)}
               </p>
               <p className="text-responsive-sm text-muted-foreground">Total em Compras</p>
             </div>
@@ -158,7 +154,7 @@ export default function MovimentacoesProdutos() {
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-responsive-lg font-bold text-success truncate">
-                {formatarValor(totais.vendas)}
+                {formatBRL(totais.vendas)}
               </p>
               <p className="text-responsive-sm text-muted-foreground">Total em Vendas</p>
             </div>
@@ -180,7 +176,7 @@ export default function MovimentacoesProdutos() {
               <p className={`text-responsive-lg font-bold truncate ${
                 totais.lucro >= 0 ? 'text-primary' : 'text-destructive'
               }`}>
-                {formatarValor(totais.lucro)}
+                {formatBRL(totais.lucro)}
               </p>
               <p className="text-responsive-sm text-muted-foreground">Margem de Lucro</p>
             </div>
@@ -267,7 +263,7 @@ export default function MovimentacoesProdutos() {
                           mov.tipo === 'compra' ? 'text-destructive' : 'text-success'
                         }`}>
                           {mov.tipo === 'compra' ? '- ' : '+ '}
-                          {formatarValor(mov.valor)}
+                          {formatBRL(mov.valor)}
                         </p>
                       </div>
                       <div className="flex items-center gap-2 flex-wrap">

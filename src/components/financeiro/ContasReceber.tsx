@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { MessageCircle, Search, DollarSign } from 'lucide-react';
 import { Agendamento } from '@/types/agendamento';
 import { useConfigAgendamentoOnline } from '@/hooks/useConfigAgendamentoOnline';
+import { formatBRL } from '@/lib/formatters';
 
 interface ContasReceberProps {
   agendamentos: Agendamento[];
@@ -26,13 +27,6 @@ export default function ContasReceber({ agendamentos }: ContasReceberProps) {
 
   const totalReceber = contasReceber.reduce((total, agendamento) => total + agendamento.valorDevido, 0);
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    }).format(value);
-  };
-
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('pt-BR');
   };
@@ -42,7 +36,7 @@ export default function ContasReceber({ agendamentos }: ContasReceberProps) {
     const logoLine = config.logo_url ? `Logo: ${config.logo_url}` : '';
     const mensagem = `${header}\n${logoLine}\n\nOlá ${agendamento.clienteNome}! 
     
-Você tem um saldo pendente de ${formatCurrency(agendamento.valorDevido)} referente ao serviço de ${agendamento.servicoNome} realizado em ${formatDate(agendamento.data)}.
+Você tem um saldo pendente de ${formatBRL(agendamento.valorDevido)} referente ao serviço de ${agendamento.servicoNome} realizado em ${formatDate(agendamento.data)}.
 
 Para facilitar o pagamento, entre em contato conosco.
 
@@ -61,7 +55,7 @@ Obrigado!`;
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-muted-foreground">Total a Receber</p>
-              <p className="text-2xl font-bold text-orange-600">{formatCurrency(totalReceber)}</p>
+              <p className="text-2xl font-bold text-orange-600">{formatBRL(totalReceber)}</p>
             </div>
             <DollarSign className="h-8 w-8 text-orange-600" />
           </div>
@@ -112,10 +106,10 @@ Obrigado!`;
                     <TableCell className="font-medium">{agendamento.clienteNome}</TableCell>
                     <TableCell>{agendamento.servicoNome}</TableCell>
                     <TableCell>{formatDate(agendamento.data)}</TableCell>
-                    <TableCell className="font-mono">{formatCurrency(agendamento.valor)}</TableCell>
-                    <TableCell className="font-mono">{formatCurrency(agendamento.valorPago)}</TableCell>
+                    <TableCell className="font-mono">{formatBRL(agendamento.valor)}</TableCell>
+                    <TableCell className="font-mono">{formatBRL(agendamento.valorPago)}</TableCell>
                     <TableCell className="font-mono font-bold text-orange-600">
-                      {formatCurrency(agendamento.valorDevido)}
+                      {formatBRL(agendamento.valorDevido)}
                     </TableCell>
                     <TableCell>
                       <Badge 

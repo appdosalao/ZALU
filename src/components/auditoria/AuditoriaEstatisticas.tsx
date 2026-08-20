@@ -14,6 +14,7 @@ import {
   BarChart3
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { formatBRL } from '@/lib/formatters';
 
 interface EstatisticasProps {
   estatisticas: {
@@ -139,7 +140,7 @@ export function AuditoriaEstatisticas({ estatisticas }: EstatisticasProps) {
               )}
             />
             <p className="text-xs text-muted-foreground mt-2">
-              Lucro: R$ {lucro.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              Lucro: {formatBRL(lucro)}
             </p>
           </CardContent>
         </Card>
@@ -274,13 +275,13 @@ export function AuditoriaEstatisticas({ estatisticas }: EstatisticasProps) {
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Receitas</span>
                 <span className="font-medium text-green-600 dark:text-green-400">
-                  R$ {estatisticas.valorTotalReceitas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  {formatBRL(estatisticas.valorTotalReceitas)}
                 </span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Despesas</span>
                 <span className="font-medium text-red-600 dark:text-red-400">
-                  R$ {estatisticas.valorTotalDespesas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  {formatBRL(estatisticas.valorTotalDespesas)}
                 </span>
               </div>
             </div>
@@ -312,7 +313,7 @@ export function AuditoriaEstatisticas({ estatisticas }: EstatisticasProps) {
               "text-3xl font-bold",
               lucro >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
             )}>
-              R$ {lucro.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              {formatBRL(lucro)}
             </div>
             <p className="text-xs text-muted-foreground mb-4">resultado financeiro</p>
             <div className="flex items-center gap-2 text-sm">

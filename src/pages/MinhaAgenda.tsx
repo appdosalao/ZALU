@@ -16,7 +16,8 @@ import { AgendaSemanal } from "@/components/agenda/AgendaSemanal";
 import { AgendaMensal } from "@/components/agenda/AgendaMensal";
 import type { Agendamento } from "@/types/agendamento";
 import { useSearchParams } from "react-router-dom";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
+import { storage, LOCAL_STORAGE_KEYS } from "@/lib/localStorage";
 
 type Visualizacao = "lista" | "dia" | "semana" | "mes";
 type VisualizacaoInterna = "lista" | "formulario" | "detalhes";
@@ -52,7 +53,14 @@ export default function MinhaAgenda() {
   const [agendamentoParaTrocar, setAgendamentoParaTrocar] = useState<Agendamento | null>(null);
   const [dialogPagamentoOpen, setDialogPagamentoOpen] = useState(false);
   const [agendamentoParaPagar, setAgendamentoParaPagar] = useState<Agendamento | null>(null);
-  const [initialForm, setInitialForm] = useState<any | null>(null);
+  const [initialForm, setInitialForm] = useState<{
+    data?: string;
+    hora?: string;
+    status?: 'agendado';
+    statusPagamento?: 'em_aberto';
+    formaPagamento?: 'dinheiro';
+  } | null>(null);
+
 
   useEffect(() => {
     setParams(prev => {
@@ -60,13 +68,13 @@ export default function MinhaAgenda() {
       p.set("tab", tab);
       return p;
     }, { replace: true });
-    try { localStorage.setItem('minhaAgenda.tab', tab); } catch {}
+    storage.setString(LOCAL_STORAGE_KEYS.MINHA_AGENDA_TAB, tab);
   }, [tab, setParams]);
 
   useEffect(() => {
     if (!params.get('tab')) {
       try {
-        const saved = localStorage.getItem('minhaAgenda.tab') as Visualizacao | null;
+        const saved = storage.getString(LOCAL_STORAGE_KEYS.MINHA_AGENDA_TAB) as Visualizacao | null;
         if (saved) setTab(saved);
       } catch {}
     }
@@ -152,22 +160,22 @@ export default function MinhaAgenda() {
       if (!agendamento1 || !agendamento2) return false;
       const conflito1 = verificarConflito({ data: agendamento2.data, hora: agendamento2.hora, duracao: agendamento1.duracao }, agendamento2Id);
       if (conflito1) {
-        toast({ title: "Conflito de horário", description: "O primeiro agendamento não cabe no novo horário.", variant: "destructive" });
+        toast.error("Conflito de horário", { description: "O primeiro agendamento não cabe no novo horário." });
         return false;
       }
       const conflito2 = verificarConflito({ data: agendamento1.data, hora: agendamento1.hora, duracao: agendamento2.duracao }, agendamento1Id);
       if (conflito2) {
-        toast({ title: "Conflito de horário", description: "O segundo agendamento não cabe no novo horário.", variant: "destructive" });
+        toast.error("Conflito de horário", { description: "O segundo agendamento não cabe no novo horário." });
         return false;
       }
       const s1 = await atualizarAgendamento(agendamento1Id, { data: agendamento2.data, hora: agendamento2.hora });
       const s2 = await atualizarAgendamento(agendamento2Id, { data: agendamento1.data, hora: agendamento1.hora });
       if (s1 && s2) {
-        toast({ title: "Horários trocados", description: "Troca realizada com sucesso!" });
+        toast("Horários trocados", { description: "Troca realizada com sucesso!" });
       }
       return s1 && s2;
     } catch {
-      toast({ title: "Erro ao trocar horários", description: "Tente novamente.", variant: "destructive" });
+      toast.error("Erro ao trocar horários", { description: "Tente novamente." });
       return false;
     }
   };
@@ -198,8 +206,7 @@ export default function MinhaAgenda() {
       formaPagamento: formaPagamento as any,
     });
     if (sucesso) {
-      toast({
-        title: "Pagamento registrado",
+      toast("Pagamento registrado", {
         description: novoStatusPagamento === 'pago'
           ? "Pagamento completo registrado com sucesso!"
           : `Pagamento parcial de R$ ${valorPago.toFixed(2)} registrado.`,

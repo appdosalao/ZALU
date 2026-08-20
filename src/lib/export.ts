@@ -2,6 +2,32 @@ import type { RelatorioExportacao } from '@/types/relatorio';
 import type { Lancamento } from '@/types/lancamento';
 import type { ContaFixa } from '@/types/contaFixa';
 import type { Agendamento } from '@/types/agendamento';
+import { formatBRL } from '@/lib/formatters';
+import DOMPurify from 'dompurify';
+
+const escapeHTML = (value: unknown): string => {
+  if (value == null) return '';
+  const str = String(value);
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+    .replace(/`/g, '&#96;');
+};
+
+const safeAttribute = (value: unknown): string => {
+  if (value == null) return '';
+  const str = String(value);
+  if (/^https?:\/\//i.test(str) || /^\/[^\\]*/.test(str)) {
+    return escapeHTML(str);
+  }
+  if (str.startsWith('data:image/')) {
+    return escapeHTML(str);
+  }
+  return '';
+};
 
 function downloadBlob(content: BlobPart, filename: string, type: string) {
   const blob = new Blob([content], { type });
@@ -61,8 +87,8 @@ export function exportContasFixasCSV(contas: ContaFixa[], filename = 'contas_fix
     nome: c.nome,
     categoria: c.categoria,
     valor: c.valor,
-    vencimento: c.vencimento,
-    pago: c.pago ? 'sim' : 'não',
+    vencimento: c.proximoVencimento || '',
+    pago: c.status === 'pago' ? 'sim' : 'não',
     created_at: c.created_at,
     updated_at: c.updated_at,
   }));
@@ -100,7 +126,7 @@ export function exportRelatorioCSV(relatorio: RelatorioExportacao) {
 }
 
 export function exportRelatorioPDF(relatorio: RelatorioExportacao, brand?: { salonName?: string; logoUrl?: string }) {
-  const win = window.open('', '_blank');
+  const win = window.open('', '_blank', 'noopener,noreferrer');
   if (!win) return;
   const style = `
     body { font-family: Arial, sans-serif; padding: 16px; color: #111; }
@@ -114,26 +140,26 @@ export function exportRelatorioPDF(relatorio: RelatorioExportacao, brand?: { sal
     .summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; font-size: 12px; }
     .summary div { background: #f7f7f7; padding: 8px; border: 1px solid #eee; }
   `;
-  const fmt = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+  const safeLogo = safeAttribute(brand?.logoUrl);
   const html = `
-    <html><head><meta charset="utf-8"/><style>${style}</style><title>Relatório Financeiro</title></head>
+    <html><head><meta charset="utf-8"/><meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' data:; img-src 'self' data: https:; script-src 'unsafe-inline'"/><style>${style}</style><title>Relatório Financeiro</title></head>
     <body>
       <div class="header">
-        ${brand?.logoUrl ? `<img class="logo" src="${brand.logoUrl}" />` : ''}
-        <div class="brand">${brand?.salonName || 'Relatório Financeiro'}</div>
+        ${safeLogo ? `<img class="logo" src="${safeLogo}" alt="" />` : ''}
+        <div class="brand">${escapeHTML(brand?.salonName || 'Relatório Financeiro')}</div>
       </div>
-      <h1>Relatório Financeiro • ${relatorio.periodo}</h1>
+      <h1>Relatório Financeiro • ${escapeHTML(relatorio.periodo)}</h1>
       <div class="summary">
-        <div><strong>Entradas:</strong> ${fmt(relatorio.dadosResumo.totalEntradas)}</div>
-        <div><strong>Saídas:</strong> ${fmt(relatorio.dadosResumo.totalSaidas)}</div>
-        <div><strong>Lucro:</strong> ${fmt(relatorio.dadosResumo.lucroLiquido)}</div>
+        <div><strong>Entradas:</strong> ${escapeHTML(formatBRL(relatorio.dadosResumo.totalEntradas))}</div>
+        <div><strong>Saídas:</strong> ${escapeHTML(formatBRL(relatorio.dadosResumo.totalSaidas))}</div>
+        <div><strong>Lucro:</strong> ${escapeHTML(formatBRL(relatorio.dadosResumo.lucroLiquido))}</div>
       </div>
       <h2>Lançamentos</h2>
       <table>
         <thead><tr><th>Tipo</th><th>Valor</th><th>Data</th><th>Descrição</th><th>Categoria</th></tr></thead>
         <tbody>
           ${relatorio.dadosDetalhados.lancamentos.map(l => `
-            <tr><td>${l.tipo}</td><td>${fmt(l.valor)}</td><td>${new Date(l.data).toLocaleDateString('pt-BR')}</td><td>${l.descricao}</td><td>${l.categoria || ''}</td></tr>
+            <tr><td>${escapeHTML(l.tipo)}</td><td>${escapeHTML(formatBRL(l.valor))}</td><td>${escapeHTML(new Date(l.data).toLocaleDateString('pt-BR'))}</td><td>${escapeHTML(l.descricao)}</td><td>${escapeHTML(l.categoria || '')}</td></tr>
           `).join('')}
         </tbody>
       </table>
@@ -142,7 +168,7 @@ export function exportRelatorioPDF(relatorio: RelatorioExportacao, brand?: { sal
         <thead><tr><th>Nome</th><th>Categoria</th><th>Valor</th><th>Vencimento</th><th>Pago</th></tr></thead>
         <tbody>
           ${relatorio.dadosDetalhados.contasFixas.map(c => `
-            <tr><td>${c.nome}</td><td>${c.categoria}</td><td>${fmt(c.valor)}</td><td>${c.vencimento}</td><td>${c.pago ? 'Sim' : 'Não'}</td></tr>
+            <tr><td>${escapeHTML(c.nome)}</td><td>${escapeHTML(c.categoria)}</td><td>${escapeHTML(formatBRL(c.valor))}</td><td>${escapeHTML(c.proximoVencimento || '')}</td><td>${c.status === 'pago' ? 'Sim' : 'Não'}</td></tr>
           `).join('')}
         </tbody>
       </table>
@@ -151,16 +177,18 @@ export function exportRelatorioPDF(relatorio: RelatorioExportacao, brand?: { sal
         <thead><tr><th>Cliente</th><th>Serviço</th><th>Data</th><th>Hora</th><th>Valor</th><th>Status</th></tr></thead>
         <tbody>
           ${relatorio.dadosDetalhados.agendamentos.map(a => `
-            <tr><td>${a.clienteNome}</td><td>${a.servicoNome}</td><td>${a.data}</td><td>${a.hora}</td><td>${fmt(a.valor)}</td><td>${a.status}</td></tr>
+            <tr><td>${escapeHTML(a.clienteNome)}</td><td>${escapeHTML(a.servicoNome)}</td><td>${escapeHTML(a.data)}</td><td>${escapeHTML(a.hora)}</td><td>${escapeHTML(formatBRL(a.valor))}</td><td>${escapeHTML(a.status)}</td></tr>
           `).join('')}
         </tbody>
       </table>
-      <script>window.print();</script>
     </body></html>
   `;
+  const safeHtml = DOMPurify.sanitize(html, { ADD_TAGS: ['script'], USE_PROFILES: { html: true } });
   win.document.open();
-  win.document.write(html);
+  win.document.write(safeHtml);
   win.document.close();
+  try { win.focus(); } catch {}
+  setTimeout(() => { try { win.print(); } catch {} }, 400);
 }
 
 export function exportDespesasUsoCSV(rows: Array<{ data: string; categoria: string; valor: number; descricao: string }>, filename = 'despesas_de_uso.csv') {
@@ -174,7 +202,7 @@ export function exportDespesasUsoCSV(rows: Array<{ data: string; categoria: stri
 }
 
 export function exportDespesasUsoPDF(rows: Array<{ data: string; categoria: string; valor: number; descricao: string }>, periodo: string, brand?: { salonName?: string; logoUrl?: string }) {
-  const win = window.open('', '_blank');
+  const win = window.open('', '_blank', 'noopener,noreferrer');
   if (!win) return;
   const style = `
     body { font-family: Arial, sans-serif; padding: 16px; color: #111; }
@@ -185,27 +213,29 @@ export function exportDespesasUsoPDF(rows: Array<{ data: string; categoria: stri
     table { width: 100%; border-collapse: collapse; margin-top: 6px; font-size: 12px; }
     th, td { border: 1px solid #ddd; padding: 6px; text-align: left; }
   `;
-  const fmt = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+  const safeLogo = safeAttribute(brand?.logoUrl);
   const html = `
-    <html><head><meta charset="utf-8"/><style>${style}</style><title>Despesas de Uso</title></head>
+    <html><head><meta charset="utf-8"/><meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' data:; img-src 'self' data: https:; script-src 'unsafe-inline'"/><style>${style}</style><title>Despesas de Uso</title></head>
     <body>
       <div class="header">
-        ${brand?.logoUrl ? `<img class="logo" src="${brand.logoUrl}" />` : ''}
-        <div class="brand">${brand?.salonName || 'Despesas de Uso'}</div>
+        ${safeLogo ? `<img class="logo" src="${safeLogo}" alt="" />` : ''}
+        <div class="brand">${escapeHTML(brand?.salonName || 'Despesas de Uso')}</div>
       </div>
-      <h1>Despesas de Uso • ${periodo}</h1>
+      <h1>Despesas de Uso • ${escapeHTML(periodo)}</h1>
       <table>
         <thead><tr><th>Data</th><th>Categoria</th><th>Valor</th><th>Descrição</th></tr></thead>
         <tbody>
-          ${rows.map(r => `<tr><td>${r.data}</td><td>${r.categoria}</td><td>${fmt(r.valor)}</td><td>${r.descricao}</td></tr>`).join('')}
+          ${rows.map(r => `<tr><td>${escapeHTML(r.data)}</td><td>${escapeHTML(r.categoria)}</td><td>${escapeHTML(formatBRL(r.valor))}</td><td>${escapeHTML(r.descricao)}</td></tr>`).join('')}
         </tbody>
       </table>
-      <script>window.print();</script>
     </body></html>
   `;
+  const safeHtml = DOMPurify.sanitize(html, { USE_PROFILES: { html: true } });
   win.document.open();
-  win.document.write(html);
+  win.document.write(safeHtml);
   win.document.close();
+  try { win.focus(); } catch {}
+  setTimeout(() => { try { win.print(); } catch {} }, 400);
 }
 export function exportVendasPorProdutoCSV(rows: Array<{ produto: string; quantidade: number; valor_total: number }>, filename = 'vendas_por_produto.csv') {
   const csv = toCSV(rows.map(r => ({
@@ -217,7 +247,7 @@ export function exportVendasPorProdutoCSV(rows: Array<{ produto: string; quantid
 }
 
 export function exportVendasPorProdutoPDF(rows: Array<{ produto: string; quantidade: number; valor_total: number }>, periodo: string, brand?: { salonName?: string; logoUrl?: string }) {
-  const win = window.open('', '_blank');
+  const win = window.open('', '_blank', 'noopener,noreferrer');
   if (!win) return;
   const style = `
     body { font-family: Arial, sans-serif; padding: 16px; color: #111; }
@@ -228,27 +258,29 @@ export function exportVendasPorProdutoPDF(rows: Array<{ produto: string; quantid
     table { width: 100%; border-collapse: collapse; margin-top: 6px; font-size: 12px; }
     th, td { border: 1px solid #ddd; padding: 6px; text-align: left; }
   `;
-  const fmt = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+  const safeLogo = safeAttribute(brand?.logoUrl);
   const html = `
-    <html><head><meta charset="utf-8"/><style>${style}</style><title>Vendas por Produto</title></head>
+    <html><head><meta charset="utf-8"/><meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' data:; img-src 'self' data: https:; script-src 'unsafe-inline'"/><style>${style}</style><title>Vendas por Produto</title></head>
     <body>
       <div class="header">
-        ${brand?.logoUrl ? `<img class="logo" src="${brand.logoUrl}" />` : ''}
-        <div class="brand">${brand?.salonName || 'Vendas por Produto'}</div>
+        ${safeLogo ? `<img class="logo" src="${safeLogo}" alt="" />` : ''}
+        <div class="brand">${escapeHTML(brand?.salonName || 'Vendas por Produto')}</div>
       </div>
-      <h1>Vendas por Produto • ${periodo}</h1>
+      <h1>Vendas por Produto • ${escapeHTML(periodo)}</h1>
       <table>
         <thead><tr><th>Produto</th><th>Quantidade</th><th>Total</th></tr></thead>
         <tbody>
-          ${rows.map(r => `<tr><td>${r.produto}</td><td>${r.quantidade}</td><td>${fmt(r.valor_total)}</td></tr>`).join('')}
+          ${rows.map(r => `<tr><td>${escapeHTML(r.produto)}</td><td>${escapeHTML(String(r.quantidade))}</td><td>${escapeHTML(formatBRL(r.valor_total))}</td></tr>`).join('')}
         </tbody>
       </table>
-      <script>window.print();</script>
     </body></html>
   `;
+  const safeHtml = DOMPurify.sanitize(html, { USE_PROFILES: { html: true } });
   win.document.open();
-  win.document.write(html);
+  win.document.write(safeHtml);
   win.document.close();
+  try { win.focus(); } catch {}
+  setTimeout(() => { try { win.print(); } catch {} }, 400);
 }
 
 export function exportMovimentacoesEstoqueCSV(rows: Array<{ id: string; tipo: string; data: string; valor: number; descricao: string; status?: string; itens?: number }>, filename = 'movimentacoes_produtos.csv') {
@@ -265,7 +297,7 @@ export function exportMovimentacoesEstoqueCSV(rows: Array<{ id: string; tipo: st
 }
 
 export function exportMovimentacoesEstoquePDF(rows: Array<{ id: string; tipo: string; data: string; valor: number; descricao: string; status?: string; itens?: number }>, periodo?: string, brand?: { salonName?: string; logoUrl?: string }) {
-  const win = window.open('', '_blank');
+  const win = window.open('', '_blank', 'noopener,noreferrer');
   if (!win) return;
   const style = `
     body { font-family: Arial, sans-serif; padding: 16px; color: #111; }
@@ -276,25 +308,27 @@ export function exportMovimentacoesEstoquePDF(rows: Array<{ id: string; tipo: st
     table { width: 100%; border-collapse: collapse; margin-top: 6px; font-size: 12px; }
     th, td { border: 1px solid #ddd; padding: 6px; text-align: left; }
   `;
-  const fmt = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+  const safeLogo = safeAttribute(brand?.logoUrl);
   const html = `
-    <html><head><meta charset="utf-8"/><style>${style}</style><title>Movimentações de Produtos</title></head>
+    <html><head><meta charset="utf-8"/><meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' data:; img-src 'self' data: https:; script-src 'unsafe-inline'"/><style>${style}</style><title>Movimentações de Produtos</title></head>
     <body>
       <div class="header">
-        ${brand?.logoUrl ? `<img class="logo" src="${brand.logoUrl}" />` : ''}
-        <div class="brand">${brand?.salonName || 'Movimentações de Produtos'}</div>
+        ${safeLogo ? `<img class="logo" src="${safeLogo}" alt="" />` : ''}
+        <div class="brand">${escapeHTML(brand?.salonName || 'Movimentações de Produtos')}</div>
       </div>
-      <h1>Movimentações de Produtos${periodo ? ` • ${periodo}` : ''}</h1>
+      <h1>Movimentações de Produtos${periodo ? ` • ${escapeHTML(periodo)}` : ''}</h1>
       <table>
         <thead><tr><th>Tipo</th><th>Data</th><th>Valor</th><th>Descrição</th><th>Status</th><th>Itens</th></tr></thead>
         <tbody>
-          ${rows.map(r => `<tr><td>${r.tipo}</td><td>${r.data}</td><td>${fmt(r.valor)}</td><td>${r.descricao}</td><td>${r.status || ''}</td><td>${r.itens || 0}</td></tr>`).join('')}
+          ${rows.map(r => `<tr><td>${escapeHTML(r.tipo)}</td><td>${escapeHTML(r.data)}</td><td>${escapeHTML(formatBRL(r.valor))}</td><td>${escapeHTML(r.descricao)}</td><td>${escapeHTML(r.status || '')}</td><td>${escapeHTML(String(r.itens || 0))}</td></tr>`).join('')}
         </tbody>
       </table>
-      <script>window.print();</script>
     </body></html>
   `;
+  const safeHtml = DOMPurify.sanitize(html, { USE_PROFILES: { html: true } });
   win.document.open();
-  win.document.write(html);
+  win.document.write(safeHtml);
   win.document.close();
+  try { win.focus(); } catch {}
+  setTimeout(() => { try { win.print(); } catch {} }, 400);
 }

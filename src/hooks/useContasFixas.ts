@@ -34,10 +34,6 @@ export function useContasFixas() {
       return supabaseHook.updateContaFixa(id, { status: 'pago' });
     },
     
-    pagarContaFixa: async (id: string) => {
-      return supabaseHook.updateContaFixa(id, { status: 'pago' });
-    },
-    
     marcarComoEmAberto: async (id: string) => {
       return supabaseHook.updateContaFixa(id, { status: 'em_aberto' });
     },

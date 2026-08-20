@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Calendar, CreditCard, Edit2, Filter, Search, Trash2, DollarSign, Repeat, Power } from 'lucide-react';
 import { ContaFixa, CategoriaFinanceira } from '@/types/contaFixa';
+import { formatBRL } from '@/lib/formatters';
 
 interface ContasFixasListProps {
   contas: ContaFixa[];
@@ -39,12 +40,7 @@ export default function ContasFixasList({
     return matchBusca && matchCategoria && matchStatus;
   });
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    }).format(value);
-  };
+
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -107,7 +103,7 @@ export default function ContasFixasList({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Em Aberto</p>
-                <p className="text-2xl font-bold text-red-600">{formatCurrency(totalEmAberto)}</p>
+                <p className="text-2xl font-bold text-red-600">{formatBRL(totalEmAberto)}</p>
               </div>
               <CreditCard className="h-8 w-8 text-red-600" />
             </div>
@@ -119,7 +115,7 @@ export default function ContasFixasList({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Pagas</p>
-                <p className="text-2xl font-bold text-green-600">{formatCurrency(totalPago)}</p>
+                <p className="text-2xl font-bold text-green-600">{formatBRL(totalPago)}</p>
               </div>
               <DollarSign className="h-8 w-8 text-green-600" />
             </div>
@@ -227,7 +223,7 @@ export default function ContasFixasList({
                         <Badge variant="outline">{conta.categoria}</Badge>
                       </TableCell>
                       <TableCell className="font-mono">
-                        {formatCurrency(conta.valor)}
+                        {formatBRL(conta.valor)}
                       </TableCell>
                       <TableCell>
                         <span className={vencimentoStatus.cor}>

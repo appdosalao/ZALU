@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import type { Usuario, UsuarioCadastro } from '@/types/usuario';
 import type { Assinatura } from '@/types/assinatura';
 import { updateManifest } from '@/utils/manifestUtils';
+import { storage, LOCAL_STORAGE_KEYS } from '@/lib/localStorage';
 
 export interface AuthContextType {
   user: User | null;
@@ -72,7 +73,7 @@ const normalizeUsuario = (profile: any, assinatura?: any): Usuario => {
 const applyTheme = (theme?: Usuario['tema_preferencia'] | null) => {
   const next = theme || 'feminino';
   document.documentElement.setAttribute('data-theme', next);
-  localStorage.setItem('app-theme', next);
+  storage.setString(LOCAL_STORAGE_KEYS.APP_THEME, next);
 };
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -94,7 +95,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(null);
       setUsuario(null);
       setSessionError(false);
-      applyTheme(localStorage.getItem('app-theme') as any);
+      applyTheme(storage.getString(LOCAL_STORAGE_KEYS.APP_THEME) as any);
       return;
     }
 
@@ -147,7 +148,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               timeouts[attempts]
             ),
             withTimeout(
-              supabase.from('assinaturas').select('*').eq('usuario_id', nextSession.user.id).maybeSingle(),
+              (supabase as any).from('assinaturas').select('*').eq('usuario_id', nextSession.user.id).maybeSingle(),
               timeouts[attempts]
             )
           ]);
@@ -340,7 +341,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               timeouts[attempts]
             ),
             withTimeout(
-              supabase.from('assinaturas').select('*').eq('usuario_id', currentUserId).maybeSingle(),
+              (supabase as any).from('assinaturas').select('*').eq('usuario_id', currentUserId).maybeSingle(),
               timeouts[attempts]
             )
           ]);
@@ -380,7 +381,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let active = true;
 
-    const storedTheme = localStorage.getItem('app-theme');
+    const storedTheme = storage.getString(LOCAL_STORAGE_KEYS.APP_THEME);
     if (storedTheme) {
       document.documentElement.setAttribute('data-theme', storedTheme);
     }

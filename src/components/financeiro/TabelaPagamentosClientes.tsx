@@ -22,7 +22,8 @@ import {
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Agendamento } from "@/types/agendamento";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
+import { formatBRL } from '@/lib/formatters';
 
 interface TabelaPagamentosClientesProps {
   agendamentos: Agendamento[];
@@ -37,18 +38,11 @@ export default function TabelaPagamentosClientes({ agendamentos }: TabelaPagamen
     (agendamento.clienteNome || '').toLowerCase().includes(busca.toLowerCase())
   );
 
-  const formatarValor = (valor: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(valor);
-  };
-
   const handleEnviarCobranca = (agendamento: Agendamento) => {
     const telefone = ""; // TODO: Pegar telefone do cliente
     const mensagem = `Olá ${agendamento.clienteNome}! 
 
-Você tem um saldo devedor de ${formatarValor(agendamento.valorDevido || 0)} referente ao serviço ${agendamento.servicoNome} realizado em ${format(new Date(agendamento.data), "dd/MM/yyyy", { locale: ptBR })}.
+Você tem um saldo devedor de ${formatBRL(agendamento.valorDevido || 0)} referente ao serviço ${agendamento.servicoNome} realizado em ${format(new Date(agendamento.data), "dd/MM/yyyy", { locale: ptBR })}.
 
 ${agendamento.dataPrevistaPagamento ? `Data prevista para pagamento: ${format(new Date(agendamento.dataPrevistaPagamento), "dd/MM/yyyy", { locale: ptBR })}` : ''}
 
@@ -57,8 +51,7 @@ Por favor, entre em contato para acertarmos o pagamento. Obrigado!`;
     const whatsappUrl = `https://wa.me/${telefone}?text=${encodeURIComponent(mensagem)}`;
     window.open(whatsappUrl, '_blank');
     
-    toast({
-      title: "WhatsApp aberto",
+    toast("WhatsApp aberto", {
       description: "Mensagem de cobrança preparada no WhatsApp.",
     });
   };
@@ -130,15 +123,15 @@ Por favor, entre em contato para acertarmos o pagamento. Obrigado!`;
                       </div>
                     </TableCell>
                     <TableCell className="font-semibold">
-                      {formatarValor(agendamento.valor)}
+                      {formatBRL(agendamento.valor)}
                     </TableCell>
                     <TableCell className="text-green-600 font-semibold">
-                      {formatarValor(agendamento.valorPago)}
+                      {formatBRL(agendamento.valorPago)}
                     </TableCell>
                     <TableCell className={`font-semibold ${
                       (agendamento.valorDevido || 0) > 0 ? 'text-red-600' : 'text-green-600'
                     }`}>
-                      {formatarValor(agendamento.valorDevido || 0)}
+                      {formatBRL(agendamento.valorDevido || 0)}
                     </TableCell>
                     <TableCell>
                       {getStatusBadge(agendamento)}
@@ -186,13 +179,13 @@ Por favor, entre em contato para acertarmos o pagamento. Obrigado!`;
               <div>
                 <p className="text-sm text-muted-foreground">Valor Total Pago</p>
                 <p className="text-2xl font-bold text-green-600">
-                  {formatarValor(agendamentosComPagamento.reduce((total, a) => total + a.valorPago, 0))}
+                  {formatBRL(agendamentosComPagamento.reduce((total, a) => total + a.valorPago, 0))}
                 </p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Saldo Total Devedor</p>
                 <p className="text-2xl font-bold text-red-600">
-                  {formatarValor(agendamentosComPagamento.reduce((total, a) => total + (a.valorDevido || 0), 0))}
+                  {formatBRL(agendamentosComPagamento.reduce((total, a) => total + (a.valorDevido || 0), 0))}
                 </p>
               </div>
             </div>

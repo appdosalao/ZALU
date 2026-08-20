@@ -15,6 +15,7 @@ export interface LocalStorageKeys {
   NOTIFICATION_SHOWN_PREFIX: 'notification-shown-';
   SUBSCRIPTION_CHECK: 'subscription-check-timestamp';
   CUSTOM_SOUND_LIB: 'sound-library-urls';
+  AUDIT_LOG: 'zalu-audit-log';
 }
 
 export const LOCAL_STORAGE_KEYS: LocalStorageKeys = {
@@ -33,6 +34,7 @@ export const LOCAL_STORAGE_KEYS: LocalStorageKeys = {
   NOTIFICATION_SHOWN_PREFIX: 'notification-shown-',
   SUBSCRIPTION_CHECK: 'subscription-check-timestamp',
   CUSTOM_SOUND_LIB: 'sound-library-urls',
+  AUDIT_LOG: 'zalu-audit-log',
 };
 
 // Eventos customizados para sincronização entre abas/contextos

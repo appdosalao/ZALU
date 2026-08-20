@@ -1,6 +1,7 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Area, AreaChart } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DadosRelatorio } from "@/types/relatorio";
+import { formatBRL } from '@/lib/formatters';
 
 interface GraficosAvancadosProps {
   dados: DadosRelatorio;
@@ -12,13 +13,6 @@ const CORES = [
 ];
 
 export default function GraficosAvancados({ dados }: GraficosAvancadosProps) {
-  const formatarValor = (valor: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(valor);
-  };
-
   // Dados para o gráfico de resumo
   const dadosResumo = [
     {
@@ -58,8 +52,8 @@ export default function GraficosAvancados({ dados }: GraficosAvancadosProps) {
             <BarChart data={dadosResumo}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="categoria" />
-              <YAxis tickFormatter={formatarValor} />
-              <Tooltip formatter={(value) => formatarValor(Number(value))} />
+              <YAxis tickFormatter={formatBRL} />
+              <Tooltip formatter={(value) => formatBRL(Number(value))} />
               <Legend />
               <Bar dataKey="valor" fill="#8884d8">
                 {dadosResumo.map((entry, index) => (
@@ -81,8 +75,8 @@ export default function GraficosAvancados({ dados }: GraficosAvancadosProps) {
             <AreaChart data={dados.evolucaoMensal}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="periodo" />
-              <YAxis tickFormatter={formatarValor} />
-              <Tooltip formatter={(value) => formatarValor(Number(value))} />
+              <YAxis tickFormatter={formatBRL} />
+              <Tooltip formatter={(value) => formatBRL(Number(value))} />
               <Legend />
               <Area
                 type="monotone"
@@ -137,7 +131,7 @@ export default function GraficosAvancados({ dados }: GraficosAvancadosProps) {
                     <Cell key={`cell-${index}`} fill={CORES[index % CORES.length]} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value) => formatarValor(Number(value))} />
+                <Tooltip formatter={(value) => formatBRL(Number(value))} />
               </PieChart>
             </ResponsiveContainer>
           </CardContent>
@@ -156,11 +150,11 @@ export default function GraficosAvancados({ dados }: GraficosAvancadosProps) {
                 margin={{ left: 50 }}
               >
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis type="number" tickFormatter={formatarValor} />
+                <XAxis type="number" tickFormatter={formatBRL} />
                 <YAxis dataKey="nome" type="category" width={100} />
                 <Tooltip 
                   formatter={(value, name) => [
-                    name === 'valorTotal' ? formatarValor(Number(value)) : value,
+                    name === 'valorTotal' ? formatBRL(Number(value)) : value,
                     name === 'valorTotal' ? 'Valor Total' : 'Quantidade'
                   ]}
                 />
@@ -181,28 +175,28 @@ export default function GraficosAvancados({ dados }: GraficosAvancadosProps) {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="text-center p-4 bg-green-50 rounded-lg border border-green-200">
               <div className="text-2xl font-bold text-green-600">
-                {formatarValor(dados.agendamentosPagos)}
+                {formatBRL(dados.agendamentosPagos)}
               </div>
               <div className="text-sm text-green-600">Agendamentos Pagos</div>
             </div>
             
             <div className="text-center p-4 bg-orange-50 rounded-lg border border-orange-200">
               <div className="text-2xl font-bold text-orange-600">
-                {formatarValor(dados.agendamentosAbertos)}
+                {formatBRL(dados.agendamentosAbertos)}
               </div>
               <div className="text-sm text-orange-600">Agendamentos em Aberto</div>
             </div>
             
             <div className="text-center p-4 bg-blue-50 rounded-lg border border-blue-200">
               <div className="text-2xl font-bold text-blue-600">
-                {formatarValor(dados.contasFixasPagas)}
+                {formatBRL(dados.contasFixasPagas)}
               </div>
               <div className="text-sm text-blue-600">Contas Fixas Pagas</div>
             </div>
             
             <div className="text-center p-4 bg-red-50 rounded-lg border border-red-200">
               <div className="text-2xl font-bold text-red-600">
-                {formatarValor(dados.contasFixasAbertas)}
+                {formatBRL(dados.contasFixasAbertas)}
               </div>
               <div className="text-sm text-red-600">Contas Fixas em Aberto</div>
             </div>

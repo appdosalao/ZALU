@@ -31,7 +31,6 @@ const Marketing = lazy(() => import('./pages/Marketing'));
 const Produtos = lazy(() => import('./pages/Produtos'));
 const Assinatura = lazy(() => import('./pages/Assinatura'));
 const IntegracaoCakto = lazy(() => import('./pages/IntegracaoCakto'));
-const TesteFidelidade = lazy(() => import('./pages/TesteFidelidade'));
 
 const Onboarding = lazy(() => import('./pages/Onboarding'));
 const Login = lazy(() => import('./pages/Login'));
@@ -48,7 +47,6 @@ const Checkout = lazy(() => import('./pages/Checkout'));
 const RetornoPagamento = lazy(() => import('./pages/RetornoPagamento'));
 const PaymentSuccess = lazy(() => import('./pages/PaymentSuccess'));
 const TesteSomPage = lazy(() => import('./pages/TesteSomPage'));
-const TesteAgendamentosPage = lazy(() => import('./pages/TesteAgendamentosPage'));
 
 const RouteFallback = (
   <div className="min-h-screen flex items-center justify-center">
@@ -99,7 +97,6 @@ const AppContent = () => {
         <Route path="/pagamento/retorno" element={<Suspense fallback={RouteFallback}><RetornoPagamento /></Suspense>} />
         <Route path="/payment/success" element={<Suspense fallback={RouteFallback}><PaymentSuccess /></Suspense>} />
         <Route path="/teste-som" element={<Suspense fallback={RouteFallback}><TesteSomPage /></Suspense>} />
-        <Route path="/teste-agendamentos" element={<Suspense fallback={RouteFallback}><TesteAgendamentosPage /></Suspense>} />
         <Route path="/sobre" element={<Suspense fallback={RouteFallback}><Sobre /></Suspense>} />
         
         {/* Rotas protegidas com Layout */}
@@ -188,14 +185,7 @@ const AppContent = () => {
             </Layout>
           </ProtectedRoute>
         } />
-        <Route path="/teste-fidelidade" element={
-          <ProtectedRoute>
-            <Layout>
-              <Suspense fallback={RouteFallback}><TesteFidelidade /></Suspense>
-            </Layout>
-          </ProtectedRoute>
-        } />
-        
+
         {/* Redirecionamentos e Catch-all */}
         <Route path="/agenda" element={<Navigate to="/minha-agenda?tab=semana" replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />
