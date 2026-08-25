@@ -2,7 +2,7 @@ import { Zap, Crown, Sparkles, Gem, Scissors, Users, Calendar, DollarSign, Megap
 import type { LucideIcon } from 'lucide-react';
 
 export type BillingCycle = 'monthly' | 'annual';
-export type PlanId = 'essencial' | 'profissional' | 'semestral';
+export type PlanId = 'essencial' | 'profissional' | 'semestral' | 'anual';
 
 export interface PlanFeature {
   key: string;
@@ -11,6 +11,7 @@ export interface PlanFeature {
   essencial: boolean | string;
   profissional: boolean | string;
   semestral: boolean | string;
+  anual: boolean | string;
 }
 
 export interface PlanConfig {
@@ -29,7 +30,7 @@ export interface PlanConfig {
     monthly: number;
     annual: number;
   };
-  caktoEnvKey: 'VITE_CAKTO_CHECKOUT_ESSENCIAL_URL' | 'VITE_CAKTO_CHECKOUT_PROFISSIONAL_URL' | 'VITE_CAKTO_CHECKOUT_SEMESTRAL_URL';
+  caktoEnvKey: 'VITE_CAKTO_CHECKOUT_ESSENCIAL_URL' | 'VITE_CAKTO_CHECKOUT_PROFISSIONAL_URL' | 'VITE_CAKTO_CHECKOUT_SEMESTRAL_URL' | 'VITE_CAKTO_CHECKOUT_ANUAL_URL';
   planTypeInDb: 'mensal' | 'vitalicio';
   features: string[];
   consentText: string;
@@ -48,24 +49,24 @@ export const FEATURE_CATEGORIES: { key: PlanFeature['category']; label: string; 
 ];
 
 export const COMPARISON_FEATURES: PlanFeature[] = [
-  { key: 'unlimited-bookings', label: 'Agendamentos ilimitados', category: 'agenda', essencial: true, profissional: true, semestral: true },
-  { key: 'unlimited-clients', label: 'Cadastro de clientes ilimitado', category: 'clientes', essencial: true, profissional: true, semestral: true },
-  { key: 'daily-weekly-view', label: 'Visão diária e semanal da agenda', category: 'agenda', essencial: true, profissional: true, semestral: true },
-  { key: 'monthly-view', label: 'Visão mensal da agenda', category: 'agenda', essencial: false, profissional: true, semestral: true },
-  { key: 'online-scheduling', label: 'Agendamento online público', category: 'agenda', essencial: true, profissional: true, semestral: true },
-  { key: 'services-catalog', label: 'Catálogo de serviços e preços', category: 'clientes', essencial: true, profissional: true, semestral: true },
-  { key: 'return-schedule', label: 'Cronogramas de retorno', category: 'clientes', essencial: true, profissional: true, semestral: true },
-  { key: 'financial-releases', label: 'Lançamentos financeiros', category: 'financeiro', essencial: true, profissional: true, semestral: true },
-  { key: 'financial-reports', label: 'Relatórios e gráficos financeiros', category: 'financeiro', essencial: 'Básico', profissional: 'Avançado', semestral: 'Avançado' },
-  { key: 'accounts-receivable', label: 'Contas a receber e avisos', category: 'financeiro', essencial: false, profissional: true, semestral: true },
-  { key: 'products-module', label: 'Módulo de Produtos (estoque/vendas)', category: 'financeiro', essencial: false, profissional: true, semestral: true },
-  { key: 'loyalty-program', label: 'Programa de fidelidade', category: 'marketing', essencial: false, profissional: true, semestral: true },
-  { key: 'marketing-module', label: 'Módulo de Marketing', category: 'marketing', essencial: false, profissional: true, semestral: true },
-  { key: 'audit-module', label: 'Módulo de Auditoria', category: 'core', essencial: false, profissional: true, semestral: true },
-  { key: 'email-support', label: 'Suporte por e-mail', category: 'suporte', essencial: true, profissional: true, semestral: true },
-  { key: 'priority-support', label: 'Suporte prioritário (WhatsApp)', category: 'suporte', essencial: false, profissional: true, semestral: true },
-  { key: 'updates', label: 'Atualizações e melhorias contínuas', category: 'suporte', essencial: true, profissional: true, semestral: true },
-  { key: 'annual-discount', label: 'Desconto especial anual', category: 'suporte', essencial: false, profissional: false, semestral: false },
+  { key: 'unlimited-bookings', label: 'Agendamentos ilimitados', category: 'agenda', essencial: true, profissional: true, semestral: true, anual: true },
+  { key: 'unlimited-clients', label: 'Cadastro de clientes ilimitado', category: 'clientes', essencial: true, profissional: true, semestral: true, anual: true },
+  { key: 'daily-weekly-view', label: 'Visão diária e semanal da agenda', category: 'agenda', essencial: true, profissional: true, semestral: true, anual: true },
+  { key: 'monthly-view', label: 'Visão mensal da agenda', category: 'agenda', essencial: false, profissional: true, semestral: true, anual: true },
+  { key: 'online-scheduling', label: 'Agendamento online público', category: 'agenda', essencial: true, profissional: true, semestral: true, anual: true },
+  { key: 'services-catalog', label: 'Catálogo de serviços e preços', category: 'clientes', essencial: true, profissional: true, semestral: true, anual: true },
+  { key: 'return-schedule', label: 'Cronogramas de retorno', category: 'clientes', essencial: true, profissional: true, semestral: true, anual: true },
+  { key: 'financial-releases', label: 'Lançamentos financeiros', category: 'financeiro', essencial: true, profissional: true, semestral: true, anual: true },
+  { key: 'financial-reports', label: 'Relatórios e gráficos financeiros', category: 'financeiro', essencial: 'Básico', profissional: 'Avançado', semestral: 'Avançado', anual: 'Avançado' },
+  { key: 'accounts-receivable', label: 'Contas a receber e avisos', category: 'financeiro', essencial: false, profissional: true, semestral: true, anual: true },
+  { key: 'products-module', label: 'Módulo de Produtos (estoque/vendas)', category: 'financeiro', essencial: false, profissional: true, semestral: true, anual: true },
+  { key: 'loyalty-program', label: 'Programa de fidelidade', category: 'marketing', essencial: false, profissional: true, semestral: true, anual: true },
+  { key: 'marketing-module', label: 'Módulo de Marketing', category: 'marketing', essencial: false, profissional: true, semestral: true, anual: true },
+  { key: 'audit-module', label: 'Módulo de Auditoria', category: 'core', essencial: false, profissional: true, semestral: true, anual: true },
+  { key: 'email-support', label: 'Suporte por e-mail', category: 'suporte', essencial: true, profissional: true, semestral: true, anual: true },
+  { key: 'priority-support', label: 'Suporte prioritário (WhatsApp)', category: 'suporte', essencial: false, profissional: true, semestral: true, anual: true },
+  { key: 'updates', label: 'Atualizações e melhorias contínuas', category: 'suporte', essencial: true, profissional: true, semestral: true, anual: true },
+  { key: 'annual-discount', label: 'Desconto especial anual', category: 'suporte', essencial: false, profissional: false, semestral: false, anual: true },
 ];
 
 export const PLANS: Record<PlanId, PlanConfig> = {
@@ -143,7 +144,7 @@ export const PLANS: Record<PlanId, PlanConfig> = {
     planTypeInDb: 'mensal',
     pricing: {
       monthly: 25.11,
-      annual: 0,
+      annual: 150.66,
     },
     features: [
       'Tudo do Plano Profissional',
@@ -155,9 +156,36 @@ export const PLANS: Record<PlanId, PlanConfig> = {
     ],
     consentText: 'Li e concordo que estou assinando o Plano Semestral e confirmo estar ciente das políticas de pagamento e cancelamento.',
   },
+  anual: {
+    id: 'anual',
+    name: 'Anual',
+    tagline: 'Máxima economia para o ano todo',
+    description: 'Plano Profissional com desconto para pagamento anual.',
+    icon: Sparkles,
+    accentColor: 'text-emerald-600 dark:text-emerald-400',
+    ringColor: 'ring-emerald-500/30',
+    bgGradient: 'from-emerald-500/10 via-emerald-500/5 to-transparent',
+    badgeText: '-17% OFF',
+    badgeClass: 'bg-emerald-500 hover:bg-emerald-600 text-white border-none shadow-md',
+    caktoEnvKey: 'VITE_CAKTO_CHECKOUT_ANUAL_URL',
+    planTypeInDb: 'vitalicio',
+    pricing: {
+      monthly: 23.25,
+      annual: 279.00,
+    },
+    features: [
+      'Tudo do Plano Profissional',
+      'Pagamento anual',
+      'Desconto de 17% garantido',
+      'Preço congelado por 12 meses',
+      'Suporte prioritário no período',
+      'Acesso a todas as funcionalidades',
+    ],
+    consentText: 'Li e concordo que estou assinando o Plano Anual e confirmo estar ciente das políticas de pagamento e cancelamento.',
+  },
 };
 
-export const PLAN_ID_ORDER: PlanId[] = ['essencial', 'profissional', 'semestral'];
+export const PLAN_ID_ORDER: PlanId[] = ['essencial', 'profissional', 'semestral', 'anual'];
 
 export const formatCurrency = (value: number): string => {
   return new Intl.NumberFormat('pt-BR', {
@@ -179,6 +207,7 @@ export const getPlanDisplayPrice = (planId: PlanId, cycle: BillingCycle): string
 
 export const getPriceSuffix = (cycle: BillingCycle, planId: PlanId): string => {
   if (planId === 'semestral') return '/semestre';
+  if (planId === 'anual') return '/ano';
   return cycle === 'monthly' ? '/mês' : '/ano';
 };
 

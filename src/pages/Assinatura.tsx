@@ -191,6 +191,13 @@ export default function Assinatura() {
       if (savings <= 0) return null;
       return `Economize ~${formatCurrency(savings)} vs mensal`;
     }
+    if (planId === 'anual') {
+      const monthlyPrice = PLANS.profissional.pricing.monthly;
+      const anualPrice = PLANS.anual.pricing.monthly;
+      const savings = (monthlyPrice * 12) - (anualPrice * 12);
+      if (savings <= 0) return null;
+      return `Economize ~${formatCurrency(savings)} vs mensal`;
+    }
     if (cycle !== 'annual') return null;
     const plan = PLANS[planId];
     const monthlyTotal = plan.pricing.monthly * 12;
@@ -204,18 +211,21 @@ export default function Assinatura() {
     essencial: 'from-sky-50 to-white dark:from-sky-950/30 dark:to-background',
     profissional: 'from-primary/10 to-white dark:from-primary/15 dark:to-background',
     semestral: 'from-orange-50 to-white dark:from-orange-950/30 dark:to-background',
+    anual: 'from-emerald-50 to-white dark:from-emerald-950/30 dark:to-background',
   };
 
   const accentButtonClass: Record<PlanId, string> = {
     essencial: 'bg-sky-600 hover:bg-sky-700 text-white shadow-sky-500/25',
     profissional: 'bg-primary hover:bg-primary/90 text-white shadow-primary/30',
     semestral: 'bg-orange-600 hover:bg-orange-700 text-white shadow-orange-500/25',
+    anual: 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/25',
   };
 
   const planCardBorder: Record<PlanId, string> = {
     essencial: 'border-sky-200 dark:border-sky-800/40',
     profissional: 'border-primary/50 dark:border-primary/40',
     semestral: 'border-orange-200 dark:border-orange-800/40',
+    anual: 'border-emerald-200 dark:border-emerald-800/40',
   };
 
   const visiblePlans = useMemo(() => {

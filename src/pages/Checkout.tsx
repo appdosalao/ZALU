@@ -29,14 +29,16 @@ export default function Checkout() {
   const [isRedirecting, setIsRedirecting] = useState(false);
   const { isAuthenticated, session, usuario } = useSupabaseAuth();
 
-  // Read plan from URL on initial load — accepts new IDs (essencial, profissional, semestral)
-  // and legacy IDs (mensal → profissional, vitalicio → semestral) for backwards compat
+  // Read plan from URL on initial load — accepts new IDs (essencial, profissional, semestral, anual)
+  // and legacy IDs (mensal → profissional, vitalicio → anual) for backwards compat
   useEffect(() => {
     const planFromUrl = searchParams.get('plan') as string | null;
     if (planFromUrl === 'essencial') {
       setSelectedPlan('essencial');
-    } else if (planFromUrl === 'semestral' || planFromUrl === 'vitalicio') {
+    } else if (planFromUrl === 'semestral') {
       setSelectedPlan('semestral');
+    } else if (planFromUrl === 'anual' || planFromUrl === 'vitalicio') {
+      setSelectedPlan('anual');
     } else {
       // 'profissional', 'mensal', or anything else → default to profissional
       setSelectedPlan('profissional');
@@ -96,18 +98,21 @@ export default function Checkout() {
     essencial: 'bg-sky-600 hover:bg-sky-700 text-white shadow-sky-500/25',
     profissional: 'bg-primary hover:bg-primary/90 text-white shadow-primary/30',
     semestral: 'bg-orange-600 hover:bg-orange-700 text-white shadow-orange-500/25',
+    anual: 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/25',
   };
 
   const accentBorderClass: Record<PlanId, string> = {
     essencial: 'border-sky-500',
     profissional: 'border-primary',
     semestral: 'border-orange-500',
+    anual: 'border-emerald-500',
   };
 
   const accentBgClass: Record<PlanId, string> = {
     essencial: 'bg-sky-500/10 border-sky-500/30',
     profissional: 'bg-primary/5 border-primary/30',
     semestral: 'bg-orange-500/10 border-orange-500/30',
+    anual: 'bg-emerald-500/10 border-emerald-500/30',
   };
 
   return (
@@ -133,7 +138,7 @@ export default function Checkout() {
             const p = PLANS[planId];
             const Icon = p.icon;
             const isSelected = selectedPlan === planId;
-            const cycle: BillingCycle = planId === 'semestral' ? 'annual' : 'monthly';
+            const cycle: BillingCycle = planId === 'semestral' || planId === 'anual' ? 'annual' : 'monthly';
 
             return (
               <Card
@@ -288,7 +293,9 @@ export default function Checkout() {
                   <AccordionContent>
                     {selectedPlan === 'semestral'
                       ? 'O plano Semestral é um pagamento único por 6 meses, sem renovações automáticas mensais. Ao final do período, você decide se quer renovar.'
-                      : 'Sim. Planos mensais têm cobrança recorrente conforme as regras exibidas no checkout. Você pode cancelar a qualquer momento.'}
+                      : selectedPlan === 'anual'
+                        ? 'O plano Anual é um pagamento único anual, sem renovações automáticas mensais. Ao final do período, você decide se quer renovar.'
+                        : 'Sim. Planos mensais têm cobrança recorrente conforme as regras exibidas no checkout. Você pode cancelar a qualquer momento.'}
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
