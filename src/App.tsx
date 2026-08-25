@@ -42,7 +42,6 @@ const AgendamentoOnline = lazy(() => import('./pages/AgendamentoOnline'));
 const Privacidade = lazy(() => import('./pages/Privacidade'));
 const Termos = lazy(() => import('./pages/Termos'));
 const Sobre = lazy(() => import('./pages/Sobre'));
-const Planos = lazy(() => import('./pages/Planos'));
 const Checkout = lazy(() => import('./pages/Checkout'));
 const RetornoPagamento = lazy(() => import('./pages/RetornoPagamento'));
 const PaymentSuccess = lazy(() => import('./pages/PaymentSuccess'));
@@ -65,7 +64,7 @@ const RedirectWithQuery = ({ to }: { to: string }) => {
 const AppContent = () => {
   const location = useLocation();
   // Atualizado para não incluir as rotas alternativas, mas só a principal
-  const publicRoutes = ['/agendamento-online', '/login', '/cadastro', '/esqueci-senha', '/auth/callback', '/redefinir-senha', '/privacidade', '/termos', '/sobre', '/planos', '/checkout', '/pagamento/retorno', '/payment/success'];
+  const publicRoutes = ['/agendamento-online', '/login', '/cadastro', '/esqueci-senha', '/auth/callback', '/redefinir-senha', '/privacidade', '/termos', '/sobre', '/checkout', '/pagamento/retorno', '/payment/success'];
   const isPublicRoute = publicRoutes.some(path => location.pathname.startsWith(path));
 
   return (
@@ -92,7 +91,6 @@ const AppContent = () => {
         <Route path="/agendar" element={<RedirectWithQuery to="/agendamento-online" />} />
         <Route path="/privacidade" element={<Suspense fallback={RouteFallback}><Privacidade /></Suspense>} />
         <Route path="/termos" element={<Suspense fallback={RouteFallback}><Termos /></Suspense>} />
-        <Route path="/planos" element={<Suspense fallback={RouteFallback}><Planos /></Suspense>} />
         <Route path="/checkout" element={<Suspense fallback={RouteFallback}><Checkout /></Suspense>} />
         <Route path="/pagamento/retorno" element={<Suspense fallback={RouteFallback}><RetornoPagamento /></Suspense>} />
         <Route path="/payment/success" element={<Suspense fallback={RouteFallback}><PaymentSuccess /></Suspense>} />

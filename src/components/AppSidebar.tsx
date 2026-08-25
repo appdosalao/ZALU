@@ -17,7 +17,8 @@ import {
   Package,
   Download,
   ChevronsLeft,
-  ChevronsRight
+  ChevronsRight,
+  Crown
 } from "lucide-react";
 import {
   Sidebar,
@@ -83,6 +84,11 @@ const navigationItems = [
     title: "Auditoria",
     href: "/auditoria",
     icon: Shield,
+  },
+  {
+    title: "Assinatura",
+    href: "/assinatura",
+    icon: Crown,
   },
   {
     title: "Configurações",

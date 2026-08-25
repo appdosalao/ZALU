@@ -69,7 +69,7 @@ const onboardingSteps = [
     icon: Bell,
     features: [
       '7 dias grátis para testar todas as funcionalidades',
-      'Assinatura mensal por R$ 7,90/mês',
+      'Planos a partir de R$ 14,90/mês após o período de teste',
       'Acesso completo enquanto a assinatura estiver ativa',
       'Suporte prioritário e atualizações constantes'
     ]

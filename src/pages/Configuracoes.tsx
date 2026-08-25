@@ -17,7 +17,8 @@ import { toast } from 'sonner';
 
 export default function Configuracoes() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const initialTab = searchParams.get('tab') || 'horarios';
+  const requestedTab = searchParams.get('tab');
+  const initialTab = (requestedTab && requestedTab !== 'assinatura') ? requestedTab : 'horarios';
   const [activeTab, setActiveTab] = useState(initialTab);
   const navigate = useNavigate();
   const { usuario, isLoading: authLoading, refreshProfile, isAuthenticated } = useSupabaseAuth();
@@ -59,13 +60,14 @@ export default function Configuracoes() {
   })();
 
   const planLabel = (() => {
-    if (isPaid) return 'Mensal (R$ 7,90/mês)';
+    if (isPaid) return usuario?.plan_type === 'vitalicio' ? 'Anual (Vitalício)' : 'Profissional';
     return 'Teste grátis (7 dias)';
   })();
   useEffect(() => {
     const tab = searchParams.get('tab');
-    if (tab && tab !== activeTab) {
-      setActiveTab(tab);
+    const targetTab = (tab && tab !== 'assinatura') ? tab : 'horarios';
+    if (targetTab !== activeTab) {
+      setActiveTab(targetTab);
     }
   }, [searchParams]);
 
@@ -108,10 +110,6 @@ export default function Configuracoes() {
               <Lock className="h-4 w-4" />
               Conta
             </TabsTrigger>
-            <TabsTrigger value="assinatura" className="flex items-center gap-2 min-h-[44px] flex-1">
-              <Crown className="h-4 w-4" />
-              Assinatura
-            </TabsTrigger>
           </TabsList>
           <ScrollBar orientation="horizontal" className="md:hidden" />
         </ScrollArea>
@@ -135,8 +133,9 @@ export default function Configuracoes() {
           {/* Informações sobre horários */}
           <Card className="border-blue-200 bg-blue-50/50 dark:border-blue-800 dark:bg-blue-900/20">
             <CardContent className="p-4">
-              <h3 className="font-medium text-blue-900 dark:text-blue-100 mb-2">
-                📋 Integração com Agendamentos
+              <h3 className="font-medium text-blue-900 dark:text-blue-100 mb-2 flex items-center gap-2">
+                <Calendar className="w-4 h-4" />
+                Integração com Agendamentos
               </h3>
               <p className="text-sm text-blue-700 dark:text-blue-300">
                 Os horários configurados aqui serão automaticamente aplicados aos formulários 
@@ -172,134 +171,6 @@ export default function Configuracoes() {
 
         <TabsContent value="conta" className="space-y-6">
           <ConfiguracaoConta />
-        </TabsContent>
-
-        <TabsContent value="assinatura" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Crown className="h-5 w-5 text-primary" />
-                <span>Plano e Assinatura</span>
-              </CardTitle>
-              <CardDescription>
-                Acompanhe seu acesso, o período de teste e como assinar
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {isLoading ? (
-                <p className="text-sm text-muted-foreground">Carregando status...</p>
-              ) : (
-                <>
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between p-4 bg-muted/50 rounded-lg border border-border/50">
-                    <div className="space-y-1">
-                      <div className="text-sm text-muted-foreground">Status</div>
-                      <div className="text-sm font-semibold">{statusLabel}</div>
-                    </div>
-                    <Badge variant={isPaid ? 'default' : 'outline'} className={isPaid ? 'bg-green-600 hover:bg-green-700' : ''}>
-                      {isPaid ? 'Ativa' : trialValid ? 'Teste grátis' : 'Pendente'}
-                    </Badge>
-                  </div>
-
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <div className="p-4 bg-muted/30 rounded-lg border border-border/50">
-                      <div className="text-sm text-muted-foreground">Plano</div>
-                      <div className="text-sm font-semibold">{planLabel}</div>
-                    </div>
-                    <div className="p-4 bg-muted/30 rounded-lg border border-border/50">
-                      <div className="text-sm text-muted-foreground">Liberação</div>
-                      <div className="text-sm font-semibold">{isPaid ? formatDate(usuario?.paid_at) : 'Após pagamento aprovado'}</div>
-                    </div>
-                  </div>
-
-                  {trialValid ? (
-                    <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
-                      <div className="flex items-center justify-between gap-3 flex-wrap">
-                        <div>
-                          <div className="text-sm font-semibold text-primary">Teste grátis em andamento</div>
-                          <div className="text-xs text-muted-foreground">
-                            Início: {formatDate(usuario?.trial_start_date)} · Expira: {trialEndMs ? formatDate(new Date(trialEndMs)) : '—'}
-                          </div>
-                        </div>
-                        <div className="text-sm font-semibold">{trialProgress !== null ? `${trialProgress}%` : ''}</div>
-                      </div>
-                      <div className="mt-3 h-2 w-full rounded-full bg-primary/10 overflow-hidden">
-                        <div className="h-full bg-primary" style={{ width: `${trialProgress ?? 0}%` }} />
-                      </div>
-                      <div className="mt-2 text-xs text-muted-foreground">
-                        Você pode usar o app normalmente durante o teste. Depois, será necessário assinar para continuar.
-                      </div>
-                    </div>
-                  ) : null}
-
-                  {!isPaid ? (
-                    <div className="rounded-lg border border-border/60 bg-card/50 p-4">
-                      <div className="text-sm font-semibold">O que você recebe na assinatura</div>
-                      <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                        {[
-                          'Agenda com visão diária/semana',
-                          'Agendamentos e clientes ilimitados',
-                          'Serviços e preços organizados',
-                          'Controle financeiro e relatórios',
-                          'Atualizações futuras inclusas',
-                          'Suporte prioritário',
-                        ].map((t) => (
-                          <div key={t} className="flex items-start gap-2 text-sm">
-                            <div className="mt-0.5 bg-green-100 dark:bg-green-900/30 rounded-full p-1">
-                              <Check className="h-3 w-3 text-green-600 dark:text-green-400" strokeWidth={3} />
-                            </div>
-                            <span className="text-foreground/80">{t}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ) : null}
-
-                  <div className="pt-1 grid grid-cols-1 gap-2 sm:grid-cols-2">
-                    <Button
-                      onClick={() => {
-                        if (!isAuthenticated) {
-                          navigate('/login');
-                          return;
-                        }
-                        navigate('/checkout');
-                      }}
-                      className="w-full gap-2"
-                      disabled={isPaid}
-                      variant={isPaid ? "outline" : "default"}
-                    >
-                      <CreditCard className="h-4 w-4" />
-                      {isPaid ? 'Assinatura ativa' : 'Assinar por R$ 7,90/mês'}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="w-full gap-2"
-                      disabled={statusLoading}
-                      onClick={async () => {
-                        if (!isAuthenticated) {
-                          navigate('/login');
-                          return;
-                        }
-                        setStatusLoading(true);
-                        try {
-                          await refreshProfile();
-                          await refetch?.();
-                          toast.success('Status atualizado!');
-                        } catch (e) {
-                          toast.error('Erro ao verificar status');
-                          void e;
-                        } finally {
-                          setStatusLoading(false);
-                        }
-                      }}
-                    >
-                      <RefreshCw className="h-4 w-4" />
-                      {statusLoading ? 'Verificando...' : 'Verificar Status'}
-                    </Button>
-                  </div>
-                </>
-              )}
-            </CardContent>
-          </Card>
         </TabsContent>
       </Tabs>
     </div>

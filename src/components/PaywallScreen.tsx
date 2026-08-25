@@ -5,51 +5,16 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
-import { Check, CreditCard, Headphones, Loader2, Lock, LogOut, ShieldCheck, Sparkles, Zap } from 'lucide-react';
+import { Check, CreditCard, Headphones, Lock, LogOut, ShieldCheck, Sparkles, Zap, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
-import { buildCaktoCheckoutUrl } from '@/lib/caktoCheckout';
+import { PLANS, TRIAL_DAYS } from '@/config/plans';
 
 export const PaywallScreen: React.FC = () => {
   const navigate = useNavigate();
-  const { session, usuario, logout } = useSupabaseAuth();
-  const [isRedirecting, setIsRedirecting] = useState(false);
+  const { logout } = useSupabaseAuth();
   const [isSigningOut, setIsSigningOut] = useState(false);
 
-  const handleBuyAccess = async () => {
-    const userId = session?.user?.id ?? null;
-    const baseUrl = String(
-      import.meta.env.VITE_CAKTO_CHECKOUT_MENSAL_URL || import.meta.env.VITE_CAKTO_CHECKOUT_VITALICIO_URL || ''
-    ).trim();
-
-    if (!userId) {
-      toast.error('Você precisa estar logado para comprar o acesso.');
-      return;
-    }
-
-    if (!baseUrl) {
-      toast.error('Checkout mensal não configurado.');
-      return;
-    }
-
-    setIsRedirecting(true);
-    try {
-      const redirectUrl = `${window.location.origin}/payment/success`;
-      const checkoutUrl = buildCaktoCheckoutUrl({
-        baseUrl,
-        sck: userId,
-        name: usuario?.nome_completo ?? null,
-        email: usuario?.email ?? null,
-        phone: usuario?.telefone ?? null,
-        redirectUrl,
-      });
-      window.location.href = checkoutUrl;
-    } catch (error) {
-      console.error('Erro ao processar checkout:', error);
-      toast.error('Erro na conexão com o servidor.');
-    } finally {
-      setIsRedirecting(false);
-    }
-  };
+  const proPlan = PLANS['profissional'];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/10 to-secondary/10">
@@ -63,10 +28,10 @@ export const PaywallScreen: React.FC = () => {
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Assinatura mensal do ZALU</h1>
+                    <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Desbloqueie o ZALU</h1>
                     <Badge variant="outline" className="gap-1">
                       <Zap className="h-3.5 w-3.5" />
-                      R$ 7,90/mês
+                      A partir de R$ {proPlan.pricing.monthly.toFixed(2).replace('.', ',')}/mês
                     </Badge>
                   </div>
                   <p className="mt-2 text-muted-foreground">
@@ -165,35 +130,30 @@ export const PaywallScreen: React.FC = () => {
           <div className="lg:sticky lg:top-6">
             <Card className="shadow-2xl border-primary/20">
               <CardHeader className="space-y-1">
-                <CardTitle className="text-xl">Desbloquear acesso agora</CardTitle>
+                <CardTitle className="text-xl">Escolha seu plano</CardTitle>
                 <CardDescription>
-                  Assinatura mensal recorrente.
+                  {TRIAL_DAYS} dias grátis para testar. Sem cartão necessário.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="rounded-xl border bg-primary/5 p-4">
-                  <div className="text-sm text-muted-foreground">Valor do acesso</div>
-                  <div className="text-2xl font-extrabold text-primary">R$ 7,90/mês</div>
+                  <div className="text-sm text-muted-foreground">Plano mais escolhido</div>
+                  <div className="text-2xl font-extrabold text-primary">
+                    R$ {proPlan.pricing.monthly.toFixed(2).replace('.', ',')}/mês
+                  </div>
                   <div className="mt-2 flex flex-wrap gap-2 text-xs text-muted-foreground">
                     <span className="inline-flex items-center gap-1"><Lock className="h-3 w-3" /> Checkout Cakto</span>
-                    <span className="inline-flex items-center gap-1"><ShieldCheck className="h-3 w-3" /> Acesso enquanto ativo</span>
+                    <span className="inline-flex items-center gap-1"><ShieldCheck className="h-3 w-3" /> 7 dias de garantia</span>
                   </div>
                 </div>
 
                 <Button
-                  className="w-full h-12 text-base font-bold shadow-lg shadow-primary/20"
+                  className="w-full h-12 text-base font-bold shadow-lg shadow-primary/20 gap-2"
                   size="lg"
-                  onClick={handleBuyAccess}
-                  disabled={isRedirecting}
+                  onClick={() => navigate('/assinatura')}
                 >
-                  {isRedirecting ? (
-                    <>
-                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                      Abrindo checkout...
-                    </>
-                  ) : (
-                    'Assinar por R$ 7,90/mês'
-                  )}
+                  Ver planos disponíveis
+                  <ArrowRight className="h-4 w-4" />
                 </Button>
 
                 <div className="text-xs text-muted-foreground">
