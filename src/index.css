@@ -1,0 +1,1509 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  @keyframes scissors-snips {
+
+    0%,
+    100% {
+      transform: translateY(-50%) translateX(0) rotate(-12deg);
+    }
+
+    50% {
+      transform: translateY(-50%) translateX(10px) rotate(18deg);
+    }
+  }
+
+  @keyframes hair-fall {
+    0% {
+      opacity: 0;
+      transform: translateY(0);
+    }
+
+    15% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    100% {
+      opacity: 0;
+      transform: translateY(26px);
+    }
+  }
+
+  .scissors-snips {
+    position: absolute;
+    transform-origin: 50% 50%;
+    animation: scissors-snips 0.9s ease-in-out infinite;
+  }
+
+  .hair-fall {
+    animation: hair-fall 0.9s ease-in-out infinite;
+  }
+}
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+
+  /* Tema Feminino - Roxo Primário (#820AD1) */
+  :root,
+  [data-theme="feminino"] {
+    --background: 265 40% 96%;
+    --foreground: 265 25% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 265 25% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 265 25% 12%;
+
+    /* COR PRIMÁRIA OFICIAL: #820AD1 → hsl(265 91% 43%) */
+    --primary: 265 91% 43%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 265 20% 94%;
+    --secondary-foreground: 265 25% 20%;
+
+    --muted: 265 15% 93%;
+    --muted-foreground: 265 12% 48%;
+
+    --accent: 265 88% 58%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 142 72% 34%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 92% 48%;
+    --warning-foreground: 0 0% 100%;
+
+    --info: 217 85% 55%;
+    --info-foreground: 0 0% 100%;
+
+    --border: 265 18% 85%;
+    --input: 265 15% 91%;
+    --ring: 265 91% 43%;
+
+    --radius: 1rem;
+
+    /* Paleta derivada do roxo primário #820AD1 */
+    --lilac-primary: 265 82% 62%;
+    --lilac-light: 268 70% 74%;
+    --lilac-lighter: 268 35% 95%;
+    --pink-accent: 285 75% 62%;
+    --lavender: 270 45% 74%;
+
+    --gradient-primary: linear-gradient(135deg, hsl(265 91% 43%), hsl(265 82% 62%));
+    --gradient-soft: linear-gradient(180deg, hsl(265 40% 96%), hsl(268 35% 95%));
+    --gradient-accent: linear-gradient(45deg, hsl(265 82% 62%), hsl(285 75% 62%));
+
+    --shadow-soft: 0 2px 8px -2px hsl(265 91% 43% / 0.15),
+      0 1px 3px -1px hsl(265 91% 43% / 0.10);
+    --shadow-elegant: 0 8px 32px -8px hsl(265 91% 43% / 0.28),
+      0 4px 12px -4px hsl(265 91% 43% / 0.15),
+      0 1px 4px -1px hsl(265 91% 43% / 0.10);
+
+    --btn-shadow-default:
+      0 1px 0 0 hsl(265 91% 33%),
+      0 4px 8px -2px hsl(265 91% 43% / 0.40),
+      inset 0 1px 0 hsl(0 0% 100% / 0.20);
+    --btn-shadow-hover:
+      0 1px 0 0 hsl(265 91% 28%),
+      0 6px 14px -2px hsl(265 91% 43% / 0.50),
+      inset 0 1px 0 hsl(0 0% 100% / 0.25);
+    --btn-shadow-active:
+      0 0px 0 0 hsl(265 91% 28%),
+      0 1px 3px -1px hsl(265 91% 43% / 0.30),
+      inset 0 2px 4px hsl(265 91% 25% / 0.20);
+
+    --card-shadow:
+      0 1px 0 0 hsl(265 18% 85%),
+      0 4px 16px -4px hsl(265 91% 43% / 0.10),
+      0 1px 4px -1px hsl(265 91% 43% / 0.06);
+    --card-shadow-hover:
+      0 1px 0 0 hsl(265 18% 80%),
+      0 12px 32px -6px hsl(265 91% 43% / 0.18),
+      0 4px 10px -2px hsl(265 91% 43% / 0.10);
+
+    --sidebar-background: 265 42% 96%;
+    --sidebar-foreground: 265 25% 12%;
+    --sidebar-primary: 265 91% 43%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 265 30% 92%;
+    --sidebar-accent-foreground: 265 25% 12%;
+    --sidebar-border: 265 18% 85%;
+    --sidebar-ring: 265 91% 43%;
+  }
+
+  /* Tema Masculino - Fundo Cinza-Azul + Roxo Primário (#820AD1) */
+  [data-theme="masculino"] {
+    --background: 215 22% 96%;
+    --foreground: 222 40% 10%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 40% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 40% 10%;
+
+    /* COR PRIMÁRIA OFICIAL (mesma do tema feminino): #820AD1 → hsl(265 91% 43%) */
+    --primary: 265 91% 43%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 210 18% 93%;
+    --secondary-foreground: 222 40% 15%;
+
+    --muted: 210 16% 92%;
+    --muted-foreground: 215 16% 48%;
+
+    --accent: 265 88% 58%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 142 72% 34%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 92% 48%;
+    --warning-foreground: 0 0% 100%;
+
+    --info: 217 78% 40%;
+    --info-foreground: 0 0% 100%;
+
+    --border: 214 20% 85%;
+    --input: 214 20% 91%;
+    --ring: 265 91% 43%;
+
+    --radius: 1rem;
+
+    /* Paleta derivada do roxo primário, com suporte a tons frios de apoio */
+    --lilac-primary: 265 82% 62%;
+    --lilac-light: 220 58% 70%;
+    --lilac-lighter: 215 45% 95%;
+    --pink-accent: 265 80% 65%;
+    --lavender: 220 42% 70%;
+
+    --gradient-primary: linear-gradient(135deg, hsl(265 91% 43%), hsl(265 82% 62%));
+    --gradient-soft: linear-gradient(180deg, hsl(215 22% 96%), hsl(215 45% 95%));
+    --gradient-accent: linear-gradient(45deg, hsl(265 82% 62%), hsl(220 58% 70%));
+
+    --shadow-soft: 0 2px 8px -2px hsl(265 91% 43% / 0.15),
+      0 1px 3px -1px hsl(265 91% 43% / 0.10);
+    --shadow-elegant: 0 8px 32px -8px hsl(265 91% 43% / 0.28),
+      0 4px 12px -4px hsl(265 91% 43% / 0.15),
+      0 1px 4px -1px hsl(265 91% 43% / 0.10);
+
+    --btn-shadow-default:
+      0 1px 0 0 hsl(265 91% 33%),
+      0 4px 8px -2px hsl(265 91% 43% / 0.40),
+      inset 0 1px 0 hsl(0 0% 100% / 0.20);
+    --btn-shadow-hover:
+      0 1px 0 0 hsl(265 91% 28%),
+      0 6px 14px -2px hsl(265 91% 43% / 0.50),
+      inset 0 1px 0 hsl(0 0% 100% / 0.25);
+    --btn-shadow-active:
+      0 0px 0 0 hsl(265 91% 28%),
+      0 1px 3px -1px hsl(265 91% 43% / 0.30),
+      inset 0 2px 4px hsl(265 91% 25% / 0.20);
+
+    --card-shadow:
+      0 1px 0 0 hsl(214 20% 85%),
+      0 4px 16px -4px hsl(265 91% 43% / 0.10),
+      0 1px 4px -1px hsl(265 91% 43% / 0.06);
+    --card-shadow-hover:
+      0 1px 0 0 hsl(214 20% 80%),
+      0 12px 32px -6px hsl(265 91% 43% / 0.18),
+      0 4px 10px -2px hsl(265 91% 43% / 0.10);
+
+    --sidebar-background: 215 30% 96%;
+    --sidebar-foreground: 222 40% 10%;
+    --sidebar-primary: 265 91% 43%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 215 22% 92%;
+    --sidebar-accent-foreground: 222 40% 10%;
+    --sidebar-border: 214 20% 85%;
+    --sidebar-ring: 265 91% 43%;
+  }
+
+  /* Dark mode - Feminino */
+  .dark[data-theme="feminino"] {
+    --background: 265 30% 7%;
+    --foreground: 265 15% 92%;
+    --card: 265 28% 11%;
+    --card-foreground: 265 15% 92%;
+    --popover: 265 28% 11%;
+    --popover-foreground: 265 15% 92%;
+    /* COR PRIMÁRIA OFICIAL: #820AD1 → hsl(265 91% 43%) */
+    --primary: 265 91% 43%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 265 22% 18%;
+    --secondary-foreground: 265 15% 88%;
+    --muted: 265 22% 16%;
+    --muted-foreground: 265 12% 58%;
+    --accent: 265 88% 58%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 62% 42%;
+    --destructive-foreground: 265 15% 92%;
+    --success: 142 72% 34%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 48%;
+    --warning-foreground: 0 0% 100%;
+    --info: 217 75% 55%;
+    --info-foreground: 0 0% 100%;
+    --border: 265 22% 20%;
+    --input: 265 22% 20%;
+    --ring: 265 91% 43%;
+
+    --lilac-primary: 265 82% 62%;
+    --lilac-light: 268 70% 74%;
+    --lilac-lighter: 268 35% 30%;
+    --pink-accent: 285 75% 68%;
+    --lavender: 270 45% 74%;
+
+    --gradient-primary: linear-gradient(135deg, hsl(265 91% 43%), hsl(265 82% 62%));
+    --gradient-soft: linear-gradient(180deg, hsl(265 30% 7%), hsl(268 28% 12%));
+    --gradient-accent: linear-gradient(45deg, hsl(265 82% 62%), hsl(285 75% 68%));
+
+    --shadow-soft: 0 2px 8px -2px hsl(265 91% 43% / 0.30),
+      0 1px 3px -1px hsl(265 91% 43% / 0.20);
+    --shadow-elegant: 0 8px 32px -8px hsl(265 91% 43% / 0.45),
+      0 4px 12px -4px hsl(265 91% 43% / 0.25),
+      0 1px 4px -1px hsl(265 91% 43% / 0.15);
+
+    --btn-shadow-default:
+      0 1px 0 0 hsl(265 50% 10%),
+      0 4px 8px -2px hsl(265 91% 43% / 0.45),
+      inset 0 1px 0 hsl(0 0% 100% / 0.12);
+    --btn-shadow-hover:
+      0 1px 0 0 hsl(265 50% 8%),
+      0 6px 14px -2px hsl(265 91% 43% / 0.55),
+      inset 0 1px 0 hsl(0 0% 100% / 0.16);
+    --btn-shadow-active:
+      0 0px 0 0 hsl(265 50% 8%),
+      0 1px 3px -1px hsl(265 91% 43% / 0.35),
+      inset 0 2px 4px hsl(265 91% 25% / 0.30);
+
+    --card-shadow:
+      0 1px 0 0 hsl(265 22% 22%),
+      0 4px 16px -4px hsl(0 0% 0% / 0.30),
+      0 1px 4px -1px hsl(265 91% 43% / 0.12);
+    --card-shadow-hover:
+      0 1px 0 0 hsl(265 22% 26%),
+      0 12px 32px -6px hsl(0 0% 0% / 0.45),
+      0 4px 10px -2px hsl(265 91% 43% / 0.22);
+
+    --sidebar-background: 265 35% 5%;
+    --sidebar-foreground: 265 15% 85%;
+    --sidebar-primary: 265 91% 43%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 265 28% 13%;
+    --sidebar-accent-foreground: 265 15% 85%;
+    --sidebar-border: 265 28% 15%;
+    --sidebar-ring: 265 91% 43%;
+  }
+
+  /* Dark mode - Masculino */
+  .dark[data-theme="masculino"] {
+    --background: 222 40% 8%;
+    --foreground: 210 18% 92%;
+    --card: 222 38% 12%;
+    --card-foreground: 210 18% 92%;
+    --popover: 222 38% 12%;
+    --popover-foreground: 210 18% 92%;
+    /* COR PRIMÁRIA OFICIAL: #820AD1 → hsl(265 91% 43%) */
+    --primary: 265 91% 43%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 217 25% 20%;
+    --secondary-foreground: 210 18% 88%;
+    --muted: 217 25% 18%;
+    --muted-foreground: 215 16% 56%;
+    --accent: 265 88% 58%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 62% 42%;
+    --destructive-foreground: 210 18% 92%;
+    --success: 142 72% 34%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 48%;
+    --warning-foreground: 0 0% 100%;
+    --info: 217 72% 55%;
+    --info-foreground: 0 0% 100%;
+    --border: 217 25% 20%;
+    --input: 217 25% 20%;
+    --ring: 265 91% 43%;
+
+    --lilac-primary: 265 82% 62%;
+    --lilac-light: 220 58% 70%;
+    --lilac-lighter: 215 30% 25%;
+    --pink-accent: 265 80% 68%;
+    --lavender: 220 42% 70%;
+
+    --gradient-primary: linear-gradient(135deg, hsl(265 91% 43%), hsl(265 82% 62%));
+    --gradient-soft: linear-gradient(180deg, hsl(222 40% 8%), hsl(220 38% 14%));
+    --gradient-accent: linear-gradient(45deg, hsl(265 82% 62%), hsl(220 58% 70%));
+
+    --shadow-soft: 0 2px 8px -2px hsl(265 91% 43% / 0.30),
+      0 1px 3px -1px hsl(265 91% 43% / 0.20);
+    --shadow-elegant: 0 8px 32px -8px hsl(265 91% 43% / 0.45),
+      0 4px 12px -4px hsl(265 91% 43% / 0.25),
+      0 1px 4px -1px hsl(265 91% 43% / 0.15);
+
+    --btn-shadow-default:
+      0 1px 0 0 hsl(265 91% 25%),
+      0 4px 8px -2px hsl(265 91% 43% / 0.45),
+      inset 0 1px 0 hsl(0 0% 100% / 0.12);
+    --btn-shadow-hover:
+      0 1px 0 0 hsl(265 91% 20%),
+      0 6px 14px -2px hsl(265 91% 43% / 0.55),
+      inset 0 1px 0 hsl(0 0% 100% / 0.16);
+    --btn-shadow-active:
+      0 0px 0 0 hsl(265 91% 20%),
+      0 1px 3px -1px hsl(265 91% 43% / 0.35),
+      inset 0 2px 4px hsl(265 91% 20% / 0.30);
+
+    --card-shadow:
+      0 1px 0 0 hsl(217 25% 22%),
+      0 4px 16px -4px hsl(0 0% 0% / 0.30),
+      0 1px 4px -1px hsl(265 91% 43% / 0.12);
+    --card-shadow-hover:
+      0 1px 0 0 hsl(217 25% 26%),
+      0 12px 32px -6px hsl(0 0% 0% / 0.45),
+      0 4px 10px -2px hsl(265 91% 43% / 0.22);
+
+    --sidebar-background: 222 45% 6%;
+    --sidebar-foreground: 210 18% 85%;
+    --sidebar-primary: 265 91% 43%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 222 38% 14%;
+    --sidebar-accent-foreground: 210 18% 85%;
+    --sidebar-border: 222 38% 16%;
+    --sidebar-ring: 265 91% 43%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    /* Touch-friendly default */
+    touch-action: manipulation;
+    /* Better text rendering on mobile */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Safe area support for notched devices */
+  body {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+
+  /* Better focus visibility */
+  *:focus-visible {
+    @apply outline-2 outline-offset-2 outline-ring;
+  }
+
+  /* Prevent zoom on iOS inputs */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="tel"],
+  input[type="url"],
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
+/* Forçar tamanho mínimo de toque em mobile */
+@media (max-width: 640px) {
+
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="tel"],
+  input[type="url"],
+  input[type="date"],
+  input[type="time"],
+  input[type="month"],
+  input[type="search"],
+  input[type="datetime-local"],
+  select,
+  button:not(.icon-only) {
+    min-height: 44px;
+  }
+}
+
+@layer utilities {
+
+  /* Container responsive utility classes */
+  .container-responsive {
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 0 clamp(0.5rem, 3vw, 2rem);
+  }
+
+  /* Responsive grid utilities */
+  .grid-responsive {
+    display: grid;
+    gap: clamp(0.5rem, 2vw, 1.5rem);
+    grid-template-columns: 1fr;
+  }
+
+
+  @media (min-width: 768px) {
+    .grid-responsive {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .grid-responsive {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .grid-responsive-2 {
+    display: grid;
+    gap: clamp(1rem, 4vw, 2rem);
+    grid-template-columns: 1fr;
+  }
+
+  @media (min-width: 768px) {
+    .grid-responsive-2 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .grid-responsive-3 {
+    display: grid;
+    gap: clamp(0.5rem, 2vw, 1.5rem);
+    grid-template-columns: 1fr;
+  }
+
+  @media (min-width: 640px) {
+    .grid-responsive-3 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .grid-responsive-3 {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .grid-responsive-4 {
+    display: grid;
+    gap: clamp(1rem, 4vw, 2rem);
+    grid-template-columns: 1fr;
+  }
+
+  @media (min-width: 640px) {
+    .grid-responsive-4 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .grid-responsive-4 {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  .grid-responsive-5 {
+    display: grid;
+    gap: clamp(1rem, 4vw, 2rem);
+    grid-template-columns: 1fr;
+  }
+
+  @media (min-width: 640px) {
+    .grid-responsive-5 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .grid-responsive-5 {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .grid-responsive-5 {
+      grid-template-columns: repeat(5, 1fr);
+    }
+  }
+
+  /* Responsive text utilities with better scaling */
+  .text-responsive-xs {
+    font-size: clamp(0.6rem, 2vw, 0.75rem);
+    line-height: 1.4;
+  }
+
+  .text-responsive-sm {
+    font-size: clamp(0.75rem, 2.5vw, 0.875rem);
+    line-height: 1.5;
+  }
+
+  .text-responsive-base {
+    font-size: clamp(0.875rem, 3vw, 1rem);
+    line-height: 1.6;
+  }
+
+  .text-responsive-lg {
+    font-size: clamp(1rem, 4vw, 1.125rem);
+    line-height: 1.6;
+  }
+
+  .text-responsive-xl {
+    font-size: clamp(1.125rem, 5vw, 1.25rem);
+    line-height: 1.5;
+  }
+
+  .text-responsive-2xl {
+    font-size: clamp(1.25rem, 6vw, 1.5rem);
+    line-height: 1.4;
+  }
+
+  .text-responsive-3xl {
+    font-size: clamp(1.5rem, 7vw, 2rem);
+    line-height: 1.3;
+  }
+
+  .text-responsive-4xl {
+    font-size: clamp(1.875rem, 8vw, 2.5rem);
+    line-height: 1.2;
+  }
+
+  /* Responsive spacing utilities */
+  .space-responsive {
+    gap: clamp(0.75rem, 3vw, 1.5rem);
+  }
+
+  .space-responsive-sm {
+    gap: clamp(0.5rem, 2vw, 1rem);
+  }
+
+  .space-responsive-md {
+    gap: clamp(0.75rem, 3vw, 1.25rem);
+  }
+
+  .space-responsive-lg {
+    gap: clamp(1rem, 4vw, 2rem);
+  }
+
+  .space-responsive-xl {
+    gap: clamp(1.5rem, 5vw, 3rem);
+  }
+
+  /* Responsive padding utilities */
+  .p-responsive {
+    padding: clamp(0.5rem, 3vw, 1.25rem);
+  }
+
+  .p-responsive-sm {
+    padding: clamp(0.25rem, 2vw, 0.75rem);
+  }
+
+  .p-responsive-lg {
+    padding: clamp(1rem, 5vw, 2rem);
+  }
+
+  .p-responsive-xl {
+    padding: clamp(1.5rem, 6vw, 3rem);
+  }
+
+  /* Responsive margin utilities */
+  .m-responsive {
+    margin: clamp(0.75rem, 4vw, 1.5rem);
+  }
+
+  .m-responsive-sm {
+    margin: clamp(0.5rem, 2vw, 1rem);
+  }
+
+  .m-responsive-lg {
+    margin: clamp(1rem, 5vw, 2rem);
+  }
+
+  /* Touch-friendly button utilities */
+  .btn-touch {
+    padding: clamp(0.75rem, 2vw, 1rem) clamp(1rem, 3vw, 1.25rem);
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  @media (max-width: 767px) {
+    .btn-touch {
+      min-height: 44px;
+      min-width: 44px;
+    }
+  }
+
+  /* Form input responsive */
+  .input-responsive {
+    min-height: clamp(44px, 8vw, 48px);
+    padding: clamp(0.75rem, 2vw, 1rem);
+    font-size: clamp(1rem, 3vw, 1.125rem);
+    touch-action: manipulation;
+  }
+
+  /* Select input responsive */
+  .select-responsive {
+    min-height: clamp(44px, 8vw, 48px);
+    padding: clamp(0.75rem, 2vw, 1rem);
+    font-size: clamp(1rem, 3vw, 1.125rem);
+  }
+
+  /* Responsive overflow handling */
+  .overflow-responsive {
+    overflow-x: auto;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Better table responsive */
+  .table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 0.5rem;
+  }
+
+  .table-responsive table {
+    width: 100%;
+  }
+
+  /* Tabelas com muitas colunas definem min-w próprio nas células e
+     mantêm scroll horizontal apenas quando necessário. */
+
+  /* Card responsive */
+  .card-responsive {
+    padding: clamp(1rem, 4vw, 1.5rem);
+    border-radius: clamp(0.5rem, 2vw, 1rem);
+  }
+
+  /* Custom scrollbar for mobile */
+  .overflow-responsive::-webkit-scrollbar,
+  .table-responsive::-webkit-scrollbar {
+    height: 6px;
+    width: 6px;
+  }
+
+  .overflow-responsive::-webkit-scrollbar-track,
+  .table-responsive::-webkit-scrollbar-track {
+    background: hsl(var(--muted));
+    border-radius: 3px;
+  }
+
+  .overflow-responsive::-webkit-scrollbar-thumb,
+  .table-responsive::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground));
+    border-radius: 3px;
+  }
+
+  .overflow-responsive::-webkit-scrollbar-thumb:hover,
+  .table-responsive::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary));
+  }
+
+  /* Responsive image utilities */
+  .img-responsive {
+    width: 100%;
+    height: auto;
+    max-width: 100%;
+  }
+
+  /* Responsive video utilities */
+  .video-responsive {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16/9;
+  }
+
+  /* Responsive flexbox utilities */
+  .flex-responsive {
+    display: flex;
+    flex-wrap: wrap;
+    gap: clamp(0.75rem, 3vw, 1.5rem);
+  }
+
+  .flex-responsive-col {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(0.75rem, 3vw, 1.5rem);
+  }
+
+  @media (min-width: 640px) {
+    .flex-responsive-row-sm {
+      flex-direction: row;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .flex-responsive-row-md {
+      flex-direction: row;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .flex-responsive-row-lg {
+      flex-direction: row;
+    }
+  }
+
+  /* Modal/Dialog responsive */
+  .dialog-responsive {
+    width: clamp(300px, 90vw, 500px);
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  /* Sidebar responsive breakpoints */
+  @media (max-width: 1023px) {
+    .sidebar-hide-mobile {
+      display: none;
+    }
+  }
+
+  /* Form field responsive utilities */
+  .form-field-responsive {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(0.5rem, 2vw, 0.75rem);
+  }
+
+  @media (min-width: 768px) {
+    .form-field-responsive-row {
+      flex-direction: row;
+      align-items: center;
+    }
+  }
+
+  /* Navigation responsive */
+  .nav-responsive {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(0.5rem, 2vw, 1rem);
+  }
+
+  @media (min-width: 768px) {
+    .nav-responsive-row {
+      flex-direction: row;
+    }
+  }
+
+  /* Gap responsive utilities */
+  .gap-responsive {
+    gap: clamp(0.75rem, 3vw, 1.5rem);
+  }
+
+  .gap-responsive-sm {
+    gap: clamp(0.5rem, 2vw, 1rem);
+  }
+
+  .gap-responsive-lg {
+    gap: clamp(1rem, 4vw, 2rem);
+  }
+
+  /* Mobile-first breakpoint utilities */
+  .mobile-hidden {
+    display: none;
+  }
+
+  @media (min-width: 640px) {
+    .mobile-hidden {
+      display: block;
+    }
+  }
+
+  .desktop-hidden {
+    display: block;
+  }
+
+  @media (min-width: 1024px) {
+    .desktop-hidden {
+      display: none;
+    }
+  }
+
+  /* Responsive heights */
+  .h-responsive {
+    height: clamp(200px, 40vh, 400px);
+  }
+
+  .h-responsive-sm {
+    height: clamp(150px, 30vh, 300px);
+  }
+
+  .h-responsive-lg {
+    height: clamp(300px, 50vh, 600px);
+  }
+
+  /* Better mobile scrolling */
+  .scroll-smooth {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Agendamentos specific utilities */
+  .agendamento-card {
+    @apply border border-border/50 bg-card/50 backdrop-blur-sm hover:bg-card/70 transition-all duration-200 cursor-pointer rounded-lg;
+    min-height: clamp(120px, 20vw, 140px);
+  }
+
+  .agendamento-header {
+    @apply flex flex-col gap-3;
+  }
+
+  @media (min-width: 640px) {
+    .agendamento-header {
+      @apply flex-row items-start justify-between;
+    }
+  }
+
+  .status-badge {
+    @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium;
+    min-height: 24px;
+  }
+
+  .filter-grid {
+    @apply grid gap-3 grid-cols-2;
+  }
+
+  @media (min-width: 640px) {
+    .filter-grid {
+      @apply grid-cols-3;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .filter-grid {
+      @apply grid-cols-4;
+    }
+  }
+
+  /* Touch-friendly dropdown menus */
+  .dropdown-menu-responsive {
+    min-width: 200px;
+    padding: 0.5rem 0;
+  }
+
+  .dropdown-menu-responsive [role="menuitem"] {
+    min-height: 44px;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+  }
+
+  /* Better focus for mobile navigation */
+  .focus-mobile:focus {
+    @apply outline-2 outline-offset-2 outline-primary;
+    background: hsl(var(--primary) / 0.1);
+  }
+
+  /* Responsive stats cards */
+  .stats-card {
+    @apply border border-border/50 bg-card/50 backdrop-blur-sm hover:bg-card/60 transition-colors rounded-lg;
+    min-height: clamp(80px, 15vw, 100px);
+  }
+
+  .stats-icon {
+    @apply flex items-center justify-center rounded-xl flex-shrink-0;
+    width: clamp(40px, 8vw, 48px);
+    height: clamp(40px, 8vw, 48px);
+  }
+
+  /* Form improvements for mobile */
+  .form-responsive {
+    @apply space-y-4;
+  }
+
+  @media (min-width: 640px) {
+    .form-responsive {
+      @apply space-y-6;
+    }
+  }
+
+  .form-responsive .form-field {
+    @apply space-y-2;
+  }
+
+  .form-responsive input,
+  .form-responsive select,
+  .form-responsive textarea {
+    min-height: 44px;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    touch-action: manipulation;
+  }
+
+  /* Responsive action buttons */
+  .action-buttons {
+    @apply flex flex-col gap-3;
+  }
+
+  @media (min-width: 640px) {
+    .action-buttons {
+      @apply flex-row;
+    }
+  }
+
+  .action-button {
+    @apply justify-center;
+    min-height: 44px;
+    font-size: 0.875rem;
+  }
+
+  @media (min-width: 640px) {
+    .action-button {
+      @apply justify-start;
+    }
+  }
+
+  /* Better mobile navigation */
+  .mobile-nav {
+    @apply fixed bottom-0 left-0 right-0 bg-background border-t border-border/50 p-4 safe-bottom;
+    z-index: 50;
+  }
+
+  .mobile-nav-button {
+    @apply flex-1 flex flex-col items-center gap-1 p-3 rounded-lg text-xs font-medium transition-colors;
+    min-height: 56px;
+    touch-action: manipulation;
+  }
+
+  .mobile-nav-button.active {
+    @apply bg-primary/10 text-primary;
+  }
+
+  .mobile-nav-button:not(.active) {
+    @apply text-muted-foreground hover:text-foreground hover:bg-muted/50;
+  }
+
+  /* Safe area support for mobile navigation */
+  .safe-bottom {
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+  }
+
+  .safe-top {
+    padding-top: calc(1rem + env(safe-area-inset-top));
+  }
+
+  /* Better scrollable areas */
+  .scrollable-area {
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted-foreground)) hsl(var(--muted));
+  }
+
+  .scrollable-area::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollable-area::-webkit-scrollbar-track {
+    background: hsl(var(--muted));
+    border-radius: 3px;
+  }
+
+  .scrollable-area::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground));
+    border-radius: 3px;
+  }
+
+  .scrollable-area::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary));
+  }
+}
+
+/* Animation utilities for mobile interactions */
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.3s ease-out;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.2s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideUp {
+    from {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes scaleIn {
+    from {
+      transform: scale(0.95);
+      opacity: 0;
+    }
+
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  /* Touch feedback */
+  .touch-feedback {
+    transition: all 0.1s ease;
+  }
+
+  .touch-feedback:active {
+    transform: scale(0.98);
+    opacity: 0.8;
+  }
+
+  /* Touch-friendly utilities */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .touch-padding {
+    padding: var(--mobile-padding);
+  }
+
+  .touch-spacing {
+    gap: 12px;
+  }
+
+  /* Mobile-specific layouts */
+  .mobile-stack {
+    @apply flex flex-col gap-4;
+  }
+
+  .mobile-grid-1 {
+    @apply grid grid-cols-1 gap-4;
+  }
+
+  .mobile-list-item {
+    @apply p-4 space-y-3;
+  }
+
+  .mobile-card {
+    @apply p-4 sm:p-6;
+  }
+
+  /* Typography mobile-optimized */
+  .text-mobile-h1 {
+    @apply text-2xl sm:text-3xl lg:text-4xl;
+  }
+
+  .text-mobile-h2 {
+    @apply text-xl sm:text-2xl lg:text-3xl;
+  }
+
+  .text-mobile-h3 {
+    @apply text-lg sm:text-xl;
+  }
+
+  .text-mobile-body {
+    @apply text-sm sm:text-base;
+  }
+
+  .text-mobile-small {
+    @apply text-xs sm:text-sm;
+  }
+
+  /* Input fields mobile-friendly */
+  .input-mobile {
+    @apply h-12 text-base;
+  }
+
+  .select-mobile {
+    @apply h-12 text-base;
+  }
+
+  /* Form spacing */
+  .form-mobile {
+    @apply space-y-5 sm:space-y-6;
+  }
+
+  .form-row-mobile {
+    @apply grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6;
+  }
+
+  /* Custom scrollbar utility */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: hsl(var(--primary) / 0.2);
+    border-radius: 10px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary) / 0.4);
+  }
+
+  /* Scrollbar hide utility */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@layer utilities {
+
+  /* ── Sistema de responsividade unificado ──
+     Utilitários padrão para alvo de toque e tipografia.
+     Use estes em vez de valores arbitrários (w-[..]px, text-[..]px). */
+
+  /* Botão de ícone com alvo de toque mínimo (44px) no mobile */
+  .icon-touch {
+    height: clamp(44px, 10vw, 44px);
+    width: clamp(44px, 10vw, 44px);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  @media (min-width: 768px) {
+    .icon-touch {
+      height: 40px;
+      width: 40px;
+    }
+  }
+
+  /* Título de página unificado (todos os módulos usam a mesma escala) */
+  .page-title {
+    font-size: clamp(1.125rem, 4vw, 1.375rem);
+    line-height: 1.3;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  @media (min-width: 768px) {
+    .page-title {
+      font-size: clamp(1.25rem, 3vw, 1.625rem);
+    }
+  }
+
+  /* Subtítulo/descrição de página unificado */
+  .page-description {
+    font-size: clamp(0.75rem, 2.5vw, 0.875rem);
+    line-height: 1.5;
+    color: hsl(var(--muted-foreground));
+  }
+
+  /* Título de seção dentro de cards */
+  .section-title {
+    font-size: clamp(0.9375rem, 3vw, 1.0625rem);
+    line-height: 1.4;
+    font-weight: 600;
+  }
+
+  /* Tabela responsiva com scroll horizontal apenas quando necessário */
+  .overflow-x-auto-safe {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+
+  /* Evita que filhos estourem containers flex/grid no mobile */
+  .min-w-0-safe {
+    min-width: 0;
+  }
+
+  /* Padding horizontal padrão de conteúdo em telas pequenas */
+  .px-page {
+    padding-left: clamp(0.75rem, 4vw, 1.5rem);
+    padding-right: clamp(0.75rem, 4vw, 1.5rem);
+  }
+}
+
+@layer utilities {
+
+  /* ── 3D Button Surface ── */
+  .btn-3d {
+    background-color: hsl(var(--primary));
+    background-image: none;
+    box-shadow:
+      0 1px 0 0 hsl(265 91% 28%),
+      0 4px 8px -2px hsl(var(--primary) / 0.40),
+      inset 0 1px 0 hsl(0 0% 100% / 0.20);
+    transform: translateY(0px);
+    transition: background-color 0.15s ease, box-shadow 0.15s ease, transform 0.12s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-3d::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom,
+        hsl(0 0% 100% / 0.14) 0%,
+        transparent 52%);
+    border-radius: inherit;
+    pointer-events: none;
+  }
+
+  .btn-3d:hover:not(:disabled) {
+    background-color: hsl(265 91% 36%);
+    box-shadow:
+      0 1px 0 0 hsl(265 91% 22%),
+      0 6px 14px -2px hsl(var(--primary) / 0.50),
+      inset 0 1px 0 hsl(0 0% 100% / 0.25);
+    transform: translateY(-1px);
+  }
+
+  .btn-3d:active:not(:disabled) {
+    background-color: hsl(265 91% 28%);
+    box-shadow:
+      0 0 0 0 hsl(265 91% 22%),
+      0 1px 3px -1px hsl(var(--primary) / 0.30),
+      inset 0 2px 4px hsl(265 91% 20% / 0.20);
+    transform: translateY(1px);
+  }
+
+  /* ── 3D Card Surface ── */
+  .card-3d {
+    box-shadow: var(--card-shadow);
+    background-image: linear-gradient(to bottom,
+        hsl(0 0% 100%) 0%,
+        hsl(var(--secondary) / 0.40) 100%);
+    transition: box-shadow 0.20s ease, transform 0.18s ease;
+    transform: translateY(0px);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card-3d::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(to right,
+        transparent,
+        hsl(0 0% 100% / 0.80) 30%,
+        hsl(0 0% 100% / 0.80) 70%,
+        transparent);
+    pointer-events: none;
+  }
+
+  .card-3d:hover {
+    box-shadow: var(--card-shadow-hover);
+    transform: translateY(-2px);
+  }
+
+  /* Dark mode card override */
+  .dark .card-3d {
+    background-image: linear-gradient(to bottom,
+        hsl(var(--card)) 0%,
+        hsl(var(--muted) / 0.60) 100%);
+  }
+
+  .dark .card-3d::before {
+    background: linear-gradient(to right,
+        transparent,
+        hsl(0 0% 100% / 0.06) 30%,
+        hsl(0 0% 100% / 0.06) 70%,
+        transparent);
+  }
+}
+
+/* ─────────────────────────────────────────────
+   Cores de acento por módulo (adaptáveis ao tema)
+   Usadas em: sidebar, navegação mobile e ações rápidas.
+   Padrão de variável: --mod-<módulo>-a (from),
+   --mod-<módulo>-b (to) e --mod-<módulo>-dark (borda/acento).
+   ───────────────────────────────────────────── */
+:root,
+[data-theme="feminino"] {
+  --mod-dashboard-a: 265 91% 43%;
+  --mod-dashboard-b: 265 82% 62%;
+  --mod-dashboard-dark: 265 91% 30%;
+  --mod-agenda-a: 265 82% 62%;
+  --mod-agenda-b: 285 75% 62%;
+  --mod-agenda-dark: 265 91% 32%;
+  --mod-cliente-a: 239 84% 66%;
+  --mod-cliente-b: 199 89% 48%;
+  --mod-cliente-dark: 226 70% 40%;
+  --mod-servico-a: 350 89% 60%;
+  --mod-servico-b: 329 86% 70%;
+  --mod-servico-dark: 348 80% 35%;
+  --mod-cronograma-a: 38 92% 50%;
+  --mod-cronograma-b: 48 96% 53%;
+  --mod-cronograma-dark: 45 90% 30%;
+  --mod-financeiro-a: 160 84% 39%;
+  --mod-financeiro-b: 140 71% 58%;
+  --mod-financeiro-dark: 158 81% 28%;
+  --mod-marketing-a: 285 84% 61%;
+  --mod-marketing-b: 265 88% 72%;
+  --mod-marketing-dark: 292 70% 40%;
+  --mod-produto-a: 265 91% 65%;
+  --mod-produto-b: 265 82% 66%;
+  --mod-produto-dark: 270 66% 32%;
+  --mod-auditoria-a: 215 16% 47%;
+  --mod-auditoria-b: 215 14% 68%;
+  --mod-auditoria-dark: 215 15% 34%;
+  --mod-assinatura-a: 47 95% 53%;
+  --mod-assinatura-b: 32 95% 55%;
+  --mod-assinatura-dark: 40 90% 35%;
+  --mod-config-a: 25 5% 45%;
+  --mod-config-b: 24 6% 68%;
+  --mod-config-dark: 25 6% 35%;
+}
+
+[data-theme="masculino"] {
+  --mod-dashboard-a: 265 91% 43%;
+  --mod-dashboard-b: 265 82% 62%;
+  --mod-dashboard-dark: 265 91% 28%;
+  --mod-agenda-a: 265 82% 62%;
+  --mod-agenda-b: 220 58% 65%;
+  --mod-agenda-dark: 265 91% 30%;
+  --mod-cliente-a: 224 78% 62%;
+  --mod-cliente-b: 210 85% 52%;
+  --mod-cliente-dark: 226 70% 38%;
+  --mod-servico-a: 265 75% 55%;
+  --mod-servico-b: 205 80% 62%;
+  --mod-servico-dark: 220 70% 36%;
+  --mod-cronograma-a: 38 92% 50%;
+  --mod-cronograma-b: 48 96% 53%;
+  --mod-cronograma-dark: 45 90% 30%;
+  --mod-financeiro-a: 160 84% 39%;
+  --mod-financeiro-b: 140 71% 58%;
+  --mod-financeiro-dark: 158 81% 28%;
+  --mod-marketing-a: 265 80% 60%;
+  --mod-marketing-b: 230 85% 68%;
+  --mod-marketing-dark: 250 70% 36%;
+  --mod-produto-a: 265 82% 62%;
+  --mod-produto-b: 222 78% 60%;
+  --mod-produto-dark: 235 70% 34%;
+  --mod-auditoria-a: 215 16% 47%;
+  --mod-auditoria-b: 215 14% 68%;
+  --mod-auditoria-dark: 215 15% 34%;
+  --mod-assinatura-a: 47 95% 53%;
+  --mod-assinatura-b: 32 95% 55%;
+  --mod-assinatura-dark: 40 90% 35%;
+  --mod-config-a: 25 5% 45%;
+  --mod-config-b: 24 6% 68%;
+  --mod-config-dark: 25 6% 35%;
+}
+
+.dark[data-theme="feminino"] {
+  --mod-dashboard-a: 265 91% 43%;
+  --mod-dashboard-b: 265 82% 62%;
+  --mod-dashboard-dark: 265 91% 28%;
+  --mod-agenda-a: 265 82% 65%;
+  --mod-agenda-b: 285 75% 68%;
+  --mod-agenda-dark: 265 91% 30%;
+  --mod-cliente-a: 224 80% 68%;
+  --mod-cliente-b: 200 85% 62%;
+  --mod-cliente-dark: 226 60% 45%;
+  --mod-servico-a: 348 85% 65%;
+  --mod-servico-b: 329 80% 72%;
+  --mod-servico-dark: 348 70% 42%;
+  --mod-cronograma-a: 40 90% 60%;
+  --mod-cronograma-b: 50 92% 62%;
+  --mod-cronograma-dark: 45 80% 40%;
+  --mod-financeiro-a: 155 75% 45%;
+  --mod-financeiro-b: 135 70% 62%;
+  --mod-financeiro-dark: 158 70% 35%;
+  --mod-marketing-a: 285 78% 68%;
+  --mod-marketing-b: 265 88% 76%;
+  --mod-marketing-dark: 292 60% 45%;
+  --mod-produto-a: 265 85% 68%;
+  --mod-produto-b: 265 82% 70%;
+  --mod-produto-dark: 270 55% 42%;
+  --mod-auditoria-a: 215 12% 60%;
+  --mod-auditoria-b: 215 12% 72%;
+  --mod-auditoria-dark: 215 10% 40%;
+  --mod-assinatura-a: 47 90% 60%;
+  --mod-assinatura-b: 32 92% 62%;
+  --mod-assinatura-dark: 40 85% 40%;
+  --mod-config-a: 25 4% 58%;
+  --mod-config-b: 24 5% 70%;
+  --mod-config-dark: 25 4% 42%;
+}
+
+.dark[data-theme="masculino"] {
+  --mod-dashboard-a: 265 91% 43%;
+  --mod-dashboard-b: 265 82% 62%;
+  --mod-dashboard-dark: 265 91% 28%;
+  --mod-agenda-a: 265 82% 65%;
+  --mod-agenda-b: 220 58% 65%;
+  --mod-agenda-dark: 265 91% 30%;
+  --mod-cliente-a: 224 78% 64%;
+  --mod-cliente-b: 205 80% 62%;
+  --mod-cliente-dark: 226 60% 44%;
+  --mod-servico-a: 265 72% 58%;
+  --mod-servico-b: 200 75% 66%;
+  --mod-servico-dark: 220 60% 42%;
+  --mod-cronograma-a: 40 90% 58%;
+  --mod-cronograma-b: 50 90% 60%;
+  --mod-cronograma-dark: 45 80% 40%;
+  --mod-financeiro-a: 155 75% 45%;
+  --mod-financeiro-b: 135 70% 62%;
+  --mod-financeiro-dark: 158 70% 35%;
+  --mod-marketing-a: 265 76% 64%;
+  --mod-marketing-b: 230 82% 70%;
+  --mod-marketing-dark: 250 58% 44%;
+  --mod-produto-a: 265 80% 64%;
+  --mod-produto-b: 222 76% 64%;
+  --mod-produto-dark: 235 55% 42%;
+  --mod-auditoria-a: 215 10% 58%;
+  --mod-auditoria-b: 215 10% 70%;
+  --mod-auditoria-dark: 215 8% 40%;
+  --mod-assinatura-a: 47 90% 58%;
+  --mod-assinatura-b: 32 90% 60%;
+  --mod-assinatura-dark: 40 85% 40%;
+  --mod-config-a: 25 4% 56%;
+  --mod-config-b: 24 5% 68%;
+  --mod-config-dark: 25 4% 42%;
+}
