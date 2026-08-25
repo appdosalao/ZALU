@@ -164,7 +164,7 @@ export default function Assinatura() {
 
   const currentPlanId: PlanId = useMemo(() => {
     if (isPaid) {
-      if (usuario?.plan_type === 'vitalicio') return 'semestral';
+      if (usuario?.plan_type === 'vitalicio') return 'anual';
       return 'profissional';
     }
     return 'essencial';
@@ -184,10 +184,10 @@ export default function Assinatura() {
   };
 
   const getSavings = (planId: PlanId): string | null => {
-    if (planId === 'semestral') {
+    if (planId === 'trimestral') {
       const monthlyPrice = PLANS.profissional.pricing.monthly;
-      const semestralPrice = PLANS.semestral.pricing.monthly;
-      const savings = (monthlyPrice * 6) - (semestralPrice * 6);
+      const trimestralPrice = PLANS.trimestral.pricing.monthly;
+      const savings = (monthlyPrice * 3) - (trimestralPrice * 3);
       if (savings <= 0) return null;
       return `Economize ~${formatCurrency(savings)} vs mensal`;
     }
@@ -210,21 +210,21 @@ export default function Assinatura() {
   const accentBgClass: Record<PlanId, string> = {
     essencial: 'from-sky-50 to-white dark:from-sky-950/30 dark:to-background',
     profissional: 'from-primary/10 to-white dark:from-primary/15 dark:to-background',
-    semestral: 'from-orange-50 to-white dark:from-orange-950/30 dark:to-background',
+    trimestral: 'from-orange-50 to-white dark:from-orange-950/30 dark:to-background',
     anual: 'from-emerald-50 to-white dark:from-emerald-950/30 dark:to-background',
   };
 
   const accentButtonClass: Record<PlanId, string> = {
     essencial: 'bg-sky-600 hover:bg-sky-700 text-white shadow-sky-500/25',
     profissional: 'bg-primary hover:bg-primary/90 text-white shadow-primary/30',
-    semestral: 'bg-orange-600 hover:bg-orange-700 text-white shadow-orange-500/25',
+    trimestral: 'bg-orange-600 hover:bg-orange-700 text-white shadow-orange-500/25',
     anual: 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/25',
   };
 
   const planCardBorder: Record<PlanId, string> = {
     essencial: 'border-sky-200 dark:border-sky-800/40',
     profissional: 'border-primary/50 dark:border-primary/40',
-    semestral: 'border-orange-200 dark:border-orange-800/40',
+    trimestral: 'border-orange-200 dark:border-orange-800/40',
     anual: 'border-emerald-200 dark:border-emerald-800/40',
   };
 
@@ -232,7 +232,7 @@ export default function Assinatura() {
     if (cycle === 'annual') {
       return ['essencial', 'profissional'] as PlanId[];
     }
-    return PLAN_ID_ORDER;
+    return ['essencial', 'profissional', 'trimestral'] as PlanId[];
   }, [cycle]);
 
   return (

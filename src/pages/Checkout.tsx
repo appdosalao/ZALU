@@ -29,14 +29,14 @@ export default function Checkout() {
   const [isRedirecting, setIsRedirecting] = useState(false);
   const { isAuthenticated, session, usuario } = useSupabaseAuth();
 
-  // Read plan from URL on initial load — accepts new IDs (essencial, profissional, semestral, anual)
+  // Read plan from URL on initial load — accepts new IDs (essencial, profissional, trimestral, anual)
   // and legacy IDs (mensal → profissional, vitalicio → anual) for backwards compat
   useEffect(() => {
     const planFromUrl = searchParams.get('plan') as string | null;
     if (planFromUrl === 'essencial') {
       setSelectedPlan('essencial');
-    } else if (planFromUrl === 'semestral') {
-      setSelectedPlan('semestral');
+    } else if (planFromUrl === 'trimestral') {
+      setSelectedPlan('trimestral');
     } else if (planFromUrl === 'anual' || planFromUrl === 'vitalicio') {
       setSelectedPlan('anual');
     } else {
@@ -52,7 +52,7 @@ export default function Checkout() {
 
   const plan = PLANS[selectedPlan];
   const PlanIcon = plan.icon;
-  const billingCycle: BillingCycle = selectedPlan === 'semestral' ? 'annual' : 'monthly';
+  const billingCycle: BillingCycle = selectedPlan === 'trimestral' || selectedPlan === 'anual' ? 'annual' : 'monthly';
 
   const redirectToCakto = async () => {
     const userId = session?.user?.id ?? null;
@@ -97,21 +97,21 @@ export default function Checkout() {
   const accentButtonClass: Record<PlanId, string> = {
     essencial: 'bg-sky-600 hover:bg-sky-700 text-white shadow-sky-500/25',
     profissional: 'bg-primary hover:bg-primary/90 text-white shadow-primary/30',
-    semestral: 'bg-orange-600 hover:bg-orange-700 text-white shadow-orange-500/25',
+    trimestral: 'bg-orange-600 hover:bg-orange-700 text-white shadow-orange-500/25',
     anual: 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/25',
   };
 
   const accentBorderClass: Record<PlanId, string> = {
     essencial: 'border-sky-500',
     profissional: 'border-primary',
-    semestral: 'border-orange-500',
+    trimestral: 'border-orange-500',
     anual: 'border-emerald-500',
   };
 
   const accentBgClass: Record<PlanId, string> = {
     essencial: 'bg-sky-500/10 border-sky-500/30',
     profissional: 'bg-primary/5 border-primary/30',
-    semestral: 'bg-orange-500/10 border-orange-500/30',
+    trimestral: 'bg-orange-500/10 border-orange-500/30',
     anual: 'bg-emerald-500/10 border-emerald-500/30',
   };
 
@@ -138,7 +138,7 @@ export default function Checkout() {
             const p = PLANS[planId];
             const Icon = p.icon;
             const isSelected = selectedPlan === planId;
-            const cycle: BillingCycle = planId === 'semestral' || planId === 'anual' ? 'annual' : 'monthly';
+            const cycle: BillingCycle = planId === 'trimestral' || planId === 'anual' ? 'annual' : 'monthly';
 
             return (
               <Card
@@ -291,8 +291,8 @@ export default function Checkout() {
                 <AccordionItem value="faq-3">
                   <AccordionTrigger>A assinatura renova automaticamente?</AccordionTrigger>
                   <AccordionContent>
-                    {selectedPlan === 'semestral'
-                      ? 'O plano Semestral é um pagamento único por 6 meses, sem renovações automáticas mensais. Ao final do período, você decide se quer renovar.'
+                    {selectedPlan === 'trimestral'
+                      ? 'O plano Trimestral é um pagamento único por 3 meses, sem renovações automáticas mensais. Ao final do período, você decide se quer renovar.'
                       : selectedPlan === 'anual'
                         ? 'O plano Anual é um pagamento único anual, sem renovações automáticas mensais. Ao final do período, você decide se quer renovar.'
                         : 'Sim. Planos mensais têm cobrança recorrente conforme as regras exibidas no checkout. Você pode cancelar a qualquer momento.'}
