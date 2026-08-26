@@ -8,6 +8,13 @@ import { CacheableResponsePlugin } from 'workbox-cacheable-response';
 self.skipWaiting();
 clientsClaim();
 
+// Handler for SKIP_WAITING message
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
+
 // Precache resources
 cleanupOutdatedCaches();
 precacheAndRoute(self.__WB_MANIFEST);

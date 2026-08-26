@@ -80,13 +80,27 @@ export const usePWA = (): PWAState & PWAActions => {
         .then((registration) => {
           console.log('Service Worker verificado no usePWA:', registration.scope);
           
+          // Verificar atualizações periodicamente
+          const checkForUpdates = () => {
+            registration.update().catch((error) => {
+              console.log('Erro ao verificar atualizações:', error);
+            });
+          };
+          
+          // Verificar imediatamente e depois a cada 30 minutos
+          checkForUpdates();
+          const updateInterval = setInterval(checkForUpdates, 30 * 60 * 1000);
+          
           // Verificar atualizações
           registration.addEventListener('updatefound', () => {
             const newWorker = registration.installing;
             if (newWorker) {
+              console.log('Novo service worker encontrado, instalando...');
               newWorker.addEventListener('statechange', () => {
+                console.log('Service worker state:', newWorker.state);
                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                   try {
+                    console.log('Nova versão disponível!');
                     setHasUpdate(true);
                   } catch (error) {
                     console.warn('Erro ao atualizar hasUpdate:', error);
@@ -95,6 +109,8 @@ export const usePWA = (): PWAState & PWAActions => {
               });
             }
           });
+          
+          return () => clearInterval(updateInterval);
         })
         .catch((error) => {
           console.log('Erro ao acessar Service Worker:', error);
@@ -150,14 +166,26 @@ export const usePWA = (): PWAState & PWAActions => {
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.getRegistration().then((registration) => {
           if (registration && registration.waiting) {
+            console.log('Atualizando service worker...');
+            
             // Listen for when the new service worker becomes active
-            registration.addEventListener('controllerchange', () => {
-              // Refresh the page to use the new service worker
+            const handleControllerChange = () => {
+              console.log('Novo service worker ativo, recarregando página...');
               window.location.reload();
-            });
+            };
+            
+            registration.addEventListener('controllerchange', handleControllerChange);
             
             // Send message to skip waiting
             registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+          } else {
+            console.log('Nenhuma atualização pendente encontrada');
+            // Tente verificar se há atualizações
+            if (registration) {
+              registration.update().then(() => {
+                console.log('Verificação de atualização iniciada');
+              });
+            }
           }
         });
       }

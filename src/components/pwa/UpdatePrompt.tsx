@@ -19,6 +19,7 @@ export const UpdatePrompt = ({ variant = 'floating', showDismiss = true }: Updat
   const handleUpdate = () => {
     setIsUpdating(true);
     updateApp();
+    // A página será recarregada automaticamente pelo service worker
   };
 
   const handleDismiss = () => {
