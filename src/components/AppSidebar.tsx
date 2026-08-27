@@ -37,6 +37,7 @@ import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { AppLogo } from "@/components/branding/AppLogo";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useConfigAgendamentoOnline } from "@/hooks/useConfigAgendamentoOnline";
+import { buildPublicBookingLink } from "@/lib/utils";
 import { toast } from "sonner";
 
 const navigationItems = [
@@ -115,7 +116,11 @@ export function AppSidebar() {
   };
 
   // Gerar o link público do agendamento online com o slug (s) ou o ID do usuário (uid)
-  const onlineBookingLink = `/agendamento-online?${config.public_id ? `s=${config.public_id}` : config.user_id ? `uid=${config.user_id}` : ''}`;
+  const onlineBookingLink = buildPublicBookingLink({
+    origin: window.location.origin,
+    public_id: config.public_id,
+    user_id: (config as any).user_id,
+  });
 
   const badgeFor = (href: string) => {
     if (href === "/") return "from-primary to-lilac-primary";

@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Store, Phone, Mail, MapPin, Instagram, Facebook, MessageCircle, DollarSign, Clock, FileText, Image, Upload, X, Palette, Eye, Layout, Loader2 } from 'lucide-react';
 import { useConfigAgendamentoOnline, ConfigAgendamentoOnline } from '@/hooks/useConfigAgendamentoOnline';
+import { buildPublicBookingLink } from '@/lib/utils';
 
 export function ConfiguracaoAgendamentoOnline() {
   const { config, loading, saving, setConfig, salvarConfig } = useConfigAgendamentoOnline();
@@ -460,13 +461,21 @@ export function ConfiguracaoAgendamentoOnline() {
                 <div className="flex gap-2 pt-2">
                   <Input
                     readOnly
-                    value={`${window.location.origin}/agendamento-online?${config.public_id ? `s=${config.public_id}` : `uid=${config.user_id}`}`}
+                    value={buildPublicBookingLink({
+                      origin: window.location.origin,
+                      public_id: config.public_id,
+                      user_id: (config as any).user_id,
+                    })}
                     className="bg-background/50 h-11 rounded-xl font-medium"
                   />
                   <Button
                     variant="default"
                     onClick={() => {
-                      const link = `${window.location.origin}/agendamento-online?${config.public_id ? `s=${config.public_id}` : `uid=${config.user_id}`}`;
+                      const link = buildPublicBookingLink({
+                        origin: window.location.origin,
+                        public_id: config.public_id,
+                        user_id: (config as any).user_id,
+                      });
                       navigator.clipboard.writeText(link);
                       toast.success('Link copiado com sucesso! 🚀');
                     }}

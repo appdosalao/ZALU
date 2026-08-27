@@ -46,18 +46,21 @@ export default function Planos() {
     essencial: 'from-sky-50 to-white dark:from-sky-950/30 dark:to-background',
     profissional: 'from-primary/10 to-white dark:from-primary/15 dark:to-background',
     anual: 'from-emerald-50 to-white dark:from-emerald-950/30 dark:to-background',
+    trimestral: 'from-blue-50 to-white dark:from-blue-950/30 dark:to-background',
   };
 
   const accentButtonClass: Record<PlanId, string> = {
     essencial: 'bg-sky-600 hover:bg-sky-700 text-white shadow-sky-500/25',
     profissional: 'bg-primary hover:bg-primary/90 text-white shadow-primary/30',
     anual: 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/25',
+    trimestral: 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/25',
   };
 
   const planCardBorder: Record<PlanId, string> = {
     essencial: 'border-sky-200 dark:border-sky-800/40',
     profissional: 'border-primary/50 dark:border-primary/40',
     anual: 'border-emerald-200 dark:border-emerald-800/40',
+    trimestral: 'border-blue-200 dark:border-blue-800/40',
   };
 
   return (

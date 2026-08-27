@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { supabasePublic } from '@/integrations/supabase/publicClient';
 import { AgendamentoOnlineData, ServicoDisponivel, HorarioDisponivel } from '@/types/agendamento-online';
 import { toast } from 'sonner';
+import { getPublicIdFromUrl, getOwnerUserIdFromUrl, resolveOwnerIdFromPublicId } from '@/lib/utils';
 
 const shouldDebug = () => {
   try {
@@ -24,25 +25,6 @@ const withTiming = async <T,>(op: string, fn: () => Promise<T>): Promise<T> => {
   }
 };
 
-const getPublicIdFromUrl = () => {
-  try {
-    const params = new URLSearchParams(window.location.search);
-    // Prioridade para 's' (slug/public_id) ou 'uid' (user_id)
-    return params.get('s') || params.get('public_id') || params.get('salao') || params.get('slug') || '';
-  } catch {
-    return '';
-  }
-};
-
-const getOwnerUserIdFromUrl = () => {
-  try {
-    const params = new URLSearchParams(window.location.search);
-    return params.get('uid') || params.get('user_id') || params.get('owner') || params.get('id') || '';
-  } catch {
-    return '';
-  }
-};
-
 export const useAgendamentoOnlineService = () => {
   const db = supabasePublic as any;
   const [loading, setLoading] = useState(false);
@@ -62,7 +44,7 @@ export const useAgendamentoOnlineService = () => {
       const urlOwnerId = getOwnerUserIdFromUrl();
 
       // 1. Se temos o UID direto, ele é soberano
-      if (urlOwnerId) {
+      if (urlOwnerId && urlOwnerId !== 'demo') {
         setOwnerUserId(urlOwnerId);
         return { ownerUserId: urlOwnerId, publicId: urlPublicId };
       }
@@ -70,24 +52,16 @@ export const useAgendamentoOnlineService = () => {
       // 2. Se temos o publicId (slug), resolvemos o owner via RPC
       if (urlPublicId) {
         setPublicId(urlPublicId);
-        const { data, error } = (await withTiming('rpc:get_booking_owner_id', () => 
-          db.rpc('get_booking_owner_id', { p_public_id: urlPublicId })
-        )) as any;
-        
-        if (error) {
-          console.error('[booking] Erro ao resolver owner pelo slug:', error);
-        } else if (data) {
-          const resolvedId = String(data);
-          setOwnerUserId(resolvedId);
-          return { ownerUserId: resolvedId, publicId: urlPublicId };
+        const resolved = await withTiming('rpc:get_booking_owner_id', () =>
+          resolveOwnerIdFromPublicId(db, urlPublicId)
+        );
+        if (resolved) {
+          setOwnerUserId(resolved);
+          return { ownerUserId: resolved, publicId: urlPublicId };
         }
       }
 
-      // 3. Fallback para modo demo em desenvolvimento
-      if (import.meta.env.DEV && (urlPublicId === 'demo' || urlOwnerId === 'demo')) {
-        return { ownerUserId: 'demo', publicId: 'demo' };
-      }
-
+      // Nenhum identificador encontrado — retorna null para mostrar a mensagem de erro padrão
       return { ownerUserId: null, publicId: urlPublicId };
     } catch (error) {
       console.error('[booking] Erro ao resolver identificadores:', error);
@@ -102,7 +76,7 @@ export const useAgendamentoOnlineService = () => {
     try {
       const { ownerUserId: resolvedOwnerId, publicId: resolvedPublicId } = await resolveIdentifiers();
       
-      if (!resolvedOwnerId) {
+      if (!resolvedOwnerId || resolvedOwnerId === 'demo') {
         setServicos([]);
         setServicosError('Link do agendamento incompleto ou salão não encontrado. Use o link oficial fornecido pelo estabelecimento.');
         return;

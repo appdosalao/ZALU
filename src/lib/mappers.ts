@@ -68,7 +68,18 @@ export function clienteToSupabase(cliente: Partial<Cliente> | any): Record<strin
   if (cliente.telefone !== undefined) result.telefone = cliente.telefone;
   if (cliente.email !== undefined) result.email = cliente.email ?? null;
   if (cliente.endereco !== undefined) result.endereco = cliente.endereco ?? null;
-  if (cliente.dataNascimento !== undefined) result.data_nascimento = cliente.dataNascimento ?? null;
+  if (cliente.dataNascimento !== undefined) {
+    const raw = cliente.dataNascimento;
+    if (raw === '' || raw === null || raw === undefined) {
+      result.data_nascimento = null;
+    } else if (raw instanceof Date) {
+      result.data_nascimento = raw.toISOString().split('T')[0];
+    } else if (typeof raw === 'string' && raw.includes('T')) {
+      result.data_nascimento = new Date(raw).toISOString().split('T')[0];
+    } else {
+      result.data_nascimento = raw;
+    }
+  }
   if (cliente.observacoes !== undefined) result.observacoes = cliente.observacoes ?? null;
   if (cliente.historicoServicos !== undefined) result.historico_servicos = cliente.historicoServicos ?? [];
   return result;
@@ -156,7 +167,13 @@ export function cronogramaToSupabase(cronograma: Partial<Cronograma> | any): Rec
   if (cronograma.cliente_nome !== undefined) result.cliente_nome = cronograma.cliente_nome;
   if (cronograma.servico_id !== undefined) result.servico_id = cronograma.servico_id;
   if (cronograma.tipo_servico !== undefined) result.tipo_servico = cronograma.tipo_servico;
-  if (cronograma.data_inicio !== undefined) result.data_inicio = cronograma.data_inicio;
+  if (cronograma.data_inicio !== undefined) {
+    result.data_inicio = (cronograma.data_inicio === '' || cronograma.data_inicio === null || cronograma.data_inicio === undefined)
+      ? null
+      : (cronograma.data_inicio instanceof Date
+          ? cronograma.data_inicio.toISOString().split('T')[0]
+          : cronograma.data_inicio);
+  }
   if (cronograma.hora_inicio !== undefined) result.hora_inicio = cronograma.hora_inicio;
   if (cronograma.duracao_minutos !== undefined) result.duracao_minutos = cronograma.duracao_minutos;
   if (cronograma.recorrencia !== undefined) result.recorrencia = cronograma.recorrencia;
@@ -183,7 +200,13 @@ export function retornoToSupabase(retorno: Partial<Retorno> | any): Record<strin
   const result: Record<string, any> = {};
   if (retorno.id_cliente !== undefined) result.id_cliente = retorno.id_cliente;
   if (retorno.id_cronograma !== undefined) result.id_cronograma = retorno.id_cronograma;
-  if (retorno.data_retorno !== undefined) result.data_retorno = retorno.data_retorno;
+  if (retorno.data_retorno !== undefined) {
+    result.data_retorno = (retorno.data_retorno === '' || retorno.data_retorno === null || retorno.data_retorno === undefined)
+      ? null
+      : (retorno.data_retorno instanceof Date
+          ? retorno.data_retorno.toISOString().split('T')[0]
+          : retorno.data_retorno);
+  }
   if (retorno.status !== undefined) result.status = retorno.status;
   if (retorno.id_agendamento_retorno !== undefined) result.id_agendamento_retorno = retorno.id_agendamento_retorno;
   return result;

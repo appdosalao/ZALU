@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { supabasePublic } from '@/integrations/supabase/publicClient';
 import type { ConfigAgendamentoOnline } from '@/hooks/useConfigAgendamentoOnline';
+import { getPublicIdFromUrl, getOwnerUserIdFromUrl, resolveOwnerIdFromPublicId } from '@/lib/utils';
 
 const defaultConfig: ConfigAgendamentoOnline = {
   ativo: true,
@@ -14,12 +15,12 @@ const defaultConfig: ConfigAgendamentoOnline = {
   whatsapp: '',
   logo_url: '',
   banner_url: '',
-  taxa_sinal_percentual: 30,
+  taxa_sinal_percentual: 0,
   tempo_minimo_antecedencia: 60,
   tempo_maximo_antecedencia: 4320,
   mensagem_boas_vindas: 'Olá! Estamos felizes em atendê-lo(a). Preencha os dados abaixo para agendar seu horário.',
   termos_condicoes: 'Ao agendar, você concorda em chegar no horário marcado. Em caso de atraso superior a 15 minutos, o agendamento poderá ser cancelado.',
-  mensagem_confirmacao: 'Agendamento recebido! Em breve você receberá uma confirmação.',
+  mensagem_confirmacao: 'Agendamento confirmado! Em breve você receberá uma confirmação no WhatsApp.',
   cor_primaria: '#8B5CF6',
   cor_texto_botao: '#FFFFFF',
   mostrar_precos: true,
@@ -33,16 +34,35 @@ export function useConfigAgendamentoOnlinePublic(ownerUserId?: string | null) {
   const cacheKey = useMemo(() => ownerUserId || 'default', [ownerUserId]);
 
   useEffect(() => {
+    // Se ownerUserId === null, o componente pai ainda está resolvendo o ID.
+    // Aguardamos a próxima renderização para evitar RPC duplicada de resolução.
+    if (ownerUserId === null) return;
+
     let active = true;
 
     async function fetchConfig() {
       try {
         setLoading(true);
+
+        let resolvedUserId = ownerUserId ?? undefined;
+
+        if (!resolvedUserId) {
+          const directUid = getOwnerUserIdFromUrl();
+          if (directUid && directUid !== 'demo') {
+            resolvedUserId = directUid;
+          } else {
+            const publicId = getPublicIdFromUrl();
+            if (publicId) {
+              resolvedUserId = (await resolveOwnerIdFromPublicId(supabasePublic as any, publicId)) || undefined;
+            }
+          }
+        }
+
         const query = supabasePublic
           .from('configuracoes_agendamento_online' as any)
           .select('*');
 
-        if (!ownerUserId) {
+        if (!resolvedUserId || resolvedUserId === 'demo') {
           if (active) {
             setConfig(defaultConfig);
             setLoading(false);
@@ -50,7 +70,7 @@ export function useConfigAgendamentoOnlinePublic(ownerUserId?: string | null) {
           return;
         }
 
-        const { data, error } = await query.eq('user_id', ownerUserId).maybeSingle();
+        const { data, error } = await query.eq('user_id', resolvedUserId).maybeSingle();
 
         if (!active) return;
 
@@ -77,4 +97,6 @@ export function useConfigAgendamentoOnlinePublic(ownerUserId?: string | null) {
 
   return { config, loading };
 }
+
+
 

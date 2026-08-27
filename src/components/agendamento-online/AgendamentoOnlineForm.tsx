@@ -365,7 +365,7 @@ export function AgendamentoOnlineForm() {
   const valorTotal = valorServico + valorProdutoTotal;
 
   const compartilharComprovante = async () => {
-    const dataFormatada = new Date(formData.data).toLocaleDateString('pt-BR', {
+    const dataFormatada = new Date(formData.data + 'T00:00:00').toLocaleDateString('pt-BR', {
       day: '2-digit',
       month: 'long',
       year: 'numeric'
@@ -393,7 +393,7 @@ Você receberá uma confirmação em breve.
   };
 
   const copiarComprovante = async () => {
-    const dataFormatada = new Date(formData.data).toLocaleDateString('pt-BR', {
+    const dataFormatada = new Date(formData.data + 'T00:00:00').toLocaleDateString('pt-BR', {
       day: '2-digit',
       month: 'long',
       year: 'numeric'
@@ -461,7 +461,7 @@ Você receberá uma confirmação em breve.
                 <div className="grid grid-cols-2 gap-4 relative z-10">
                   <div className="bg-white p-3 rounded-2xl shadow-sm border border-primary/5">
                     <p className="text-[10px] uppercase font-black text-muted-foreground tracking-widest">Data</p>
-                    <p className="font-bold">{new Date(formData.data).toLocaleDateString('pt-BR')}</p>
+                    <p className="font-bold">{new Date(formData.data + 'T00:00:00').toLocaleDateString('pt-BR')}</p>
                   </div>
                   <div className="bg-white p-3 rounded-2xl shadow-sm border border-primary/5">
                     <p className="text-[10px] uppercase font-black text-muted-foreground tracking-widest">Horário</p>
@@ -686,15 +686,6 @@ Você receberá uma confirmação em breve.
                                   <p className="font-bold mb-1 uppercase tracking-widest text-[10px]">Dica para o proprietário:</p>
                                   Certifique-se de compartilhar o link completo com seu <code className="bg-primary/10 px-1 rounded text-primary">slug</code> ou <code className="bg-primary/10 px-1 rounded text-primary">ID</code> único.
                                 </div>
-                                {import.meta.env.DEV && (
-                                  <Button 
-                                    variant="outline" 
-                                    className="w-full h-10 rounded-xl border-primary/30 text-primary font-bold text-xs hover:bg-primary hover:text-white transition-all"
-                                    onClick={() => window.location.search = '?s=demo'}
-                                  >
-                                    Acessar Modo Demonstração
-                                  </Button>
-                                )}
                               </div>
                             )
                             : (
@@ -954,7 +945,7 @@ Você receberá uma confirmação em breve.
                         <div className="space-y-1">
                           <p className="text-muted-foreground">Data e Horário</p>
                           <p className="font-bold text-foreground">
-                            {formData.data ? new Date(formData.data).toLocaleDateString('pt-BR') : '-'} às {formData.horario}
+                            {formData.data ? new Date(formData.data + 'T00:00:00').toLocaleDateString('pt-BR') : '-'} às {formData.horario}
                           </p>
                         </div>
                         <div className="space-y-1">

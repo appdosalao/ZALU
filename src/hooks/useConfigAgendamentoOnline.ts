@@ -41,7 +41,7 @@ const defaultConfig: ConfigAgendamentoOnline = {
   whatsapp: '',
   logo_url: '',
   banner_url: '',
-  taxa_sinal_percentual: 30,
+  taxa_sinal_percentual: 0,
   tempo_minimo_antecedencia: 60,
   tempo_maximo_antecedencia: 4320,
   mensagem_boas_vindas: 'Olá! Estamos felizes em atendê-lo(a). Preencha os dados abaixo para agendar seu horário.',
@@ -57,6 +57,10 @@ export function useConfigAgendamentoOnline() {
   const [config, setConfig] = useState<ConfigAgendamentoOnline>(defaultConfig);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+
+  const gerarPublicId = (): string => {
+    return crypto.randomUUID().replace(/-/g, '').slice(0, 8).toLowerCase();
+  };
 
   useEffect(() => {
     carregarConfig();
@@ -98,7 +102,10 @@ export function useConfigAgendamentoOnline() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Usuário não autenticado');
 
-      // Mapeamento direto agora que as colunas existem no banco
+      const publicIdFinal = (newConfig.public_id && newConfig.public_id.trim() !== '')
+        ? newConfig.public_id.toLowerCase().replace(/[^a-z0-9-]/g, '')
+        : gerarPublicId();
+
       const configData: any = {
         ativo: newConfig.ativo,
         nome_salao: newConfig.nome_salao,
@@ -120,7 +127,7 @@ export function useConfigAgendamentoOnline() {
         cor_primaria: newConfig.cor_primaria,
         mostrar_precos: newConfig.mostrar_precos,
         mostrar_duracao: newConfig.mostrar_duracao,
-        public_id: newConfig.public_id,
+        public_id: publicIdFinal,
         user_id: user.id,
         updated_at: new Date().toISOString()
       };
@@ -131,7 +138,7 @@ export function useConfigAgendamentoOnline() {
 
       if (error) throw error;
 
-      setConfig(newConfig);
+      setConfig({ ...newConfig, public_id: publicIdFinal });
       toast.success('Configurações aplicadas com sucesso! 🚀');
       return true;
     } catch (error) {

@@ -98,7 +98,7 @@ export default function ClienteDetalhes({ cliente, open, onOpenChange, onEdit }:
             </DialogTitle>
             <ClienteForm
               cliente={cliente}
-              onSubmit={(data) => onEdit({ ...cliente, ...data })}
+              onSubmit={(data) => onEdit({ ...cliente, ...data, dataNascimento: data.dataNascimento instanceof Date ? data.dataNascimento.toISOString() : data.dataNascimento } as any)}
               trigger={
                 <Button variant="outline" size="sm">
                   <Edit className="h-4 w-4 mr-1" />

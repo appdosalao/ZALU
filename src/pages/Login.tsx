@@ -172,7 +172,10 @@ const Login = () => {
 
           <div className="pt-8 border-t border-border/50">
             <p className="text-sm text-muted-foreground">
-              Não é profissional? <Link to="/agendamento-online" className="text-primary font-bold hover:underline">Agende um serviço aqui</Link>
+              Não é profissional?{' '}
+              <span className="font-medium text-foreground/80">
+                Utilize o link de agendamento fornecido pelo seu salão.
+              </span>
             </p>
           </div>
         </div>

@@ -170,7 +170,7 @@ const AppContent = () => {
           </ProtectedRoute>
         } />
         <Route path="/assinatura" element={
-          <ProtectedRoute>
+          <ProtectedRoute requirePaid={false}>
             <Layout>
               <Suspense fallback={RouteFallback}><Assinatura /></Suspense>
             </Layout>

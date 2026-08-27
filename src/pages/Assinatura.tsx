@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { usePaidAccess } from '@/hooks/usePaidAccess';
@@ -36,6 +36,11 @@ export default function Assinatura() {
   const [loading, setLoading] = useState(false);
   const [cycle, setCycle] = useState<BillingCycle>('monthly');
   const [hoveredPlan, setHoveredPlan] = useState<PlanId | null>(null);
+  const plansSectionRef = useRef<HTMLElement | null>(null);
+
+  const scrollToPlans = () => {
+    plansSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   const trialInfo = useMemo(() => {
     const trialStart =
@@ -326,10 +331,10 @@ export default function Assinatura() {
                 </div>
                 <Button
                   size="lg"
-                  onClick={() => navigate(`/checkout?plan=profissional`)}
+                  onClick={scrollToPlans}
                   className="w-full lg:w-auto bg-gradient-to-r from-sky-500 to-primary hover:from-sky-600 hover:to-primary/90 text-white shadow-lg shadow-primary/20 gap-2"
                 >
-                  Assinar agora
+                  Escolher plano
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </div>
@@ -373,10 +378,10 @@ export default function Assinatura() {
                 </div>
                 <Button
                   size="lg"
-                  onClick={() => navigate(`/checkout?plan=profissional`)}
+                  onClick={scrollToPlans}
                   className="w-full sm:w-auto bg-white text-primary hover:bg-white/90 gap-2 text-base font-semibold px-8 shadow-xl"
                 >
-                  Assinar agora
+                  Escolher plano e reativar
                   <ArrowRight className="h-5 w-5" />
                 </Button>
               </div>
@@ -432,7 +437,7 @@ export default function Assinatura() {
         </section>
 
         {/* PRICING CARDS */}
-        <section className="py-12 md:py-16">
+        <section ref={plansSectionRef} id="planos-disponiveis" className="py-12 md:py-16">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-8">
               <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground mb-2">

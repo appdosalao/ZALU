@@ -23,7 +23,7 @@ type FormData = {
   email?: string;
   telefone: string;
   endereco?: string;
-  dataNascimento?: string;
+  dataNascimento?: Date;
   servicoFrequente?: string;
   ultimaVisita?: Date;
   observacoes?: string;
@@ -36,7 +36,7 @@ const clienteSchema = z.object({
     .min(10, "Telefone deve ter pelo menos 10 dígitos")
     .regex(/^[\d\s\-\+\(\)]+$/, "Telefone deve conter apenas números e símbolos padrões"),
   endereco: z.string().optional(),
-  dataNascimento: z.string().optional(),
+  dataNascimento: z.date().optional(),
   servicoFrequente: z.string().optional(),
   ultimaVisita: z.date().optional(),
   observacoes: z.string().optional(),
@@ -59,7 +59,7 @@ export default function ClienteForm({ cliente, onSubmit, trigger }: ClienteFormP
       email: cliente?.email || "",
       telefone: cliente?.telefone || "",
       endereco: cliente?.endereco || "",
-      dataNascimento: cliente?.dataNascimento || "",
+      dataNascimento: cliente?.dataNascimento ? new Date(cliente.dataNascimento) : undefined,
       servicoFrequente: cliente?.servicoFrequente || "",
       ultimaVisita: cliente?.ultimaVisita ? new Date(cliente.ultimaVisita) : undefined,
       observacoes: cliente?.observacoes || "",
@@ -171,6 +171,47 @@ export default function ClienteForm({ cliente, onSubmit, trigger }: ClienteFormP
                       {...field} 
                     />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="dataNascimento"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel className="text-foreground font-medium">Data de Nascimento (opcional)</FormLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full pl-3 text-left font-normal border-border/50",
+                            !field.value && "text-muted-foreground"
+                          )}
+                        >
+                          {field.value ? (
+                            format(field.value, "PPP", { locale: ptBR })
+                          ) : (
+                            <span>Selecione uma data</span>
+                          )}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={field.value}
+                        onSelect={field.onChange}
+                        disabled={(date) => date > new Date()}
+                        initialFocus
+                        className="p-3 pointer-events-auto"
+                      />
+                    </PopoverContent>
+                  </Popover>
                   <FormMessage />
                 </FormItem>
               )}

@@ -312,7 +312,7 @@ export default function ClientesList({ clientes, onEdit, onDelete, onViewDetails
                           </Button>
                           <ClienteForm
                             cliente={cliente}
-                            onSubmit={(data) => onEdit({ ...cliente, ...data })}
+                            onSubmit={(data) => onEdit({ ...cliente, ...data, dataNascimento: data.dataNascimento instanceof Date ? data.dataNascimento.toISOString() : data.dataNascimento } as any)}
                             trigger={
                               <Button
                                 size="sm"
@@ -437,7 +437,7 @@ export default function ClientesList({ clientes, onEdit, onDelete, onViewDetails
                       <div className="grid grid-cols-2 gap-2 pt-2 border-t border-border/50">
                         <ClienteForm
                           cliente={cliente}
-                          onSubmit={(data) => onEdit({ ...cliente, ...data })}
+                          onSubmit={(data) => onEdit({ ...cliente, ...data, dataNascimento: data.dataNascimento instanceof Date ? data.dataNascimento.toISOString() : data.dataNascimento } as any)}
                           trigger={
                             <Button
                               size="sm"

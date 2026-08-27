@@ -26,7 +26,7 @@ export interface ClienteFormData {
   email?: string;
   telefone: string;
   endereco?: string;
-  dataNascimento?: string;
+  dataNascimento?: Date | string;
   servicoFrequente?: string;
   ultimaVisita?: Date;
   observacoes?: string;
