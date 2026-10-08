@@ -1,8 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800;900&family=Lato:wght@400;700;900&family=Manrope:wght@400;500;600;700;800&family=Montserrat:wght@400;500;600;700;800;900&family=Nunito+Sans:wght@400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800;900&family=Poppins:wght@400;500;600;700;800;900&display=swap');
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@config "../tailwind.config.ts";
 
 @layer utilities {
   @keyframes scissors-snips {
@@ -921,8 +920,9 @@ All colors MUST be HSL.
 
   /* Better mobile navigation */
   .mobile-nav {
-    @apply fixed bottom-0 left-0 right-0 bg-background border-t border-border/50 p-4 safe-bottom;
+    @apply fixed bottom-0 left-0 right-0 bg-background border-t border-border/50 p-4;
     z-index: 50;
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom));
   }
 
   .mobile-nav-button {
