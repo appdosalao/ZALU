@@ -9,6 +9,7 @@ import Layout from "./components/Layout";
 import { NotificationProviderAvancado } from "./components/notificacoes/NotificationProviderAvancado";
 import { BackupPrompt } from "./components/configuracoes/BackupPrompt";
 import { PWAUpdateNotification } from "./components/PWAUpdateNotification";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -214,6 +215,7 @@ const App = () => {
           <NotificationProviderAvancado>
             <PWAProvider>
               <AppContent />
+              <SpeedInsights />
             </PWAProvider>
           </NotificationProviderAvancado>
         </SupabaseAuthProvider>
