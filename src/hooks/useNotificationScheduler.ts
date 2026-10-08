@@ -11,7 +11,24 @@ interface ScheduledNotification {
   titulo: string;
   mensagem: string;
   programadaPara: Date;
-  dados?: Record<string, any>;
+  dados?: Record<string, unknown>;
+}
+
+export interface AppointmentNotificationInput {
+  id: string;
+  clienteNome: string;
+  servicoNome: string;
+  data: string;
+  hora: string;
+  origem?: 'manual' | 'cronograma' | 'online';
+  valor: number;
+}
+
+export interface FixedExpenseNotificationInput {
+  id: string;
+  descricao: string;
+  valor: number;
+  dataVencimento: string;
 }
 
 export const useNotificationScheduler = () => {
@@ -59,6 +76,7 @@ export const useNotificationScheduler = () => {
     } catch (error) {
       console.error('Erro ao agendar notificação:', error);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [usuario, isSubscribed]);
 
   // Obter notificações agendadas
@@ -99,6 +117,7 @@ export const useNotificationScheduler = () => {
     } catch (error) {
       console.error('Erro ao enviar notificação:', error);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSubscribed]);
 
 
@@ -107,7 +126,7 @@ export const useNotificationScheduler = () => {
     if (!usuario) return;
 
     const scheduledNotifications = getScheduledNotifications();
-    const filtered = scheduledNotifications.filter((n: any) => n.id !== notificationId);
+    const filtered = scheduledNotifications.filter((n) => n.id !== notificationId);
     storage.saveData(getScheduledNotificationKey(usuario.id), filtered);
   }, [usuario, getScheduledNotifications]);
 
@@ -131,7 +150,7 @@ export const useNotificationScheduler = () => {
   }, [usuario, isSubscribed, getScheduledNotifications, sendImmediateNotification]);
 
   // Agendar lembrete de agendamento
-  const scheduleAppointmentReminder = useCallback(async (agendamento: any, minutosAntes: number = 60) => {
+  const scheduleAppointmentReminder = useCallback(async (agendamento: AppointmentNotificationInput, minutosAntes: number = 60) => {
     const agendamentoDate = new Date(`${agendamento.data}T${agendamento.hora}`);
     const reminderTime = new Date(agendamentoDate.getTime() - (minutosAntes * 60 * 1000));
 
@@ -152,7 +171,7 @@ export const useNotificationScheduler = () => {
   }, [scheduleNotification]);
 
   // Agendar lembrete de despesa fixa
-  const scheduleExpenseReminder = useCallback(async (contaFixa: any, diasAntes: number = 7) => {
+  const scheduleExpenseReminder = useCallback(async (contaFixa: FixedExpenseNotificationInput, diasAntes: number = 7) => {
     const vencimentoDate = new Date(contaFixa.dataVencimento);
     const reminderTime = new Date(vencimentoDate.getTime() - (diasAntes * 24 * 60 * 60 * 1000));
 
@@ -173,7 +192,7 @@ export const useNotificationScheduler = () => {
   }, [scheduleNotification]);
 
   // Notificar novo agendamento
-  const notifyNewAppointment = useCallback(async (agendamento: any) => {
+  const notifyNewAppointment = useCallback(async (agendamento: AppointmentNotificationInput) => {
     await sendImmediateNotification({
       id: `new-appointment-${agendamento.id}`,
       tipo: 'novo_agendamento',
@@ -192,7 +211,7 @@ export const useNotificationScheduler = () => {
   }, [sendImmediateNotification]);
 
   // Notificar serviço finalizado
-  const notifyServiceCompleted = useCallback(async (agendamento: any) => {
+  const notifyServiceCompleted = useCallback(async (agendamento: AppointmentNotificationInput) => {
     await sendImmediateNotification({
       id: `service-completed-${agendamento.id}`,
       tipo: 'servico_finalizado',

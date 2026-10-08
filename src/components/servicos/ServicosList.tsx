@@ -9,7 +9,9 @@ import {
   Filter,
   ArrowUpDown,
   ArrowUp,
-  ArrowDown
+  ArrowDown,
+  X,
+  Layers3
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -83,23 +85,48 @@ export default function ServicosList({
   return (
     <div className="space-y-6">
       {/* Filtros */}
-      <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Filter className="h-5 w-5 text-primary" />
-            Filtros e Ordenação
-          </CardTitle>
+      <Card className="overflow-hidden rounded-3xl border-border/60 shadow-sm">
+        <CardHeader className="border-b bg-muted/20 p-4 sm:p-5">
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Filter className="h-5 w-5 text-primary" />
+                Catálogo de serviços
+              </CardTitle>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {servicos.length} {servicos.length === 1 ? 'serviço encontrado' : 'serviços encontrados'}
+                {filtros.busca ? ` para "${filtros.busca}"` : ''}
+              </p>
+            </div>
+            <Badge variant="secondary" className="w-fit rounded-full">
+              <Layers3 className="mr-1.5 h-3.5 w-3.5" />
+              {servicos.length} {servicos.length === 1 ? 'item' : 'itens'}
+            </Badge>
+          </div>
         </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 md:grid-cols-2">
+        <CardContent className="space-y-4 p-4 sm:p-5">
+          <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(220px,0.65fr)]">
             <div className="relative">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
+                aria-label="Buscar serviços"
                 placeholder="Buscar serviço..."
                 value={filtros.busca || ''}
                 onChange={(e) => onFiltrosChange({ ...filtros, busca: e.target.value })}
-                className="pl-10"
+                className="h-11 rounded-xl border-border/60 bg-background pl-10 pr-10"
               />
+              {!!filtros.busca && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  aria-label="Limpar busca"
+                  onClick={() => onFiltrosChange({ ...filtros, busca: '' })}
+                  className="absolute right-1 top-1/2 h-8 w-8 -translate-y-1/2 p-0"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
             </div>
             
             <Select
@@ -109,7 +136,7 @@ export default function ServicosList({
                 onFiltrosChange({ ...filtros, ordenacao, direcao });
               }}
             >
-              <SelectTrigger>
+              <SelectTrigger className="h-11 rounded-xl bg-background">
                 <SelectValue placeholder="Ordenar por" />
               </SelectTrigger>
               <SelectContent>
@@ -123,39 +150,39 @@ export default function ServicosList({
             </Select>
           </div>
           
-          {filtros.busca && (
-            <div className="mt-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onFiltrosChange({ ...filtros, busca: '' })}
-              >
-                Limpar busca
-              </Button>
-            </div>
-          )}
         </CardContent>
       </Card>
 
       {/* Lista de Serviços */}
       <div className="space-y-4">
         {servicos.length === 0 ? (
-          <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+          <Card className="rounded-3xl border-border/60 bg-card shadow-sm">
             <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-              <Scissors className="h-12 w-12 text-muted-foreground mb-4" />
+              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
+                <Scissors className="h-8 w-8 text-primary" />
+              </div>
               <h3 className="text-lg font-semibold mb-2">Nenhum serviço encontrado</h3>
               <p className="text-muted-foreground">
                 {filtros.busca ? 
-                  'Tente ajustar os filtros ou criar um novo serviço.' :
+                  'Tente outro termo de busca ou limpe o filtro para ver todos os serviços.' :
                   'Comece criando seu primeiro serviço.'
                 }
               </p>
+              {filtros.busca && (
+                <Button
+                  variant="outline"
+                  className="mt-5 rounded-xl"
+                  onClick={() => onFiltrosChange({ ...filtros, busca: '' })}
+                >
+                  Limpar busca
+                </Button>
+              )}
             </CardContent>
           </Card>
         ) : (
           <>
             {/* Cabeçalho da lista para desktop */}
-            <Card className="border-border/50 bg-card/50 backdrop-blur-sm hidden md:block">
+            <Card className="hidden rounded-2xl border-border/60 bg-muted/30 shadow-none md:block">
               <CardContent className="p-4">
                 <div className="grid grid-cols-5 gap-4 items-center font-semibold text-sm text-muted-foreground">
                   <button 
@@ -189,9 +216,9 @@ export default function ServicosList({
             {servicos.map((servico) => (
               <Card 
                 key={servico.id} 
-                className="border-border/50 bg-card/50 backdrop-blur-sm hover:bg-card/70 transition-all duration-200"
+                className="rounded-2xl border-border/60 bg-card shadow-sm transition-all duration-200 hover:border-primary/25 hover:shadow-md"
               >
-                <CardContent className="p-6">
+                <CardContent className="p-4 sm:p-5">
                   {/* Layout mobile */}
                   <div className="md:hidden space-y-3">
                     <div className="flex items-start justify-between">

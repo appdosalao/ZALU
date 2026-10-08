@@ -19,6 +19,7 @@ export default function ContasReceber({ agendamentos }: ContasReceberProps) {
 
   // Filtrar agendamentos com saldo devedor
   const contasReceber = agendamentos.filter(agendamento => 
+    agendamento.status !== 'nao_compareceu' &&
     (agendamento.statusPagamento === 'em_aberto' || agendamento.statusPagamento === 'parcial') &&
     agendamento.valorDevido > 0
   ).filter(agendamento =>

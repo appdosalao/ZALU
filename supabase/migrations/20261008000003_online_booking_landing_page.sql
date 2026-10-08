@@ -1,0 +1,7 @@
+ALTER TABLE public.configuracoes_agendamento_online
+  ADD COLUMN IF NOT EXISTS sobre_texto TEXT NOT NULL DEFAULT '',
+  ADD COLUMN IF NOT EXISTS galeria_urls JSONB NOT NULL DEFAULT '[]'::jsonb,
+  ADD COLUMN IF NOT EXISTS estilo_fundo TEXT NOT NULL DEFAULT 'aurora',
+  ADD COLUMN IF NOT EXISTS cor_fundo TEXT NOT NULL DEFAULT '#F5F3FF',
+  ADD COLUMN IF NOT EXISTS cor_fundo_secundaria TEXT NOT NULL DEFAULT '#FDF2F8',
+  ADD COLUMN IF NOT EXISTS efeito_visual TEXT NOT NULL DEFAULT 'glow';

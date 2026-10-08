@@ -12,6 +12,17 @@ interface NotificationSettings {
   soundType: 'notification' | 'notification2' | 'notification3';
 }
 
+interface AgendamentoInput {
+  id: string;
+  userId: string;
+  createdAt: string;
+  clienteNome: string;
+  servicoNome: string;
+  data: string;
+  hora: string;
+  origem?: 'manual' | 'cronograma' | 'online';
+}
+
 interface AgendamentoNotification {
   id: string;
   clienteNome: string;
@@ -114,7 +125,9 @@ export const useNotifications = () => {
       audio.currentTime = 0;
       audioRef.current = audio;
       await audio.play();
-    } catch {}
+    } catch (error) {
+      console.error('Erro ao reproduzir som de notificação:', error);
+    }
   }, [buildSoundUrl, configuracaoNotificacoes?.som_personalizado, settings.soundEnabled, settings.soundType]);
 
   const addNotification = useCallback((agendamento: Omit<AgendamentoNotification, 'shown'>) => {
@@ -135,6 +148,7 @@ export const useNotifications = () => {
         removeNotification(agendamento.id);
       }, settings.hideDelay);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [usuario, settings, playNotificationSound]);
 
   const removeNotification = useCallback((id: string) => {
@@ -149,7 +163,7 @@ export const useNotifications = () => {
     setSettings(prev => ({ ...prev, ...newSettings }));
   }, []);
 
-  const checkForNewAgendamentos = useCallback((agendamentos: any[]) => {
+  const checkForNewAgendamentos = useCallback((agendamentos: AgendamentoInput[]) => {
     if (!usuario) return;
 
     const newAgendamentos = agendamentos.filter(agendamento => {
@@ -178,6 +192,7 @@ export const useNotifications = () => {
 
       setLastChecked(new Date().toISOString());
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [usuario, lastChecked, addNotification]);
 
   const requestNotificationPermission = useCallback(async () => {

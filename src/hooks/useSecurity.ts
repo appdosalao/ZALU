@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 import { useCallback, useEffect, useRef } from 'react';
 import { storage, LOCAL_STORAGE_KEYS } from '@/lib/localStorage';
 
@@ -56,7 +58,7 @@ function rotateAntiCsrfToken(): string {
     if (typeof window !== 'undefined' && window.sessionStorage) {
       window.sessionStorage.removeItem(CSRF_TOKEN_KEY);
     }
-  } catch {}
+  } catch { /* no-op */ }
   return generateAntiCsrfToken();
 }
 
@@ -111,18 +113,18 @@ export function clearSensitiveStorageOnLogout(): void {
     if (window.indexedDB && 'databases' in indexedDB) {
       try {
         indexedDB.deleteDatabase('zalu-pwa-cache');
-      } catch {}
+      } catch { /* no-op */ }
     }
     if (window.caches && typeof window.caches.keys === 'function') {
       window.caches.keys().then((keys) => {
         keys.forEach((k) => {
           try {
             window.caches.delete(k);
-          } catch {}
+          } catch { /* no-op */ }
         });
       }).catch(() => {});
     }
-  } catch {}
+  } catch { /* no-op */ }
 }
 
 export function auditLog(action: AuditAction, entity?: string, meta?: Record<string, unknown>): void {
@@ -140,8 +142,8 @@ export function auditLog(action: AuditAction, entity?: string, meta?: Record<str
     storage.setString(LOCAL_STORAGE_KEYS.AUDIT_LOG, JSON.stringify(trimmed));
     try {
       console.info(`[security:audit] ${action}`, entity ?? '');
-    } catch {}
-  } catch {}
+    } catch { /* no-op */ }
+  } catch { /* no-op */ }
 }
 
 export function useSecurity() {
@@ -175,7 +177,7 @@ export function useSecurity() {
         };
         (window as any).__zaluFetchPatched = true;
       }
-    } catch {}
+    } catch { /* no-op */ }
     return () => {};
   }, []);
 

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useMemo } from 'react';
 import { format, addDays, subDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -73,8 +74,8 @@ export function AgendaDiaria({ buscaTexto = '', onSlotClick }: AgendaDiariaProps
     cancelados: agendamentosDoDia.filter(ag => ag.status === 'cancelado').length,
     valorTotal: agendamentosDoDia.reduce((total, ag) => total + Number(ag.valor ?? 0), 0),
     valorRecebido: agendamentosDoDia
-      .filter(ag => ag.status === 'concluido')
-      .reduce((total, ag) => total + Number((ag as any).valorPago ?? ag.valor ?? 0), 0),
+      .filter(ag => ag.status === 'concluido' || ag.status === 'nao_compareceu')
+      .reduce((total, ag) => total + Number(ag.valorPago ?? 0), 0),
     tempoTotalAtendimento: agendamentosDoDia.reduce((total, ag) => total + (ag.duracao || 0), 0)
   }), [agendamentosDoDia]);
 
@@ -306,7 +307,8 @@ export function AgendaDiaria({ buscaTexto = '', onSlotClick }: AgendaDiariaProps
                   "group relative overflow-hidden border-0 bg-card/80 backdrop-blur-sm transition-all duration-300 hover:shadow-xl hover:scale-[1.02] cursor-pointer",
                   agendamento.origem === 'cronograma' && "bg-gradient-to-r from-purple-50/80 to-purple-100/30 dark:from-purple-950/30 dark:to-purple-900/20",
                   agendamento.status === 'concluido' && "bg-gradient-to-r from-green-50/80 to-green-100/30 dark:from-green-950/30 dark:to-green-900/20",
-                  agendamento.status === 'cancelado' && "bg-gradient-to-r from-red-50/80 to-red-100/30 dark:from-red-950/30 dark:to-red-900/20"
+                  agendamento.status === 'cancelado' && "bg-gradient-to-r from-red-50/80 to-red-100/30 dark:from-red-950/30 dark:to-red-900/20",
+                  agendamento.status === 'nao_compareceu' && "bg-gradient-to-r from-amber-50/80 to-amber-100/30 dark:from-amber-950/30 dark:to-amber-900/20"
                 )}
                 role="listitem"
                 onClick={() => {

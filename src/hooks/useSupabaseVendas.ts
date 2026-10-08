@@ -20,8 +20,9 @@ export function useSupabaseVendas() {
 
       if (error) throw error;
       setVendas(data || []);
-    } catch (error: any) {
-      toast.error('Erro ao carregar vendas: ' + error.message);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Erro ao carregar vendas';
+      toast.error('Erro ao carregar vendas: ' + message);
     } finally {
       setLoading(false);
     }
@@ -85,8 +86,9 @@ export function useSupabaseVendas() {
 
       toast.success('Venda registrada com sucesso!');
       await loadVendas();
-    } catch (error: any) {
-      toast.error('Erro ao registrar venda: ' + error.message);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Erro ao registrar venda';
+      toast.error('Erro ao registrar venda: ' + message);
       throw error;
     }
   };

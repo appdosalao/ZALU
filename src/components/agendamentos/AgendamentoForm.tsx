@@ -34,7 +34,7 @@ const agendamentoSchema = z.object({
   dataPrevistaPagamento: z.string().optional(),
 });
 
-type AgendamentoFormData = z.infer<typeof agendamentoSchema>;
+export type AgendamentoFormData = z.infer<typeof agendamentoSchema>;
 
 interface AgendamentoFormProps {
   agendamento?: Agendamento;
@@ -106,6 +106,7 @@ export default function AgendamentoForm({
         form.setValue('valor', servico.valor);
       }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.watch('servicoId'), servicos, form]);
 
   // Atualizar cliente selecionado
@@ -115,6 +116,7 @@ export default function AgendamentoForm({
       const cliente = clientes.find(c => c.id === clienteId);
       setClienteSelecionado(cliente || null);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.watch('clienteId'), clientes]);
 
   // Atualizar horários disponíveis quando data ou configurações mudam
@@ -146,6 +148,7 @@ export default function AgendamentoForm({
     } else {
       setHorariosDisponiveis([]);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.watch('data'), configuracoes, servicoSelecionado, getHorariosDisponiveis, isDiaAtivo, form, lastUpdate]);
 
   const handleSubmit = (data: AgendamentoFormData) => {

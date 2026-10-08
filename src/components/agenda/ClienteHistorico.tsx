@@ -12,7 +12,8 @@ import {
   Phone,
   MessageCircle,
   TrendingUp,
-  History
+  History,
+  UserX
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -36,6 +37,7 @@ export function ClienteHistorico({ cliente, agendamentos, onClose }: ClienteHist
     
     const concluidos = agendamentosCliente.filter(ag => ag.status === 'concluido');
     const cancelados = agendamentosCliente.filter(ag => ag.status === 'cancelado');
+    const naoCompareceram = agendamentosCliente.filter(ag => ag.status === 'nao_compareceu');
     const agendados = agendamentosCliente.filter(ag => ag.status === 'agendado');
     
     const totalGasto = concluidos.reduce((sum, ag) => sum + (ag.valorPago || 0), 0);
@@ -52,6 +54,7 @@ export function ClienteHistorico({ cliente, agendamentos, onClose }: ClienteHist
       total: agendamentosCliente.length,
       concluidos: concluidos.length,
       cancelados: cancelados.length,
+      naoCompareceram: naoCompareceram.length,
       agendados: agendados.length,
       totalGasto,
       totalServicos,
@@ -87,6 +90,8 @@ export function ClienteHistorico({ cliente, agendamentos, onClose }: ClienteHist
         return <Badge className="bg-green-500/20 text-green-700 border-green-500/30"><Check className="h-3 w-3 mr-1" />Concluído</Badge>;
       case 'cancelado':
         return <Badge className="bg-red-500/20 text-red-700 border-red-500/30"><X className="h-3 w-3 mr-1" />Cancelado</Badge>;
+      case 'nao_compareceu':
+        return <Badge className="bg-amber-500/20 text-amber-800 border-amber-500/30"><UserX className="h-3 w-3 mr-1" />Não compareceu</Badge>;
       case 'agendado':
         return <Badge className="bg-blue-500/20 text-blue-700 border-blue-500/30"><Calendar className="h-3 w-3 mr-1" />Agendado</Badge>;
       default:

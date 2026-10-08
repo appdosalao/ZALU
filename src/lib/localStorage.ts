@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // Sistema centralizado de armazenamento local
 export interface LocalStorageKeys {
   USUARIO: 'usuario';

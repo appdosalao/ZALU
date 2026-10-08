@@ -1,20 +1,24 @@
+/* eslint-disable react-refresh/only-export-components */
 import { useState, useEffect, useContext, createContext } from 'react';
 import type { ReactNode } from 'react';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useNotificationScheduler } from '@/hooks/useNotificationScheduler';
+import type { AppointmentNotificationInput, FixedExpenseNotificationInput } from '@/hooks/useNotificationScheduler';
 import { useEnhancedNotifications } from '@/hooks/useEnhancedNotifications';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { useConfiguracoes } from '@/hooks/useConfiguracoes';
 import { NotificacaoAgendamento } from './NotificacaoAgendamento';
 
+type NotificationRecord = AppointmentNotificationInput;
+
 interface NotificationContextType {
-  checkForNewAgendamentos: (agendamentos: any[]) => void;
-  scheduleAppointmentReminder: (agendamento: any, minutosAntes?: number) => Promise<void>;
-  notifyNewAppointment: (agendamento: any) => Promise<void>;
-  notifyServiceCompleted: (agendamento: any) => Promise<void>;
-  handleNewAppointment: (agendamento: any) => Promise<void>;
-  handleServiceCompleted: (agendamento: any) => Promise<void>;
-  handleExpenseReminder: (despesa: any) => Promise<void>;
+  checkForNewAgendamentos: (agendamentos: NotificationRecord[]) => void;
+  scheduleAppointmentReminder: (agendamento: AppointmentNotificationInput, minutosAntes?: number) => Promise<void>;
+  notifyNewAppointment: (agendamento: AppointmentNotificationInput) => Promise<void>;
+  notifyServiceCompleted: (agendamento: AppointmentNotificationInput) => Promise<void>;
+  handleNewAppointment: (agendamento: AppointmentNotificationInput) => Promise<void>;
+  handleServiceCompleted: (agendamento: AppointmentNotificationInput) => Promise<void>;
+  handleExpenseReminder: (despesa: FixedExpenseNotificationInput) => Promise<void>;
 }
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);

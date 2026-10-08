@@ -31,7 +31,7 @@ export const PaywallScreen: React.FC = () => {
                     <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Desbloqueie o ZALU</h1>
                     <Badge variant="outline" className="gap-1">
                       <Zap className="h-3.5 w-3.5" />
-                      A partir de R$ {proPlan.pricing.monthly.toFixed(2).replace('.', ',')}/mês
+                      A partir de R$ {proPlan.pricing.monthly.toFixed(2).replace('.', ',')}/mês
                     </Badge>
                   </div>
                   <p className="mt-2 text-muted-foreground">
@@ -139,7 +139,7 @@ export const PaywallScreen: React.FC = () => {
                 <div className="rounded-xl border bg-primary/5 p-4">
                   <div className="text-sm text-muted-foreground">Plano mais escolhido</div>
                   <div className="text-2xl font-extrabold text-primary">
-                    R$ {proPlan.pricing.monthly.toFixed(2).replace('.', ',')}/mês
+                    R$ {proPlan.pricing.monthly.toFixed(2).replace('.', ',')}/mês
                   </div>
                   <div className="mt-2 flex flex-wrap gap-2 text-xs text-muted-foreground">
                     <span className="inline-flex items-center gap-1"><Lock className="h-3 w-3" /> Checkout Cakto</span>

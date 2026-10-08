@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import type { BookingThemeId } from '@/lib/agendamento-online-themes';
 
 export interface ConfigAgendamentoOnline {
   id?: string;
@@ -17,6 +19,12 @@ export interface ConfigAgendamentoOnline {
   whatsapp?: string;
   logo_url?: string;
   banner_url?: string;
+  sobre_texto?: string;
+  galeria_urls?: string[];
+  estilo_fundo?: 'gradient' | 'solid' | 'glow' | 'aurora';
+  cor_fundo?: string;
+  cor_fundo_secundaria?: string;
+  efeito_visual?: 'none' | 'glow' | 'float';
   taxa_sinal_percentual: number;
   tempo_minimo_antecedencia: number;
   tempo_maximo_antecedencia: number;
@@ -24,7 +32,17 @@ export interface ConfigAgendamentoOnline {
   termos_condicoes: string;
   mensagem_confirmacao: string;
   cor_primaria?: string;
+  tema_preset?: BookingThemeId;
+  cor_secundaria?: string;
   cor_texto_botao?: string;
+  fonte_personalizada?: string;
+  card_background?: string;
+  raio_botoes?: number;
+  animacao_botao?: 'lift' | 'pulse' | 'shine' | 'none' | 'scale' | 'glow';
+  tema_formulario?: 'claro' | 'escuro' | 'neutro' | 'alto-contraste';
+  estilo_card?: 'premium' | 'glass' | 'soft' | 'minimal' | 'bordered';
+  estilo_botao?: 'gradiente' | 'sólido' | 'outline' | 'glass' | 'minimal';
+  sombra_botao?: 'none' | 'suave' | 'media' | 'forte' | 'colorida';
   mostrar_precos?: boolean;
   mostrar_duracao?: boolean;
 }
@@ -41,6 +59,12 @@ const defaultConfig: ConfigAgendamentoOnline = {
   whatsapp: '',
   logo_url: '',
   banner_url: '',
+  sobre_texto: '',
+  galeria_urls: [],
+  estilo_fundo: 'aurora',
+  cor_fundo: '#F5F3FF',
+  cor_fundo_secundaria: '#FDF2F8',
+  efeito_visual: 'glow',
   taxa_sinal_percentual: 0,
   tempo_minimo_antecedencia: 60,
   tempo_maximo_antecedencia: 4320,
@@ -48,7 +72,17 @@ const defaultConfig: ConfigAgendamentoOnline = {
   termos_condicoes: 'Ao agendar, você concorda em chegar no horário marcado. Em caso de atraso superior a 15 minutos, o agendamento poderá ser cancelado.',
   mensagem_confirmacao: 'Agendamento confirmado! Em breve você receberá uma confirmação no WhatsApp.',
   cor_primaria: '#8B5CF6',
+  tema_preset: 'salao-feminino',
+  cor_secundaria: '#F5D0FE',
   cor_texto_botao: '#FFFFFF',
+  fonte_personalizada: 'Inter, Segoe UI, sans-serif',
+  card_background: '#FFFFFF',
+  raio_botoes: 22,
+  animacao_botao: 'lift',
+  tema_formulario: 'claro',
+  estilo_card: 'premium',
+  estilo_botao: 'gradiente',
+  sombra_botao: 'media',
   mostrar_precos: true,
   mostrar_duracao: true
 };
@@ -118,6 +152,12 @@ export function useConfigAgendamentoOnline() {
         whatsapp: newConfig.whatsapp,
         logo_url: newConfig.logo_url,
         banner_url: newConfig.banner_url,
+        sobre_texto: newConfig.sobre_texto,
+        galeria_urls: newConfig.galeria_urls || [],
+        estilo_fundo: newConfig.estilo_fundo,
+        cor_fundo: newConfig.cor_fundo,
+        cor_fundo_secundaria: newConfig.cor_fundo_secundaria,
+        efeito_visual: newConfig.efeito_visual,
         taxa_sinal_percentual: newConfig.taxa_sinal_percentual,
         tempo_minimo_antecedencia: newConfig.tempo_minimo_antecedencia,
         tempo_maximo_antecedencia: newConfig.tempo_maximo_antecedencia,
@@ -125,6 +165,17 @@ export function useConfigAgendamentoOnline() {
         termos_condicoes: newConfig.termos_condicoes,
         mensagem_confirmacao: newConfig.mensagem_confirmacao,
         cor_primaria: newConfig.cor_primaria,
+        tema_preset: newConfig.tema_preset,
+        cor_secundaria: newConfig.cor_secundaria,
+        cor_texto_botao: newConfig.cor_texto_botao,
+        fonte_personalizada: newConfig.fonte_personalizada,
+        card_background: newConfig.card_background,
+        raio_botoes: newConfig.raio_botoes,
+        animacao_botao: newConfig.animacao_botao,
+        tema_formulario: newConfig.tema_formulario,
+        estilo_card: newConfig.estilo_card,
+        estilo_botao: newConfig.estilo_botao,
+        sombra_botao: newConfig.sombra_botao,
         mostrar_precos: newConfig.mostrar_precos,
         mostrar_duracao: newConfig.mostrar_duracao,
         public_id: publicIdFinal,

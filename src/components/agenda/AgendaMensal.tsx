@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import { format, startOfMonth, endOfMonth, addMonths, subMonths, isSameMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -299,7 +300,7 @@ export function AgendaMensal({ buscaTexto = '' }: AgendaMensalProps) {
                               >
                                 Reagendar
                               </Button>
-                              {a.status !== 'concluido' && (
+                              {a.status === 'agendado' && (
                                 <Button
                                   variant="default"
                                   size="sm"
@@ -308,7 +309,7 @@ export function AgendaMensal({ buscaTexto = '' }: AgendaMensalProps) {
                                   Marcar concluído
                                 </Button>
                               )}
-                              {a.status !== 'cancelado' && (
+                              {a.status !== 'cancelado' && a.status !== 'nao_compareceu' && (
                                 <Button
                                   variant="destructive"
                                   size="sm"

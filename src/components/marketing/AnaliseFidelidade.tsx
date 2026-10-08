@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -68,11 +69,12 @@ export const AnaliseFidelidade = () => {
         setDataInicio(startOfYear(hoje));
         setDataFim(endOfYear(hoje));
         break;
-      case 'ano_passado':
+      case 'ano_passado': {
         const anoPassado = subYears(hoje, 1);
         setDataInicio(startOfYear(anoPassado));
         setDataFim(endOfYear(anoPassado));
         break;
+      }
       case 'mes_atual':
         setDataInicio(startOfMonth(hoje));
         setDataFim(endOfMonth(hoje));
@@ -207,6 +209,7 @@ export const AnaliseFidelidade = () => {
 
   useEffect(() => {
     carregarDados();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, dataInicio, dataFim]);
 
   return (

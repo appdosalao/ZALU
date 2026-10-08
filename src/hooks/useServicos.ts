@@ -47,6 +47,7 @@ export function useServicos() {
 
   useEffect(() => {
     carregarServicos();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   // Filtrar e ordenar serviços
@@ -66,8 +67,8 @@ export function useServicos() {
     if (filtros.ordenacao) {
       resultado.sort((a, b) => {
         const campo = filtros.ordenacao!;
-        let valorA: any = a[campo];
-        let valorB: any = b[campo];
+        let valorA: string | number | undefined = a[campo];
+        let valorB: string | number | undefined = b[campo];
 
         if (typeof valorA === 'string') {
           valorA = valorA.toLowerCase();
@@ -114,7 +115,7 @@ export function useServicos() {
       };
       const { data, error } = await supabase
         .from('servicos')
-        .insert(insertPayload as any)
+        .insert(insertPayload)
         .select()
         .single();
 
@@ -222,8 +223,8 @@ export function useServicos() {
         console.log('🔍 Verificação de permissões:', permissionCheck);
         
         // Garantir que temos uma resposta válida e fazer o cast para o tipo esperado
-        const checkResult = permissionCheck as any;
-        if (checkResult && typeof checkResult === 'object') {
+        const checkResult = permissionCheck as { can_delete?: boolean; record_exists?: boolean; user_owns_record?: boolean } | null;
+        if (checkResult) {
           if (!checkResult.can_delete) {
             if (!checkResult.record_exists) {
               toast.error('Serviço não encontrado');

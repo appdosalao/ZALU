@@ -21,7 +21,7 @@ export function useSupabaseCategorias() {
 
       if (error) throw error;
       setCategorias((data || []) as CategoriasProduto[]);
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Erro ao carregar categorias: ' + error.message);
     } finally {
       setLoading(false);
@@ -43,7 +43,7 @@ export function useSupabaseCategorias() {
       if (error) throw error;
       toast.success('Categoria criada com sucesso!');
       await loadCategorias();
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Erro ao criar categoria: ' + error.message);
       throw error;
     }
@@ -59,7 +59,7 @@ export function useSupabaseCategorias() {
       if (error) throw error;
       toast.success('Categoria atualizada com sucesso!');
       await loadCategorias();
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Erro ao atualizar categoria: ' + error.message);
       throw error;
     }
@@ -75,7 +75,7 @@ export function useSupabaseCategorias() {
       if (error) throw error;
       toast.success('Categoria excluída com sucesso!');
       await loadCategorias();
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Erro ao excluir categoria: ' + error.message);
       throw error;
     }

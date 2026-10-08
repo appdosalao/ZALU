@@ -38,7 +38,7 @@ export function useRelatoriosFinanceiros(
           inicio: startOfQuarter(hoje),
           fim: endOfQuarter(hoje)
         };
-      case 'semestral':
+      case 'semestral': {
         const inicioSemestre = hoje.getMonth() < 6 
           ? new Date(hoje.getFullYear(), 0, 1)
           : new Date(hoje.getFullYear(), 6, 1);
@@ -49,6 +49,7 @@ export function useRelatoriosFinanceiros(
           inicio: inicioSemestre,
           fim: fimSemestre
         };
+      }
       case 'anual':
         return {
           inicio: startOfYear(hoje),

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useMemo, useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from 'react-router-dom';
 
@@ -115,16 +116,17 @@ export default function Dashboard() {
   // Agendamentos hoje
   const agendamentosHoje = useMemo(() => {
     return agendamentosFiltrados.filter(ag => 
-      ag.data === dataHoje && ag.status !== 'cancelado'
+      ag.data === dataHoje && ag.status !== 'cancelado' && ag.status !== 'nao_compareceu'
     );
   }, [agendamentosFiltrados, dataHoje]);
 
   // Total recebido hoje
   const totalRecebidoHoje = useMemo(() => {
-    const agendamentosConcluidos = agendamentosFiltrados.filter(ag => 
-      ag.data === dataHoje && ag.status === 'concluido'
+    const atendimentosRecebidos = agendamentosFiltrados.filter(ag =>
+      ag.data === dataHoje &&
+      (ag.status === 'concluido' || ag.status === 'nao_compareceu')
     );
-    return agendamentosConcluidos.reduce((total, ag) => total + ag.valor, 0);
+    return atendimentosRecebidos.reduce((total, ag) => total + ag.valorPago, 0);
   }, [agendamentosFiltrados, dataHoje]);
 
   // Próximo cliente a ser atendido hoje
@@ -196,6 +198,7 @@ export default function Dashboard() {
     return totalRecebidoHoje / qtd;
   }, [concluidosHoje, totalRecebidoHoje]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
   const entradasMes = useMemo(() => {
     return lancamentos

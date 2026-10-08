@@ -27,6 +27,7 @@ export const usePushSubscription = () => {
       setPermission(Notification.permission);
       checkSubscription();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [usuario]);
 
   const arrayBufferToBase64 = (buffer: ArrayBuffer): string => {
@@ -144,13 +145,14 @@ export const usePushSubscription = () => {
       toast.success('Notificações push ativadas com sucesso!');
       return true;
 
-    } catch (error: any) {
+    } catch (error) {
       console.error('Erro ao subscrever:', error);
       toast.error(`Erro ao ativar notificações: ${error.message}`);
       return false;
     } finally {
       setIsLoading(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSupported, usuario, permission]);
 
   const unsubscribe = useCallback(async () => {
@@ -176,7 +178,7 @@ export const usePushSubscription = () => {
       toast.info('Notificações push desativadas');
       return true;
 
-    } catch (error: any) {
+    } catch (error) {
       console.error('Erro ao cancelar subscription:', error);
       toast.error(`Erro ao desativar notificações: ${error.message}`);
       return false;

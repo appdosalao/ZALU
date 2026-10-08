@@ -38,6 +38,7 @@ export default function RetornoPagamento() {
 
   useEffect(() => {
     void check();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
 
   useEffect(() => {
@@ -46,6 +47,7 @@ export default function RetornoPagamento() {
       void check();
     }, 5000);
     return () => window.clearInterval(interval);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, isAuthenticated]);
 
   useEffect(() => {
@@ -120,4 +122,3 @@ export default function RetornoPagamento() {
     </div>
   );
 }
-

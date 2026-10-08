@@ -34,7 +34,7 @@ const clienteSchema = z.object({
   email: z.string().email("E-mail inválido").optional(),
   telefone: z.string()
     .min(10, "Telefone deve ter pelo menos 10 dígitos")
-    .regex(/^[\d\s\-\+\(\)]+$/, "Telefone deve conter apenas números e símbolos padrões"),
+    .regex(/^[\d\s\-+()]+$/, "Telefone deve conter apenas números e símbolos padrões"),
   endereco: z.string().optional(),
   dataNascimento: z.date().optional(),
   servicoFrequente: z.string().optional(),

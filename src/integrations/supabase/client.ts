@@ -21,7 +21,7 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
       try {
         const hasSessionStorage = typeof window !== 'undefined' && !!window.sessionStorage;
         const hasLocalStorage = typeof window !== 'undefined' && !!window.localStorage;
-        return hasLocalStorage && false ? (window.localStorage as any) : hasLocalStorage ? (window.localStorage as any) : undefined;
+        return hasLocalStorage ? window.localStorage : undefined;
       } catch {
         return undefined;
       }
@@ -31,7 +31,7 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     detectSessionInUrl: true,
   },
   global: {
-    fetch: secureFetch as any,
+    fetch: secureFetch,
     headers: {
       'X-Requested-With': 'XMLHttpRequest',
       'X-Zalu-Client': 'web',

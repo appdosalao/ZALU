@@ -28,7 +28,8 @@ const readCache = (userId: string): boolean | undefined => {
 const writeCache = (value: PaidAccessCache) => {
   try {
     storage.saveData(STORAGE_KEY, value);
-  } catch {
+  } catch (error) {
+    console.error('Erro ao salvar cache de acesso:', error);
   }
 };
 
@@ -38,6 +39,18 @@ export const usePaidAccess = () => {
   const userId = session?.user?.id ?? null;
 
   const paidFromProfile = typeof usuario?.paid_access === 'boolean' ? usuario.paid_access : undefined;
+
+  type PaidAccessRow = { paid_access?: boolean | null };
+  type LegacyPaidClient = {
+    from: (table: string) => {
+      select: (cols: string) => {
+        eq: (col: string, val: string) => {
+          maybeSingle: () => Promise<{ data: PaidAccessRow | null; error: { message?: string } | null }>;
+        };
+      };
+    };
+  };
+  const legacySupabase = supabase as unknown as LegacyPaidClient;
 
   const query = useQuery<boolean>({
     queryKey: ['paidAccess', userId],
@@ -49,15 +62,14 @@ export const usePaidAccess = () => {
     retry: 1,
     queryFn: async () => {
       if (!userId) return false;
-      const { data, error } = await (supabase as any)
+      const { data, error } = await legacySupabase
         .from('assinaturas')
         .select('paid_access')
         .eq('usuario_id', userId)
         .maybeSingle();
 
       if (error) {
-        // Fallback to usuarios table for backward compatibility
-        const { data: fallbackData, error: fallbackError } = await (supabase as any)
+        const { data: fallbackData, error: fallbackError } = await legacySupabase
           .from('usuarios')
           .select('paid_access')
           .eq('id', userId)

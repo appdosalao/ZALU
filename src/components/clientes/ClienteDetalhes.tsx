@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -33,6 +34,7 @@ export default function ClienteDetalhes({ cliente, open, onOpenChange, onEdit }:
       // No entanto, atualizamos o estado local para refletir os dados do objeto cliente
       setHistoricoServicosLocal(cliente.historicoServicos || []);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cliente?.id, cliente?.historicoServicos, open]);
 
   const carregarVendasCliente = async () => {

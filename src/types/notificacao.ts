@@ -11,7 +11,7 @@ export interface NotificacaoBase {
   tipo: TipoNotificacao;
   titulo: string;
   mensagem: string;
-  dados?: Record<string, any>;
+  dados?: Record<string, unknown>;
   lida: boolean;
   programadaPara?: string; // ISO date string
   enviadaEm?: string; // ISO date string

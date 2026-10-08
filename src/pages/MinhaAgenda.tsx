@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useAgendamentos } from "@/hooks/useAgendamentos";
 import AgendamentosList from "@/components/agendamentos/AgendamentosList";
-import AgendamentoForm from "@/components/agendamentos/AgendamentoForm";
+import AgendamentoForm, { type AgendamentoFormData } from "@/components/agendamentos/AgendamentoForm";
 import AgendamentoDetalhes from "@/components/agendamentos/AgendamentoDetalhes";
 import ReagendamentoDialog from "@/components/agendamentos/ReagendamentoDialog";
 import TrocaHorarioDialog from "@/components/agendamentos/TrocaHorarioDialog";
@@ -76,8 +76,11 @@ export default function MinhaAgenda() {
       try {
         const saved = storage.getString(LOCAL_STORAGE_KEYS.MINHA_AGENDA_TAB) as Visualizacao | null;
         if (saved) setTab(saved);
-      } catch {}
+       } catch (error) {
+         console.error('Erro ao carregar visualização salva:', error);
+       }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const hoje = new Date().toISOString().split("T")[0];
@@ -100,6 +103,7 @@ export default function MinhaAgenda() {
       const data = new Date(ag.data);
       return data >= inicioSemana && data <= fimSemana && ag.status !== "cancelado";
     }).length;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [agendamentosFiltrados]);
 
   const handleNovoAgendamento = () => {
@@ -117,7 +121,7 @@ export default function MinhaAgenda() {
     setVisualizacaoAtual("detalhes");
     setTab("lista");
   };
-  const handleSubmitFormulario = async (data: any) => {
+  const handleSubmitFormulario = async (data: AgendamentoFormData & { clienteNome: string; servicoNome: string }) => {
     const sucesso = agendamentoSelecionado 
       ? await atualizarAgendamento(agendamentoSelecionado.id, data) 
       : await criarAgendamento({ ...data, origem: 'manual' });
@@ -203,7 +207,7 @@ export default function MinhaAgenda() {
       valorDevido: Math.max(0, novoValorDevido),
       statusPagamento: novoStatusPagamento,
       status: novoStatus,
-      formaPagamento: formaPagamento as any,
+      formaPagamento: formaPagamento as Agendamento['formaPagamento'],
     });
     if (sucesso) {
       toast("Pagamento registrado", {

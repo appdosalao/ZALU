@@ -17,6 +17,7 @@ export const useHorariosTrabalho = (userId?: string) => {
 
   useEffect(() => {
     carregarConfiguracoes();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId]);
 
   const carregarConfiguracoes = async () => {

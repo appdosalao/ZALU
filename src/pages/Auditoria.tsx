@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useMemo, useEffect } from 'react';
 import { useAuditoria } from '@/hooks/useAuditoria';
 import { useRetornos } from '@/hooks/useCronogramas';

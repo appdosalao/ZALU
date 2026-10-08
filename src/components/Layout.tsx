@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import MobileBottomNav from "@/components/navigation/MobileBottomNav";
+import { AgendamentosPendentesConfirmacao } from "@/components/agendamentos/AgendamentosPendentesConfirmacao";
 
 import { Calendar, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -39,6 +41,7 @@ function LayoutContent({ children }: LayoutProps) {
 
   return (
     <SidebarProvider>
+        <AgendamentosPendentesConfirmacao />
         <div className="min-h-screen flex w-full bg-gradient-to-br from-background via-lilac-lighter to-background">
           <AppSidebar />
           

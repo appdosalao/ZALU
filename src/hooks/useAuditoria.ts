@@ -15,8 +15,8 @@ export interface ProblemaAuditoria {
   entidade: string;
   entidadeId: string;
   campo?: string;
-  valorAtual?: any;
-  valorEsperado?: any;
+  valorAtual?: unknown;
+  valorEsperado?: unknown;
   sugestao?: string;
 }
 
@@ -54,7 +54,7 @@ export function useAuditoria() {
   const { retornos } = useRetornos();
   const { user } = useSupabaseAuth();
   const [salvando, setSalvando] = useState(false);
-  const [relatoriosHistorico, setRelatoriosHistorico] = useState<any[]>([]);
+  const [relatoriosHistorico, setRelatoriosHistorico] = useState<Record<string, unknown>[]>([]);
   const [relatorioBackend, setRelatorioBackend] = useState<RelatorioAuditoria | null>(null);
   const [carregandoBackend, setCarregandoBackend] = useState(false);
   const [useBackend] = useState(true); // Flag para usar backend
@@ -118,7 +118,7 @@ export function useAuditoria() {
         setRelatorioBackend(null);
         return false;
       }
-      setRelatorioBackend(data as any);
+      setRelatorioBackend(data as unknown as RelatorioAuditoria);
       toast.success('Auditoria executada com sucesso');
       return true;
     } catch (err) {
@@ -702,6 +702,7 @@ export function useAuditoria() {
     } finally {
       setSalvando(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, relatorioAuditoria, salvando]);
 
   // Carregar histórico de relatórios

@@ -23,9 +23,10 @@ export function useSupabaseProdutos() {
       if (error) throw error;
       setProdutos((data || []).map(item => produtoFromSupabase(item)));
       setErro(null);
-    } catch (error: any) {
-      setErro(error.message || 'Erro ao carregar produtos');
-      toast.error('Erro ao carregar produtos: ' + error.message);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Erro ao carregar produtos';
+      setErro(message);
+      toast.error('Erro ao carregar produtos: ' + message);
     } finally {
       setLoading(false);
     }
@@ -44,13 +45,14 @@ export function useSupabaseProdutos() {
 
       const { error } = await supabase
         .from('produtos')
-        .insert([produtoSanitizado] as any);
+        .insert([produtoSanitizado]);
 
       if (error) throw error;
       toast.success('Produto cadastrado com sucesso!');
       await loadProdutos();
-    } catch (error: any) {
-      toast.error('Erro ao cadastrar produto: ' + error.message);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Erro ao cadastrar produto';
+      toast.error('Erro ao cadastrar produto: ' + message);
       throw error;
     }
   };
@@ -67,8 +69,9 @@ export function useSupabaseProdutos() {
       if (error) throw error;
       toast.success('Produto atualizado com sucesso!');
       await loadProdutos();
-    } catch (error: any) {
-      toast.error('Erro ao atualizar produto: ' + error.message);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Erro ao atualizar produto';
+      toast.error('Erro ao atualizar produto: ' + message);
       throw error;
     }
   };
@@ -92,8 +95,9 @@ export function useSupabaseProdutos() {
         .getPublicUrl(fileName);
 
       return publicUrl;
-    } catch (error: any) {
-      toast.error('Erro ao fazer upload da imagem: ' + error.message);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Erro ao fazer upload da imagem';
+      toast.error('Erro ao fazer upload da imagem: ' + message);
       return null;
     }
   };
@@ -109,8 +113,9 @@ export function useSupabaseProdutos() {
       if (error) throw error;
       toast.success('Produto desativado com sucesso!');
       await loadProdutos();
-    } catch (error: any) {
-      toast.error('Erro ao desativar produto: ' + error.message);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Erro ao desativar produto';
+      toast.error('Erro ao desativar produto: ' + message);
       throw error;
     }
   };
@@ -144,8 +149,9 @@ export function useSupabaseProdutos() {
       toast.success('Movimentação registrada');
       await loadProdutos();
       return true;
-    } catch (error: any) {
-      toast.error('Erro ao movimentar estoque: ' + error.message);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Erro ao movimentar estoque';
+      toast.error('Erro ao movimentar estoque: ' + message);
       return false;
     }
   };

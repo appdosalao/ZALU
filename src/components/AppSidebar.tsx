@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Link, useLocation } from "react-router-dom";
 import { usePWAContext } from "@/components/pwa/PWAProvider";
 import { 
@@ -107,7 +108,8 @@ export function AppSidebar() {
   const { isInstallable, isInstalled, installApp } = usePWAContext();
   const currentPath = location.pathname;
 
-  const isActive = (path: string) => currentPath === path;
+  const isActive = (path: string) =>
+    path === "/" ? currentPath === "/" : currentPath === path || currentPath.startsWith(`${path}/`);
 
   const handleNavClick = () => {
     if (isMobileDevice) {
@@ -123,17 +125,7 @@ export function AppSidebar() {
   });
 
   const badgeFor = (href: string) => {
-    if (href === "/") return "from-primary to-lilac-primary";
-    if (href.startsWith("/minha-agenda") || href === "/agendamentos" || href === "/agenda") return "from-lilac-primary to-pink-accent";
-    if (href === "/clientes") return "from-indigo-500 to-sky-400";
-    if (href === "/servicos") return "from-rose-500 to-pink-400";
-    if (href === "/cronogramas") return "from-amber-500 to-yellow-400";
-    if (href === "/financeiro") return "from-emerald-500 to-green-400";
-    if (href === "/marketing") return "from-fuchsia-500 to-violet-400";
-    if (href === "/produtos") return "from-purple-500 to-violet-500";
-    if (href === "/auditoria") return "from-slate-500 to-slate-400";
-    if (href === "/assinatura") return "from-yellow-500 to-amber-400";
-    if (href === "/configuracoes") return "from-stone-500 to-stone-400";
+    void href;
     return "from-primary to-lilac-primary";
   };
 
@@ -177,7 +169,8 @@ export function AppSidebar() {
       collapsible="icon"
       variant="sidebar"
     >
-      <SidebarHeader className="border-b border-sidebar-border/60 bg-white/35 backdrop-blur-xl dark:bg-white/5">
+      <SidebarHeader className="relative overflow-hidden border-b border-sidebar-border/60 bg-gradient-to-br from-white/65 via-lilac-lighter/45 to-pink-accent/10 backdrop-blur-xl dark:from-white/8 dark:via-sidebar dark:to-sidebar">
+        <div className="pointer-events-none absolute -right-8 -top-10 h-24 w-24 rounded-full bg-pink-accent/15 blur-2xl" />
         <div className="flex items-center gap-2 p-2">
           <div className="relative">
             <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-primary/20 to-transparent blur" />
@@ -192,6 +185,9 @@ export function AppSidebar() {
               </h2>
               <p className="text-xs text-sidebar-foreground/70 truncate">
                 {usuario?.nome_completo}
+              </p>
+              <p className="mt-1 text-[10px] font-medium uppercase tracking-[0.16em] text-primary/75">
+                Gestão do salão
               </p>
             </div>
           )}

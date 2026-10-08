@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Scissors, Plus } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Scissors, Plus, Sparkles, DollarSign, Clock3, Layers3 } from "lucide-react";
 import { useServicos } from "@/hooks/useServicos";
 import ServicosList from "@/components/servicos/ServicosList";
 import ServicoForm from "@/components/servicos/ServicoForm";
@@ -12,6 +14,7 @@ type VisualizacaoAtual = 'lista' | 'formulario';
 export default function Servicos() {
   const {
     servicos,
+    todosServicos,
     filtros,
     setFiltros,
     criarServico,
@@ -50,7 +53,7 @@ export default function Servicos() {
 
   if (visualizacaoAtual === 'formulario') {
     return (
-      <div className="space-y-8">
+      <div className="space-y-6 p-3 sm:p-0">
         <ServicoForm
           servico={servicoSelecionado || undefined}
           onSubmit={handleSubmitFormulario}
@@ -61,62 +64,72 @@ export default function Servicos() {
   }
 
   return (
-    <div className="space-y-4 sm:space-y-8 p-3 sm:p-0">
-      {/* Header */}
-      <div className="flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-xl sm:text-3xl font-bold text-foreground">Serviços</h1>
-          <p className="text-xs sm:text-base text-muted-foreground">
-            Gerencie todos os serviços oferecidos pelo seu salão
-          </p>
+    <div className="space-y-5 p-3 sm:space-y-7 sm:p-0">
+      <div className="overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-card via-card to-primary/[0.07] shadow-sm">
+        <div className="flex flex-col gap-5 p-5 sm:p-7 lg:flex-row lg:items-center lg:justify-between">
+          <div className="max-w-2xl">
+            <Badge variant="secondary" className="mb-3 rounded-full px-3 py-1">
+              <Sparkles className="mr-1.5 h-3.5 w-3.5" />
+              Catálogo e preços
+            </Badge>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Serviços</h1>
+            <p className="mt-2 text-sm text-muted-foreground sm:text-base">
+              Organize os serviços oferecidos, defina valores e duração para facilitar seus agendamentos.
+            </p>
+          </div>
+          <Button
+            onClick={handleNovoServico}
+            className="h-11 w-full rounded-xl bg-gradient-to-r from-primary to-lilac-primary shadow-md transition-all hover:shadow-lg sm:w-auto"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Novo serviço
+          </Button>
         </div>
-        <Button 
-          onClick={handleNovoServico}
-          className="bg-gradient-to-r from-primary to-lilac-primary shadow-lg hover:shadow-xl transition-all duration-300 btn-touch"
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          Novo Serviço
-        </Button>
       </div>
 
-      {/* Quick Stats */}
-      <div className="grid gap-2 grid-cols-2 sm:grid-cols-2 lg:grid-cols-3">
-        <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
-          <CardContent className="flex items-center gap-2 sm:gap-4 p-3 sm:p-6">
-            <div className="flex h-8 w-8 sm:h-12 sm:w-12 items-center justify-center rounded-lg sm:rounded-xl bg-gradient-to-br from-primary to-lilac-light">
-              <Scissors className="h-4 w-4 sm:h-6 sm:w-6 text-primary-foreground" />
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        <Card className="rounded-2xl border-border/60 shadow-sm">
+          <CardContent className="flex items-center gap-4 p-4 sm:p-5">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+              <Layers3 className="h-5 w-5" />
             </div>
-            <div>
-              <p className="text-lg sm:text-2xl font-bold">{servicos.length}</p>
-              <p className="text-[10px] sm:text-sm text-muted-foreground">Total</p>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
-          <CardContent className="flex items-center gap-2 sm:gap-4 p-3 sm:p-6">
-            <div className="flex h-8 w-8 sm:h-12 sm:w-12 items-center justify-center rounded-lg sm:rounded-xl bg-gradient-to-br from-lilac-primary to-pink-accent">
-              <Scissors className="h-4 w-4 sm:h-6 sm:w-6 text-primary-foreground" />
-            </div>
-            <div>
-              <p className="text-lg sm:text-2xl font-bold">
-                R$ {servicos.length > 0 ? Math.min(...servicos.map(s => s.valor)).toFixed(2) : '0,00'}
-              </p>
-              <p className="text-[10px] sm:text-sm text-muted-foreground">Menor Valor</p>
+            <div className="min-w-0">
+              <p className="text-2xl font-bold tracking-tight">{todosServicos.length}</p>
+              <p className="text-sm text-muted-foreground">Serviços cadastrados</p>
             </div>
           </CardContent>
         </Card>
         
-        <Card className="border-border/50 bg-card/50 backdrop-blur-sm col-span-2 sm:col-span-2 lg:col-span-1">
-          <CardContent className="flex items-center gap-2 sm:gap-4 p-3 sm:p-6">
-            <div className="flex h-8 w-8 sm:h-12 sm:w-12 items-center justify-center rounded-lg sm:rounded-xl bg-gradient-to-br from-pink-accent to-lavender">
-              <Scissors className="h-4 w-4 sm:h-6 sm:w-6 text-primary-foreground" />
+        <Card className="rounded-2xl border-border/60 shadow-sm">
+          <CardContent className="flex items-center gap-4 p-4 sm:p-5">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+              <DollarSign className="h-5 w-5" />
             </div>
-            <div>
-              <p className="text-lg sm:text-2xl font-bold">
-                R$ {servicos.length > 0 ? Math.max(...servicos.map(s => s.valor)).toFixed(2) : '0,00'}
+            <div className="min-w-0">
+              <p className="text-2xl font-bold tracking-tight">
+                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(
+                  todosServicos.length
+                    ? todosServicos.reduce((total, servico) => total + Number(servico.valor || 0), 0) / todosServicos.length
+                    : 0
+                )}
               </p>
-              <p className="text-[10px] sm:text-sm text-muted-foreground">Maior Valor</p>
+              <p className="text-sm text-muted-foreground">Valor médio</p>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="rounded-2xl border-border/60 shadow-sm sm:col-span-2 xl:col-span-1">
+          <CardContent className="flex items-center gap-4 p-4 sm:p-5">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-violet-500/10 text-violet-600 dark:text-violet-400">
+              <Clock3 className="h-5 w-5" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-2xl font-bold tracking-tight">
+                {todosServicos.length
+                  ? `${Math.round(todosServicos.reduce((total, servico) => total + Number(servico.duracao || 0), 0) / todosServicos.length)} min`
+                  : '0 min'}
+              </p>
+              <p className="text-sm text-muted-foreground">Duração média</p>
             </div>
           </CardContent>
         </Card>

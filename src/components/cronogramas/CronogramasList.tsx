@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -109,7 +110,7 @@ export default function CronogramasList() {
     }
 
     // Encontrar a próxima data
-    let proximaData = new Date(dataInicio);
+    const proximaData = new Date(dataInicio);
     while (proximaData <= hoje) {
       proximaData.setDate(proximaData.getDate() + intervalo);
     }

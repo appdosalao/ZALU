@@ -33,7 +33,7 @@ export const supabasePublic = createClient<Database>(SUPABASE_URL, SUPABASE_PUBL
     autoRefreshToken: false,
     detectSessionInUrl: false,
     storageKey: 'sb-public-no-session',
-    storage: memoryStorage as any,
+    storage: memoryStorage,
   },
   global: {
     fetch: createLoggedFetch({ label: 'supabasePublic', timeoutMs: 15000 }),

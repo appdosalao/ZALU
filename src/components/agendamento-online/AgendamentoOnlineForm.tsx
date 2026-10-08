@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,23 +8,25 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Calendar, Clock, User, AlertCircle, Share2, Copy, ArrowRight, ArrowLeft, ShoppingBag, Check, Scissors, Timer, Tag, LayoutGrid, CheckCircle2 } from 'lucide-react';
+import { Calendar, Clock, User, UserRound, Phone, Mail, ShieldCheck, AlertCircle, Share2, Copy, ArrowRight, ArrowLeft, ShoppingBag, Check, Scissors, Timer, Tag, LayoutGrid, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { z } from 'zod';
 import { useAgendamentoOnlineService } from '@/hooks/useAgendamentoOnlineService';
 import { useHorariosTrabalhoPublic } from '@/hooks/useHorariosTrabalhoPublic';
 import { useShare } from '@/hooks/useShare';
 import { useConfigAgendamentoOnlinePublic } from '@/hooks/useConfigAgendamentoOnlinePublic';
+import { getBookingPageBackground } from '@/lib/agendamento-online-themes';
 import { AgendamentoOnlineData, HorarioDisponivel, FormErrors } from '@/types/agendamento-online';
 import { supabasePublic } from '@/integrations/supabase/publicClient';
 import { ProgressSteps } from './ProgressSteps';
 import { SalonHeader } from './SalonHeader';
 import { SalonFooter } from './SalonFooter';
+import { SalonLandingContent } from './SalonLandingContent';
 import { Separator } from '@/components/ui/separator';
 import { agendamentoOnlineSchema } from '@/lib/validation';
 import { toast } from 'sonner';
 
-export function AgendamentoOnlineForm() {
+export function AgendamentoOnlineForm({ embedded = false }: { embedded?: boolean } = {}) {
   const {
     loading,
     servicos,
@@ -48,7 +51,106 @@ export function AgendamentoOnlineForm() {
 
   // Cores dinâmicas do formulário
   const primaryColor = configOnline.cor_primaria || '#8B5CF6';
+  const secondaryColor = configOnline.cor_secundaria || '#F5D0FE';
   const primaryHsl = hexToHsl(primaryColor);
+  const secondaryHsl = hexToHsl(secondaryColor);
+  const buttonAnimation = configOnline.animacao_botao || 'lift';
+  const buttonRadius = `${configOnline.raio_botoes ?? 22}px`;
+  const keyVisualMode = configOnline.tema_formulario || 'claro';
+  const isDarkVisualMode = keyVisualMode === 'escuro';
+  const isNeutralVisualMode = keyVisualMode === 'neutro';
+  const isHighContrastMode = keyVisualMode === 'alto-contraste';
+  const cardVisualStyle = configOnline.estilo_card || 'premium';
+  const buttonVisualStyle = configOnline.estilo_botao || 'gradiente';
+  const shadowVisualStyle = configOnline.sombra_botao || 'media';
+  const pageBackground = getBookingPageBackground(
+    configOnline.estilo_fundo,
+    configOnline.cor_fundo || (isDarkVisualMode ? '#0F172A' : isNeutralVisualMode ? '#F5F0E8' : '#F5F3FF'),
+    configOnline.cor_fundo_secundaria || (isDarkVisualMode ? '#1E293B' : isNeutralVisualMode ? '#E8DDCE' : '#FDF2F8'),
+    primaryColor,
+    isDarkVisualMode ? 'escuro' : 'claro',
+  );
+  const cardBaseColor = configOnline.card_background
+    || (isDarkVisualMode ? '#111827' : isNeutralVisualMode ? '#FFFCF7' : '#FFFFFF');
+  const visualCardBackground = cardVisualStyle === 'glass'
+    ? hexToRgba(cardBaseColor, 0.78)
+    : cardVisualStyle === 'soft'
+      ? configOnline.card_background || (isDarkVisualMode ? '#0f172a' : isNeutralVisualMode ? '#FFFCF7' : '#f8f5ff')
+      : cardVisualStyle === 'minimal'
+        ? 'transparent'
+        : cardBaseColor;
+  const buttonShadowStyle = {
+    none: 'none',
+    suave: '0 6px 16px rgba(15,23,42,0.12)',
+    media: `0 12px 28px ${primaryColor}33`,
+    forte: `0 20px 40px ${primaryColor}44`,
+    colorida: `0 12px 32px ${primaryColor}66`,
+  }[shadowVisualStyle];
+  const cardShadowStyle = cardVisualStyle === 'minimal'
+    ? 'none'
+    : cardVisualStyle === 'bordered'
+      ? `0 8px 24px ${primaryColor}14`
+      : `0 20px 50px ${primaryColor}1A`;
+  const foregroundColor = isDarkVisualMode ? '#F8FAFC' : isNeutralVisualMode ? '#3D352D' : '#0F172A';
+  const pageSurfaceColor = isDarkVisualMode ? '#0F172A' : isNeutralVisualMode ? '#F5F0E8' : '#FFFFFF';
+  const themeStyle = {
+    ['--primary' as any]: primaryHsl,
+    ['--secondary' as any]: secondaryHsl,
+    ['--card' as any]: hexToHsl(cardBaseColor),
+    ['--foreground' as any]: hexToHsl(isHighContrastMode ? '#000000' : foregroundColor),
+    ['--card-foreground' as any]: hexToHsl(isDarkVisualMode ? '#F8FAFC' : isNeutralVisualMode ? '#3D352D' : '#0F172A'),
+    ['--background' as any]: hexToHsl(isHighContrastMode ? '#FFFFFF' : pageSurfaceColor),
+    ['--ring' as any]: primaryHsl,
+    ['--radius' as any]: buttonRadius,
+    fontFamily: configOnline.fonte_personalizada || 'Inter, Segoe UI, sans-serif',
+    background: pageBackground,
+    color: isDarkVisualMode ? '#f8fafc' : isNeutralVisualMode ? '#3D352D' : '#0f172a'
+  } as React.CSSProperties;
+
+  const buttonAnimationClass = {
+    lift: 'hover:-translate-y-1 active:translate-y-0',
+    pulse: 'animate-pulse motion-reduce:animate-none',
+    shine: 'shadow-[0_0_0_1px_rgba(255,255,255,0.2),0_10px_25px_rgba(255,255,255,0.15)]',
+    none: '',
+    scale: 'hover:scale-[1.03] active:scale-100',
+    glow: 'hover:brightness-110'
+  }[buttonAnimation];
+
+  const resolvedButtonStyle = (() => {
+    switch (buttonVisualStyle) {
+      case 'sólido':
+        return {
+          background: primaryColor,
+          color: configOnline.cor_texto_botao || '#FFFFFF',
+          border: 'none'
+        };
+      case 'outline':
+        return {
+          background: 'transparent',
+          border: `1.5px solid ${primaryColor}`,
+          color: primaryColor
+        };
+      case 'glass':
+        return {
+          background: `${primaryColor}22`,
+          border: `1px solid ${primaryColor}55`,
+          color: isDarkVisualMode ? '#F8FAFC' : primaryColor,
+          backdropFilter: 'blur(10px)',
+        };
+      case 'minimal':
+        return {
+          background: 'transparent',
+          border: '1px solid transparent',
+          color: primaryColor,
+        };
+      default:
+        return {
+          background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`,
+          color: configOnline.cor_texto_botao || '#FFFFFF',
+          border: 'none'
+        };
+    }
+  })();
 
   // Função auxiliar para converter Hex para HSL (formato esperado pelo Tailwind no projeto)
   function hexToHsl(hex: string) {
@@ -61,7 +163,9 @@ export function AgendamentoOnlineForm() {
     const b = parseInt(hex.substring(4, 6), 16) / 255;
 
     const max = Math.max(r, g, b), min = Math.min(r, g, b);
-    let h = 0, s, l = (max + min) / 2;
+    let h = 0;
+    let s = 0;
+    const l = (max + min) / 2;
 
     if (max === min) {
       h = s = 0;
@@ -76,6 +180,18 @@ export function AgendamentoOnlineForm() {
       h /= 6;
     }
     return `${Math.round(h * 360)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`;
+  }
+
+  function hexToRgba(hex: string, alpha: number) {
+    const normalized = hex.replace('#', '');
+    const expanded = normalized.length === 3
+      ? normalized.split('').map(char => char + char).join('')
+      : normalized;
+    if (!/^[0-9a-f]{6}$/i.test(expanded)) return hex;
+    const red = Number.parseInt(expanded.slice(0, 2), 16);
+    const green = Number.parseInt(expanded.slice(2, 4), 16);
+    const blue = Number.parseInt(expanded.slice(4, 6), 16);
+    return `rgba(${red}, ${green}, ${blue}, ${alpha})`;
   }
 
   const [formData, setFormData] = useState<AgendamentoOnlineData>({
@@ -143,6 +259,51 @@ export function AgendamentoOnlineForm() {
     });
   }, [configuracoes, loadingHorarios]);
 
+  const gerarHorariosFallback = useCallback(() => {
+    if (!formData.servico_id || !formData.data) return [];
+
+    const dataSelecionada = new Date(formData.data + 'T00:00:00');
+    const diaSemana = dataSelecionada.getDay();
+    const configuracao = configuracoes.find(c => c.dia_semana === diaSemana && c.ativo);
+    if (!configuracao) return [];
+
+    const servicoSelecionado = servicos.find(s => s.id === formData.servico_id);
+    const duracaoMinutos = Number(servicoSelecionado?.duracao ?? 60);
+    const duracao = Number.isFinite(duracaoMinutos) && duracaoMinutos > 0 ? duracaoMinutos : 60;
+
+    const toMinutes = (time: string) => {
+      const [h, m] = String(time || '00:00').split(':').map(Number);
+      return (Number.isFinite(h) ? h : 0) * 60 + (Number.isFinite(m) ? m : 0);
+    };
+
+    const formatMinutes = (minutes: number) => {
+      const h = Math.floor(minutes / 60) % 24;
+      const m = minutes % 60;
+      return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+    };
+
+    const inicio = toMinutes(configuracao.horario_abertura);
+    const fim = toMinutes(configuracao.horario_fechamento);
+    const intervaloInicio = configuracao.intervalo_inicio ? toMinutes(configuracao.intervalo_inicio) : null;
+    const intervaloFim = configuracao.intervalo_fim ? toMinutes(configuracao.intervalo_fim) : null;
+
+    const slots: HorarioDisponivel[] = [];
+    for (let slotInicio = inicio; slotInicio + duracao <= fim; slotInicio += 30) {
+      const slotFim = slotInicio + duracao;
+      const estaNoIntervalo = intervaloInicio !== null && intervaloFim !== null
+        ? ((slotInicio >= intervaloInicio && slotInicio < intervaloFim) ||
+           (slotFim > intervaloInicio && slotFim <= intervaloFim) ||
+           (slotInicio < intervaloInicio && slotFim > intervaloFim))
+        : false;
+
+      if (!estaNoIntervalo) {
+        slots.push({ horario: formatMinutes(slotInicio), disponivel: true });
+      }
+    }
+
+    return slots;
+  }, [configuracoes, formData.data, formData.servico_id, servicos]);
+
   const carregarHorariosDisponiveis = useCallback(async () => {
     if (!formData.servico_id || !formData.data) return;
 
@@ -196,12 +357,27 @@ export function AgendamentoOnlineForm() {
           })
         : horariosFormatados;
 
+      if (horariosFiltrados.length === 0 && configuracoes.length > 0) {
+        const fallback = gerarHorariosFallback();
+        const fallbackFiltrado = isHoje
+          ? fallback.filter(h => {
+              const [hh, mm] = String(h.horario).slice(0, 5).split(':').map(Number);
+              if (!Number.isFinite(hh) || !Number.isFinite(mm)) return false;
+              const slot = new Date(agora);
+              slot.setHours(hh, mm, 0, 0);
+              return slot >= minDateTime;
+            })
+          : fallback;
+        setHorariosDisponiveis(fallbackFiltrado);
+        return;
+      }
+
       setHorariosDisponiveis(horariosFiltrados);
     } catch (error) {
       console.error('[booking] Erro ao carregar horários:', error);
       setHorariosDisponiveis([]);
     }
-  }, [formData.servico_id, formData.data, servicos, loadingHorarios, configuracoes.length, isDiaAtivo, calcularHorariosDisponiveis, minDateTime, agora]);
+  }, [formData.servico_id, formData.data, servicos, loadingHorarios, configuracoes, isDiaAtivo, calcularHorariosDisponiveis, minDateTime, agora, gerarHorariosFallback]);
 
   useEffect(() => {
     if (formData.servico_id && formData.data) {
@@ -427,104 +603,121 @@ Você receberá uma confirmação em breve.
   };
 
   if (success) {
-    return (
-      <div className="flex flex-col min-h-screen" style={{ '--primary': primaryHsl } as React.CSSProperties}>
-        <SalonHeader config={configOnline} />
-        <div className="flex-1 bg-gradient-to-br from-primary/5 to-secondary/5 flex items-center justify-center p-4">
-          <Card className="w-full max-w-md border-none shadow-[0_30px_60px_rgba(0,0,0,0.12)] bg-white/90 backdrop-blur-xl rounded-[3rem] overflow-hidden animate-in zoom-in duration-500">
-            <div className="bg-primary h-2 w-full" />
-            <CardHeader className="text-center pb-2">
-              <div className="mx-auto mb-6 w-24 h-24 bg-primary/10 rounded-[2.5rem] flex items-center justify-center rotate-12 animate-bounce">
-                <CheckCircle2 className="w-12 h-12 text-primary" />
+    if (embedded) {
+      return (
+        <div className="flex items-center justify-center rounded-[1.5rem] bg-gradient-to-br from-primary/5 to-secondary/10 p-4">
+          <Card className="w-full max-w-md overflow-hidden rounded-[2rem] border border-primary/10 bg-card/90 shadow-xl backdrop-blur-xl animate-in zoom-in duration-500">
+            <div className="h-1.5 w-full bg-gradient-to-r from-primary via-secondary to-primary" />
+            <CardHeader className="pb-3 pt-8 text-center">
+              <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-[1.75rem] bg-primary/10 text-primary shadow-inner">
+                <CheckCircle2 className="h-11 w-11" />
               </div>
-              <CardTitle className="text-3xl font-black text-primary tracking-tighter">Agendamento Confirmado!</CardTitle>
-              <CardDescription className="text-base font-medium px-4">
-                Tudo pronto! Seu horário foi reservado com sucesso em nosso sistema.
+              <CardTitle className="text-2xl font-black tracking-tight text-foreground">Agendamento confirmado!</CardTitle>
+              <CardDescription className="px-4 text-sm leading-relaxed">
+                Seu horário foi reservado com sucesso. Obrigado por escolher {configOnline.nome_salao}.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6 p-8">
-              <div className="bg-primary/5 p-6 rounded-[2rem] border-2 border-primary/10 space-y-4 relative overflow-hidden group">
-                <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:rotate-12 transition-transform duration-500">
-                  <Calendar className="w-20 h-20 text-primary" />
+            <CardContent className="px-6 pb-7 pt-2 text-center">
+              <div className="rounded-2xl bg-primary/[0.06] p-4 text-left">
+                <p className="font-bold text-foreground">{servicoSelecionado?.nome}</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {new Date(formData.data + 'T00:00:00').toLocaleDateString('pt-BR')} às {formData.horario}
+                </p>
+              </div>
+              <p className="mt-4 text-xs text-muted-foreground">Guarde os dados do seu horário. Você receberá uma confirmação em breve.</p>
+            </CardContent>
+          </Card>
+        </div>
+      );
+    }
+    return (
+      <div className="flex flex-col min-h-screen" style={themeStyle}>
+        <SalonHeader config={configOnline} />
+        <main className="relative flex flex-1 items-center justify-center overflow-hidden px-4 py-14 sm:px-6 sm:py-20">
+          <div className="pointer-events-none absolute left-1/2 top-1/2 h-[28rem] w-[28rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/10 blur-3xl" />
+          <Card className="relative w-full max-w-2xl overflow-hidden rounded-[2rem] border border-white/70 bg-card/90 shadow-[0_35px_100px_-35px_rgba(15,23,42,0.35)] backdrop-blur-xl animate-in zoom-in duration-500 sm:rounded-[2.5rem]">
+            <div className="h-2 w-full bg-gradient-to-r from-primary via-secondary to-primary" />
+            <CardHeader className="px-6 pb-5 pt-9 text-center sm:px-10 sm:pt-12">
+              <div className="relative mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-[2rem] bg-primary/10 text-primary shadow-inner ring-8 ring-primary/[0.04]">
+                <CheckCircle2 className="h-14 w-14" />
+                <span className="absolute -right-1 -top-1 h-5 w-5 rounded-full border-4 border-card bg-emerald-500" />
+              </div>
+              <span className="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-primary">Tudo certo</span>
+              <CardTitle className="text-3xl font-black tracking-tight text-foreground sm:text-4xl">Agendamento confirmado!</CardTitle>
+              <CardDescription className="mx-auto mt-2 max-w-md text-base leading-relaxed">
+                {formData.nome_completo ? `${formData.nome_completo}, seu` : 'Seu'} horário está reservado em {configOnline.nome_salao}.
+                Guarde os detalhes abaixo.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6 px-5 pb-7 sm:px-10 sm:pb-10">
+              <div className="overflow-hidden rounded-[1.75rem] border border-primary/10 bg-background/80 shadow-sm">
+                <div className="flex items-center gap-4 border-b border-border/70 bg-primary/[0.04] p-5 sm:p-6">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                    <Scissors className="h-6 w-6" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold uppercase tracking-[0.16em] text-muted-foreground">Serviço</p>
+                    <p className="truncate text-lg font-extrabold text-foreground">{servicoSelecionado?.nome}</p>
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-4 relative z-10">
-                  <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm">
-                    <Scissors className="w-6 h-6 text-primary" />
+                <div className="grid grid-cols-2 divide-x divide-border/70">
+                  <div className="p-5 sm:p-6">
+                    <p className="text-xs font-bold uppercase tracking-[0.16em] text-muted-foreground">Data</p>
+                    <p className="mt-1 font-bold text-foreground">{new Date(formData.data + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
                   </div>
-                  <div>
-                    <p className="text-[10px] uppercase font-black text-muted-foreground tracking-widest">Serviço</p>
-                    <p className="font-bold text-lg leading-tight">{servicoSelecionado?.nome}</p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 relative z-10">
-                  <div className="bg-white p-3 rounded-2xl shadow-sm border border-primary/5">
-                    <p className="text-[10px] uppercase font-black text-muted-foreground tracking-widest">Data</p>
-                    <p className="font-bold">{new Date(formData.data + 'T00:00:00').toLocaleDateString('pt-BR')}</p>
-                  </div>
-                  <div className="bg-white p-3 rounded-2xl shadow-sm border border-primary/5">
-                    <p className="text-[10px] uppercase font-black text-muted-foreground tracking-widest">Horário</p>
-                    <p className="font-bold">{formData.horario}</p>
+                  <div className="p-5 sm:p-6">
+                    <p className="text-xs font-bold uppercase tracking-[0.16em] text-muted-foreground">Horário</p>
+                    <p className="mt-1 font-bold text-foreground">{formData.horario}</p>
                   </div>
                 </div>
 
-                <div className="pt-4 border-t border-primary/10 flex flex-col gap-2 relative z-10">
-                  <div className="flex justify-between items-center text-sm font-medium text-muted-foreground/70 uppercase tracking-widest">
+                <div className="space-y-3 border-t border-dashed border-border/80 p-5 sm:p-6">
+                  <div className="flex items-center justify-between gap-4 text-sm text-muted-foreground">
                     <span>Serviço</span>
-                    <span>R$ {valorServico.toFixed(2)}</span>
+                    <span className="font-semibold text-foreground">R$ {valorServico.toFixed(2).replace('.', ',')}</span>
                   </div>
                   {produtoEnabled && produtoId && (
-                    <div className="flex justify-between items-center text-sm font-medium text-primary/70 uppercase tracking-widest animate-in fade-in slide-in-from-top-1">
-                      <span>Produto ({produtoQtd}x)</span>
-                      <span>+ R$ {valorProdutoTotal.toFixed(2)}</span>
+                    <div className="flex items-center justify-between gap-4 text-sm text-muted-foreground">
+                      <span className="truncate">Produto ({produtoQtd}× {produtoSelecionado?.nome})</span>
+                      <span className="shrink-0 font-semibold text-foreground">R$ {valorProdutoTotal.toFixed(2).replace('.', ',')}</span>
                     </div>
                   )}
-                  <Separator className="bg-primary/5 my-1" />
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-black text-foreground uppercase tracking-tighter">Valor Total</span>
-                    <span className="text-3xl font-black text-primary tracking-tighter">R$ {valorTotal.toFixed(2)}</span>
+                  <div className="flex items-end justify-between gap-4 border-t border-border/70 pt-4">
+                    <span className="text-sm font-bold text-foreground">Total</span>
+                    <span className="text-2xl font-black tracking-tight text-primary">R$ {valorTotal.toFixed(2).replace('.', ',')}</span>
                   </div>
                 </div>
-
-                {produtoEnabled && produtoId && (
-                  <div className="mt-2 pt-4 border-t border-primary/10 animate-in fade-in slide-in-from-top-2 relative z-10">
-                    <div className="flex items-center gap-2 mb-2">
-                      <ShoppingBag className="w-4 h-4 text-primary" />
-                      <span className="text-[10px] uppercase font-black text-primary tracking-widest">Produto Extra</span>
-                    </div>
-                    <p className="text-xs font-bold text-muted-foreground bg-white/50 p-2 rounded-xl">
-                      {(() => {
-                        return `${produtoSelecionado?.nome || 'Produto'} • Qtd: ${produtoQtd}`;
-                      })()}
-                    </p>
-                  </div>
-                )}
               </div>
-              
+
+              <div className="rounded-2xl border border-emerald-200/70 bg-emerald-50/70 px-4 py-3 text-center text-sm font-medium text-emerald-900">
+                Guarde este comprovante para apresentar no dia do atendimento.
+              </div>
+
               <div className="flex flex-col gap-3">
                 <Button 
                   onClick={compartilharComprovante}
                   disabled={isSharing}
-                  className="w-full h-14 rounded-2xl flex items-center justify-center gap-3 bg-primary hover:bg-primary/90 text-white font-black shadow-lg shadow-primary/20 transition-all hover:-translate-y-1 active:translate-y-0 border-b-4 border-primary/50"
+                  className={`h-14 w-full rounded-2xl font-bold transition-all hover:-translate-y-0.5 active:translate-y-0 ${buttonAnimationClass}`}
+                  style={{ ...resolvedButtonStyle, borderRadius: buttonRadius, boxShadow: buttonShadowStyle }}
                 >
-                  <Share2 className="w-5 h-5" />
-                  {isSharing ? 'Compartilhando...' : 'Enviar Comprovante'}
+                  <Share2 className="mr-2 h-5 w-5" />
+                  {isSharing ? 'Preparando comprovante...' : 'Compartilhar comprovante'}
                 </Button>
                 
                 <div className="grid grid-cols-2 gap-3">
                   <Button 
                     onClick={copiarComprovante}
                     variant="outline"
-                    className="h-12 rounded-2xl flex items-center gap-2 border-primary/10 font-bold hover:bg-primary/5"
+                    className="h-12 rounded-2xl font-semibold"
                   >
-                    <Copy className="w-4 h-4" />
-                    Copiar
+                    <Copy className="mr-2 h-4 w-4" />
+                    Copiar dados
                   </Button>
                   <Button 
                     onClick={() => window.location.reload()} 
                     variant="ghost"
-                    className="h-12 rounded-2xl font-bold text-muted-foreground hover:text-primary"
+                    className="h-12 rounded-2xl font-semibold text-muted-foreground hover:text-primary"
                   >
                     Novo Agendamento
                   </Button>
@@ -532,16 +725,22 @@ Você receberá uma confirmação em breve.
               </div>
             </CardContent>
           </Card>
-        </div>
+        </main>
         <SalonFooter config={configOnline} />
       </div>
     );
   }
 
-  // Se o agendamento online estiver desativado nas configurações
   if (!configOnline.ativo && !loading) {
+    if (embedded) {
+      return (
+        <div className="rounded-[1.5rem] border-2 border-amber-200 bg-amber-50 dark:bg-amber-950/20 p-6 text-center">
+          <h3 className="font-black">Agendamento pausado</h3><p className="text-sm text-muted-foreground mt-1">Este salão pausou agendamentos online por enquanto.</p>
+        </div>
+      );
+    }
     return (
-      <div className="flex flex-col min-h-screen" style={{ '--primary': primaryHsl } as React.CSSProperties}>
+      <div className="flex flex-col min-h-screen" style={themeStyle}>
         <SalonHeader config={configOnline} />
         <div className="flex-1 bg-gradient-to-br from-primary/5 to-secondary/5 flex items-center justify-center p-4">
           <Card className="w-full max-w-md border-none shadow-[0_30px_60px_rgba(0,0,0,0.12)] bg-white/90 backdrop-blur-xl rounded-[3rem] overflow-hidden p-8 text-center space-y-6">
@@ -571,12 +770,80 @@ Você receberá uma confirmação em breve.
     );
   }
 
+  if (embedded) {
+    return (
+      <Card className="border-none shadow-[0_20px_50px_rgba(0,0,0,0.1)] bg-white/80 backdrop-blur-md rounded-3xl overflow-hidden animate-in fade-in zoom-in duration-500">
+        <CardHeader className="bg-gradient-to-r from-primary/10 to-transparent border-b border-primary/5 p-6 sm:p-8">
+          <ProgressSteps currentStep={currentStep} steps={steps} />
+        </CardHeader>
+        <CardContent className="p-6 sm:p-8">
+          <form ref={formRef} onSubmit={handleSubmit} className="space-y-8">
+            {currentStep === 1 && (
+              <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
+                <div className="flex flex-col gap-2 border-b border-primary/10 pb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-primary/10 rounded-xl">
+                      <User className="w-5 h-5 text-primary" />
+                    </div>
+                    <h3 className="text-xl font-bold text-foreground">Seus Dados</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{configOnline.mensagem_boas_vindas || 'Preencha os dados abaixo para agendar seu horário.'}</p>
+                </div>
+                <div className="grid gap-6">
+                  <div className="space-y-2 group">
+                    <Label htmlFor="nome_completo_embed" className="text-sm font-semibold group-focus-within:text-primary transition-colors">Nome Completo *</Label>
+                    <Input id="nome_completo_embed" value={formData.nome_completo} onChange={(e) => handleInputChange('nome_completo', e.target.value)} placeholder="Seu nome completo" className={`h-12 rounded-xl border-primary/10 bg-white/50 focus:bg-white shadow-sm transition-all duration-300 ${errors.nome_completo ? 'border-destructive ring-destructive/20' : 'focus:shadow-md focus:ring-primary/20'}`} />
+                    {errors.nome_completo && (<span className="text-xs text-destructive font-medium animate-in fade-in slide-in-from-top-1">{errors.nome_completo}</span>)}
+                  </div>
+                  <div className="space-y-2 group">
+                    <Label htmlFor="email_embed" className="text-sm font-semibold group-focus-within:text-primary transition-colors">Email *</Label>
+                    <Input id="email_embed" type="email" value={formData.email} onChange={(e) => handleInputChange('email', e.target.value)} placeholder="seu@email.com" className={`h-12 rounded-xl border-primary/10 bg-white/50 focus:bg-white shadow-sm transition-all duration-300 ${errors.email ? 'border-destructive ring-destructive/20' : 'focus:shadow-md focus:ring-primary/20'}`} />
+                    {errors.email && (<span className="text-xs text-destructive font-medium animate-in fade-in slide-in-from-top-1">{errors.email}</span>)}
+                  </div>
+                  <div className="space-y-2 group">
+                    <Label htmlFor="telefone_embed" className="text-sm font-semibold group-focus-within:text-primary transition-colors">Telefone *</Label>
+                    <Input id="telefone_embed" value={formData.telefone} onChange={(e) => handleInputChange('telefone', e.target.value)} placeholder="(11) 99999-9999" className={`h-12 rounded-xl border-primary/10 bg-white/50 focus:bg-white shadow-sm transition-all duration-300 ${errors.telefone ? 'border-destructive ring-destructive/20' : 'focus:shadow-md focus:ring-primary/20'}`} />
+                    {errors.telefone && (<span className="text-xs text-destructive font-medium animate-in fade-in slide-in-from-top-1">{errors.telefone}</span>)}
+                  </div>
+                </div>
+                <div className="flex gap-4 pt-4">
+                  <Button
+                    type="button"
+                    onClick={handleNextStep}
+                    className={`flex-1 h-14 text-white font-bold shadow-lg ${buttonAnimationClass}`}
+                    style={{
+                      background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`,
+                      borderRadius: buttonRadius,
+                      boxShadow: `0 12px 30px ${primaryColor}33`
+                    }}
+                  >
+                    Continuar <ArrowRight className="w-5 h-5 ml-2" />
+                  </Button>
+                </div>
+              </div>
+            )}
+            {currentStep !== 1 && (<div className="text-center py-8 text-sm text-muted-foreground">Continue no formulário completo — este é o modo embarcado simplificado. <Button variant="link" onClick={()=>window.location.href='/agendamento-online?s='+encodeURIComponent(configOnline.public_id||'')}>Abrir página completa</Button></div>)}
+          </form>
+        </CardContent>
+      </Card>
+    );
+  }
   return (
-    <div className="flex flex-col min-h-screen" style={{ '--primary': primaryHsl, '--ring': primaryHsl } as React.CSSProperties}>
+    <div className="flex flex-col min-h-screen" style={themeStyle}>
       <SalonHeader config={configOnline} />
+      <SalonLandingContent config={configOnline} />
       <div className="flex-1 bg-gradient-to-b from-transparent to-primary/5 p-4 sm:p-6 pb-20">
         <div className="max-w-2xl mx-auto">
-          <Card className="border-none shadow-[0_20px_50px_rgba(0,0,0,0.1)] bg-white/80 backdrop-blur-md rounded-3xl overflow-hidden animate-in fade-in zoom-in duration-500">
+          <Card
+            id="agendamento-form"
+            className="overflow-hidden rounded-3xl border bg-white/80 backdrop-blur-md animate-in fade-in zoom-in duration-500"
+            style={{
+              background: configOnline.card_background || visualCardBackground,
+              borderColor: cardVisualStyle === 'bordered' ? `${primaryColor}55` : `${primaryColor}18`,
+              borderWidth: cardVisualStyle === 'bordered' ? 2 : 1,
+              boxShadow: cardShadowStyle,
+            }}
+          >
             <CardHeader className="bg-gradient-to-r from-primary/10 to-transparent border-b border-primary/5 p-6 sm:p-8">
               <ProgressSteps currentStep={currentStep} steps={steps} />
             </CardHeader>
@@ -585,63 +852,100 @@ Você receberá uma confirmação em breve.
                 {/* Step 1: Dados Pessoais */}
                 {currentStep === 1 && (
                   <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
-                    <div className="flex flex-col gap-2 border-b border-primary/10 pb-4">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-primary/10 rounded-xl">
-                          <User className="w-5 h-5 text-primary" />
+                    <div className="relative overflow-hidden rounded-[1.75rem] border border-primary/10 bg-gradient-to-br from-primary/[0.08] via-card/80 to-secondary/[0.12] p-5 shadow-sm sm:p-7">
+                      <div className="pointer-events-none absolute -right-10 -top-12 h-36 w-36 rounded-full bg-primary/10 blur-3xl" />
+                      <div className="relative flex items-start gap-4">
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg shadow-primary/20">
+                          <UserRound className="h-6 w-6" />
                         </div>
-                        <h3 className="text-xl font-bold text-foreground">
-                          Seus Dados
-                        </h3>
+                        <div className="space-y-1">
+                          <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">Etapa 1 de 3</p>
+                          <h3 className="text-2xl font-black tracking-tight text-foreground sm:text-3xl">Vamos nos conhecer</h3>
+                          <p className="text-sm leading-relaxed text-muted-foreground">
+                            Seus dados ajudam o espaço a confirmar seu horário e entrar em contato.
+                          </p>
+                        </div>
                       </div>
-                      <p className="text-sm text-muted-foreground leading-relaxed">
-                        {configOnline.mensagem_boas_vindas || 'Preencha os dados abaixo para agendar seu horário.'}
-                      </p>
                     </div>
-                  
-                    <div className="grid gap-6">
-                      <div className="space-y-2 group">
-                        <Label htmlFor="nome_completo" className="text-sm font-semibold group-focus-within:text-primary transition-colors">Nome Completo *</Label>
+
+                    {configOnline.mensagem_boas_vindas && (
+                      <p className="rounded-2xl border border-border/70 bg-card/60 px-4 py-3 text-sm leading-relaxed text-muted-foreground">
+                        {configOnline.mensagem_boas_vindas}
+                      </p>
+                    )}
+
+                    <div className="grid gap-5 sm:grid-cols-2">
+                      <div className="space-y-2 sm:col-span-2">
+                        <Label htmlFor="nome_completo" className="text-sm font-bold">Nome completo <span className="text-primary">*</span></Label>
+                        <div className={`group relative rounded-2xl border bg-background/80 transition-all duration-200 focus-within:border-primary focus-within:bg-background focus-within:ring-4 focus-within:ring-primary/10 ${errors.nome_completo ? 'border-destructive' : 'border-input'}`}>
+                          <UserRound className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary" />
                         <Input
                           id="nome_completo"
+                          name="name"
+                          autoComplete="name"
                           value={formData.nome_completo}
                           onChange={(e) => handleInputChange('nome_completo', e.target.value)}
-                          placeholder="Seu nome completo"
-                          className={`h-12 rounded-xl border-primary/10 bg-white/50 focus:bg-white shadow-sm transition-all duration-300 ${errors.nome_completo ? 'border-destructive ring-destructive/20' : 'focus:shadow-md focus:ring-primary/20'}`}
+                          placeholder="Como podemos chamar você?"
+                          aria-invalid={Boolean(errors.nome_completo)}
+                          className="h-14 rounded-2xl border-0 bg-transparent pl-12 pr-4 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
                         />
+                        </div>
                         {errors.nome_completo && (
-                          <span className="text-xs text-destructive font-medium animate-in fade-in slide-in-from-top-1">{errors.nome_completo}</span>
+                          <span role="alert" className="text-xs font-medium text-destructive animate-in fade-in slide-in-from-top-1">{errors.nome_completo}</span>
                         )}
                       </div>
 
-                      <div className="space-y-2 group">
-                        <Label htmlFor="email" className="text-sm font-semibold group-focus-within:text-primary transition-colors">Email *</Label>
-                        <Input
-                          id="email"
-                          type="email"
-                          value={formData.email}
-                          onChange={(e) => handleInputChange('email', e.target.value)}
-                          placeholder="seu@email.com"
-                          className={`h-12 rounded-xl border-primary/10 bg-white/50 focus:bg-white shadow-sm transition-all duration-300 ${errors.email ? 'border-destructive ring-destructive/20' : 'focus:shadow-md focus:ring-primary/20'}`}
-                        />
-                        {errors.email && (
-                          <span className="text-xs text-destructive font-medium animate-in fade-in slide-in-from-top-1">{errors.email}</span>
-                        )}
-                      </div>
-
-                      <div className="space-y-2 group">
-                        <Label htmlFor="telefone" className="text-sm font-semibold group-focus-within:text-primary transition-colors">Telefone *</Label>
+                      <div className="space-y-2">
+                        <Label htmlFor="telefone" className="text-sm font-bold">Celular / WhatsApp <span className="text-primary">*</span></Label>
+                        <div className={`group relative rounded-2xl border bg-background/80 transition-all duration-200 focus-within:border-primary focus-within:bg-background focus-within:ring-4 focus-within:ring-primary/10 ${errors.telefone ? 'border-destructive' : 'border-input'}`}>
+                          <Phone className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary" />
                         <Input
                           id="telefone"
+                          name="tel"
+                          type="tel"
+                          autoComplete="tel"
+                          inputMode="tel"
                           value={formData.telefone}
                           onChange={(e) => handleInputChange('telefone', e.target.value)}
                           placeholder="(11) 99999-9999"
-                          className={`h-12 rounded-xl border-primary/10 bg-white/50 focus:bg-white shadow-sm transition-all duration-300 ${errors.telefone ? 'border-destructive ring-destructive/20' : 'focus:shadow-md focus:ring-primary/20'}`}
+                          aria-invalid={Boolean(errors.telefone)}
+                          className="h-14 rounded-2xl border-0 bg-transparent pl-12 pr-4 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
                         />
+                        </div>
                         {errors.telefone && (
-                          <span className="text-xs text-destructive font-medium animate-in fade-in slide-in-from-top-1">{errors.telefone}</span>
+                          <span role="alert" className="text-xs font-medium text-destructive animate-in fade-in slide-in-from-top-1">{errors.telefone}</span>
+                        )}
+                        <p className="pl-1 text-xs text-muted-foreground">Usaremos para confirmar seu agendamento.</p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="email" className="text-sm font-bold">E-mail <span className="text-primary">*</span></Label>
+                        <div className={`group relative rounded-2xl border bg-background/80 transition-all duration-200 focus-within:border-primary focus-within:bg-background focus-within:ring-4 focus-within:ring-primary/10 ${errors.email ? 'border-destructive' : 'border-input'}`}>
+                          <Mail className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary" />
+                        <Input
+                          id="email"
+                          name="email"
+                          type="email"
+                          autoComplete="email"
+                          inputMode="email"
+                          value={formData.email}
+                          onChange={(e) => handleInputChange('email', e.target.value)}
+                          placeholder="seu@email.com"
+                          aria-invalid={Boolean(errors.email)}
+                          className="h-14 rounded-2xl border-0 bg-transparent pl-12 pr-4 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                        />
+                        </div>
+                        {errors.email && (
+                          <span role="alert" className="text-xs font-medium text-destructive animate-in fade-in slide-in-from-top-1">{errors.email}</span>
                         )}
                       </div>
+                    </div>
+
+                    <div className="flex items-start gap-3 rounded-2xl border border-primary/10 bg-primary/[0.04] p-4">
+                      <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+                      <p className="text-xs leading-relaxed text-muted-foreground">
+                        Seus dados são usados apenas para organizar e confirmar seu atendimento com {configOnline.nome_salao}.
+                      </p>
                     </div>
                   </div>
                 )}
@@ -649,14 +953,21 @@ Você receberá uma confirmação em breve.
                 {/* Step 2: Serviço e Agendamento */}
                 {currentStep === 2 && (
                   <div className="space-y-8 animate-in slide-in-from-right-4 duration-300">
-                    <div className="flex flex-col gap-2 border-b border-primary/10 pb-4">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-primary/10 rounded-xl">
-                          <Scissors className="w-5 h-5 text-primary" />
+                    <div className="relative overflow-hidden rounded-[1.75rem] border border-primary/10 bg-gradient-to-br from-primary/[0.08] via-card/80 to-secondary/[0.12] p-5 shadow-sm sm:p-7">
+                      <div className="pointer-events-none absolute -right-10 -top-12 h-36 w-36 rounded-full bg-primary/10 blur-3xl" />
+                      <div className="relative flex items-start gap-4">
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg shadow-primary/20">
+                          <Scissors className="h-6 w-6" />
                         </div>
-                        <h3 className="text-xl font-bold text-foreground">
-                          Escolha o Serviço
-                        </h3>
+                        <div className="space-y-1">
+                          <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">Etapa 2 de 3</p>
+                          <h3 className="text-2xl font-black tracking-tight text-foreground sm:text-3xl">
+                            Escolha seu serviço
+                          </h3>
+                          <p className="text-sm leading-relaxed text-muted-foreground">
+                            Selecione o atendimento desejado para ver os horários disponíveis.
+                          </p>
+                        </div>
                       </div>
                     </div>
 
@@ -665,7 +976,7 @@ Você receberá uma confirmação em breve.
                         {Array.from({ length: 4 }).map((_, i) => (
                           <div
                             key={i}
-                            className="h-[140px] rounded-[2rem] border border-primary/10 bg-white/50 animate-pulse"
+                            className="h-[176px] rounded-[1.75rem] border border-primary/10 bg-card/60 animate-pulse"
                           />
                         ))}
                       </div>
@@ -707,58 +1018,60 @@ Você receberá uma confirmação em breve.
                         <button
                           key={servico.id}
                           type="button"
+                          aria-pressed={formData.servico_id === servico.id}
                           onClick={() => handleInputChange('servico_id', servico.id)}
                           className={cn(
-                            "group relative flex flex-col p-5 rounded-[2rem] border-2 transition-all duration-300 text-left",
+                            "group relative flex min-h-[190px] flex-col overflow-hidden rounded-[1.75rem] border p-5 text-left transition-all duration-300 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20 motion-reduce:transform-none",
                             formData.servico_id === servico.id
-                              ? "border-primary bg-primary/5 shadow-[0_10px_30px_rgba(var(--primary),0.2)] scale-[1.02] -translate-y-1 border-b-8 active:translate-y-0 active:border-b-2"
-                              : "border-primary/10 bg-white/50 hover:border-primary/30 hover:bg-white hover:-translate-y-1 hover:shadow-xl border-b-4 active:translate-y-0 active:border-b-2"
+                              ? "border-primary bg-primary/[0.06] shadow-[0_18px_45px_-20px_rgba(var(--primary),0.5)] ring-2 ring-primary/15"
+                              : "border-border/70 bg-card/75 shadow-sm hover:-translate-y-1 hover:border-primary/30 hover:bg-card hover:shadow-xl"
                           )}
                         >
-                          <div className="flex justify-between items-start mb-3">
+                          <div className="mb-5 flex w-full items-start justify-between">
                             <div className={cn(
-                              "p-3 rounded-2xl transition-all duration-500",
+                              "flex h-12 w-12 items-center justify-center rounded-2xl transition-all duration-300",
                               formData.servico_id === servico.id 
-                                ? "bg-primary text-white shadow-lg rotate-12" 
-                                : "bg-primary/10 text-primary group-hover:rotate-12"
+                                ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25" 
+                                : "bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground"
                             )}>
-                              <Scissors className="w-5 h-5" />
+                              <Scissors className="h-5 w-5" />
                             </div>
                             {formData.servico_id === servico.id && (
-                              <div className="bg-primary text-white p-1.5 rounded-full shadow-lg animate-in zoom-in">
-                                <Check className="w-4 h-4 stroke-[3]" />
-                              </div>
+                              <span className="inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1.5 text-xs font-bold text-primary-foreground shadow-sm animate-in zoom-in">
+                                <Check className="h-3.5 w-3.5 stroke-[3]" />
+                                Selecionado
+                              </span>
                             )}
-                          </div>
-                          
-                          <h4 className="font-black text-lg text-foreground group-hover:text-primary transition-colors leading-tight">
-                            {servico.nome}
-                          </h4>
-                          
-                          <div className="flex items-center gap-3 mt-4">
-                            {configOnline.mostrar_precos && (
-                              <div className="flex flex-col">
-                                <span className="text-[10px] uppercase font-black text-muted-foreground/50 tracking-tighter">Preço</span>
-                                <span className="text-primary font-black text-xl tracking-tighter">
-                                  R$ {servico.valor.toFixed(2)}
-                                </span>
-                              </div>
-                            )}
-                            <div className="w-px h-8 bg-primary/10 mx-1" />
-                            {configOnline.mostrar_duracao && (
-                              <div className="flex flex-col">
-                                <span className="text-[10px] uppercase font-black text-muted-foreground/50 tracking-tighter">Duração</span>
-                                <span className="text-muted-foreground font-bold text-sm flex items-center gap-1">
-                                  <Timer className="w-3.5 h-3.5 text-primary/50" />
-                                  {servico.duracao} min
-                                </span>
-                              </div>
+                            {formData.servico_id !== servico.id && (
+                              <span className="rounded-full border border-border bg-background/70 px-3 py-1.5 text-xs font-semibold text-muted-foreground transition-colors group-hover:border-primary/20 group-hover:text-primary">
+                                Selecionar
+                              </span>
                             )}
                           </div>
 
-                          {/* Efeito de brilho ao selecionar */}
+                          <div className="flex flex-1 flex-col">
+                            <h4 className="text-lg font-extrabold leading-tight text-foreground transition-colors group-hover:text-primary">
+                              {servico.nome}
+                            </h4>
+                            <div className="mt-auto flex flex-wrap items-end justify-between gap-3 pt-5">
+                              {configOnline.mostrar_precos && (
+                                <div className="min-w-0">
+                                  <span className="mb-1 block text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">Investimento</span>
+                                  <span className="text-xl font-black tracking-tight text-primary">
+                                    R$ {servico.valor.toFixed(2)}
+                                  </span>
+                                </div>
+                              )}
+                              {configOnline.mostrar_duracao && (
+                                <span className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-background/75 px-3 py-2 text-xs font-semibold text-muted-foreground">
+                                  <Timer className="h-4 w-4 text-primary" />
+                                  {servico.duracao} min
+                                </span>
+                              )}
+                            </div>
+                          </div>
                           {formData.servico_id === servico.id && (
-                            <div className="absolute inset-0 bg-gradient-to-tr from-primary/10 to-transparent rounded-[2rem] pointer-events-none" />
+                            <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-primary/50 to-secondary" />
                           )}
                         </button>
                       ))}
@@ -927,53 +1240,90 @@ Você receberá uma confirmação em breve.
                 {/* Step 3: Condições e Finalização */}
                 {currentStep === 3 && (
                   <div className="space-y-8 animate-in slide-in-from-right-4 duration-300">
-                    {/* Resumo do Agendamento */}
-                    <div className="bg-primary/5 rounded-2xl p-6 border border-primary/10 shadow-inner">
-                      <h3 className="text-lg font-bold flex items-center gap-2 mb-4 text-primary">
-                        <Clock className="w-5 h-5" />
-                        Resumo do Agendamento
-                      </h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                        <div className="space-y-1">
-                          <p className="text-muted-foreground">Cliente</p>
-                          <p className="font-bold text-foreground truncate">{formData.nome_completo}</p>
+                    <div className="relative overflow-hidden rounded-[1.75rem] border border-primary/10 bg-gradient-to-br from-primary/[0.08] via-card/80 to-secondary/[0.12] p-5 shadow-sm sm:p-7">
+                      <div className="pointer-events-none absolute -right-10 -top-12 h-36 w-36 rounded-full bg-primary/10 blur-3xl" />
+                      <div className="relative flex items-start gap-4">
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg shadow-primary/20">
+                          <CheckCircle2 className="h-6 w-6" />
                         </div>
                         <div className="space-y-1">
-                          <p className="text-muted-foreground">Serviço</p>
-                          <p className="font-bold text-foreground">{servicoSelecionado?.nome}</p>
-                        </div>
-                        <div className="space-y-1">
-                          <p className="text-muted-foreground">Data e Horário</p>
-                          <p className="font-bold text-foreground">
-                            {formData.data ? new Date(formData.data + 'T00:00:00').toLocaleDateString('pt-BR') : '-'} às {formData.horario}
+                          <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">Etapa 3 de 3</p>
+                          <h3 className="text-2xl font-black tracking-tight text-foreground sm:text-3xl">Revise e finalize</h3>
+                          <p className="text-sm leading-relaxed text-muted-foreground">
+                            Confira os detalhes e confirme seu agendamento.
                           </p>
                         </div>
-                        <div className="space-y-1">
-                          <p className="text-muted-foreground">Investimento</p>
-                          <p className="font-bold text-primary text-lg">R$ {servicoSelecionado?.valor.toFixed(2)}</p>
+                      </div>
+                    </div>
+
+                    <div className="overflow-hidden rounded-[1.75rem] border border-border/70 bg-card/80 shadow-lg shadow-foreground/5">
+                      <div className="flex items-center justify-between border-b border-border/70 px-5 py-4 sm:px-6">
+                        <div>
+                          <p className="text-xs font-bold uppercase tracking-[0.16em] text-primary">Tudo certo?</p>
+                          <h3 className="mt-1 text-lg font-extrabold">Resumo do agendamento</h3>
+                        </div>
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                          <Calendar className="h-5 w-5" />
+                        </div>
+                      </div>
+                      <div className="grid gap-3 p-4 sm:grid-cols-2 sm:p-6">
+                        <div className="rounded-2xl bg-muted/50 p-4">
+                          <p className="mb-1 text-xs font-semibold text-muted-foreground">Cliente</p>
+                          <p className="truncate font-bold text-foreground">{formData.nome_completo || '—'}</p>
+                          <p className="mt-1 truncate text-sm text-muted-foreground">{formData.telefone}</p>
+                          <p className="truncate text-sm text-muted-foreground">{formData.email}</p>
+                        </div>
+                        <div className="rounded-2xl bg-muted/50 p-4">
+                          <p className="mb-1 text-xs font-semibold text-muted-foreground">Serviço</p>
+                          <p className="font-bold text-foreground">{servicoSelecionado?.nome || '—'}</p>
+                          {configOnline.mostrar_duracao && servicoSelecionado && (
+                            <p className="mt-1 inline-flex items-center gap-1.5 text-sm text-muted-foreground">
+                              <Timer className="h-4 w-4 text-primary" /> {servicoSelecionado.duracao} minutos
+                            </p>
+                          )}
+                        </div>
+                        <div className="rounded-2xl bg-muted/50 p-4">
+                          <p className="mb-1 text-xs font-semibold text-muted-foreground">Data e horário</p>
+                          <p className="font-bold text-foreground">
+                            {formData.data ? new Date(formData.data + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' }) : '—'}
+                          </p>
+                          <p className="mt-1 inline-flex items-center gap-1.5 text-sm text-muted-foreground">
+                            <Clock className="h-4 w-4 text-primary" /> {formData.horario || '—'}
+                          </p>
+                        </div>
+                        <div className="rounded-2xl bg-primary/[0.06] p-4">
+                          <p className="mb-1 text-xs font-semibold text-muted-foreground">Valor total</p>
+                          <p className="text-2xl font-black tracking-tight text-primary">
+                            R$ {valorTotal.toFixed(2).replace('.', ',')}
+                          </p>
+                          {produtoEnabled && produtoId && produtoSelecionado && (
+                            <p className="mt-1 text-xs text-muted-foreground">
+                              Serviço e {produtoQtd}× {produtoSelecionado.nome}
+                            </p>
+                          )}
                         </div>
                       </div>
                     </div>
 
                     {/* Produtos opcionais */}
-                    <div className="bg-white/50 border border-primary/10 rounded-3xl p-6 space-y-6 shadow-xl relative overflow-hidden group">
+                    <div className="relative overflow-hidden rounded-[1.75rem] border border-border/70 bg-card/75 p-5 shadow-sm sm:p-6">
                       <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                         <ShoppingBag className="w-12 h-12 text-primary" />
                       </div>
 
-                      <div className="flex items-center justify-between relative z-10">
+                      <div className="relative z-10 flex items-center justify-between gap-4">
                         <div className="space-y-1">
-                          <h3 className="text-xl font-black flex items-center gap-2 text-foreground">
-                            <ShoppingBag className="w-6 h-6 text-primary" />
-                            Produtos Extras
+                          <h3 className="flex items-center gap-2 text-lg font-extrabold text-foreground">
+                            <ShoppingBag className="h-5 w-5 text-primary" />
+                            Complemente seu atendimento
                           </h3>
-                          <p className="text-xs text-muted-foreground font-bold uppercase tracking-tighter">Adicione itens ao seu agendamento</p>
+                          <p className="text-sm text-muted-foreground">Deseja adicionar algum produto? Esta etapa é opcional.</p>
                         </div>
                         <Checkbox 
                           id="produtoEnabled"
                           checked={produtoEnabled}
                           onCheckedChange={(checked) => setProdutoEnabled(!!checked)}
-                          className="w-8 h-8 rounded-xl border-primary/20 data-[state=checked]:bg-primary data-[state=checked]:border-primary transition-all duration-300 shadow-lg"
+                          className="h-6 w-6 rounded-lg border-primary/30 data-[state=checked]:border-primary data-[state=checked]:bg-primary"
                         />
                       </div>
                       
@@ -1065,15 +1415,24 @@ Você receberá uma confirmação em breve.
                     {/* Condições e Termos */}
                     <div className="space-y-4">
                       {configOnline.taxa_sinal_percentual > 0 && (
-                        <div className="bg-amber-50 border border-amber-100 rounded-2xl p-6 shadow-sm">
-                          <div className="flex items-start gap-4">
+                        <div className={`rounded-[1.5rem] border p-5 transition-colors ${taxaAccepted ? 'border-amber-300 bg-amber-50/80 ring-2 ring-amber-200/60' : 'border-amber-200 bg-amber-50/50'}`}>
+                          <div className="mb-4 flex items-center gap-3">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-700">
+                              <Clock className="h-5 w-5" />
+                            </div>
+                            <div>
+                              <h4 className="font-extrabold text-amber-950">Taxa para garantir o horário</h4>
+                              <p className="text-xs font-medium text-amber-800">Leia as condições antes de confirmar</p>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-3 rounded-2xl border border-amber-200/80 bg-white/70 p-4">
                             <Checkbox
                               id="taxa"
                               checked={taxaAccepted}
                               onCheckedChange={(checked) => setTaxaAccepted(checked as boolean)}
-                              className="mt-1 w-6 h-6 rounded-lg border-amber-300 data-[state=checked]:bg-amber-600"
+                              className="mt-0.5 h-5 w-5 shrink-0 rounded-md border-amber-300 data-[state=checked]:bg-amber-600"
                             />
-                            <Label htmlFor="taxa" className="text-sm leading-relaxed cursor-pointer text-amber-900 font-medium">
+                            <Label htmlFor="taxa" className="cursor-pointer text-sm font-normal leading-relaxed text-amber-950">
                               Oi, tudo bem? 💙 Para garantir seu horário pedimos uma taxa antecipada de {configOnline.taxa_sinal_percentual}%. 
                               Esse valor é abatido no dia do atendimento. 
                               Não devolvemos em caso de cancelamento sem justificativa. *
@@ -1082,14 +1441,18 @@ Você receberá uma confirmação em breve.
                         </div>
                       )}
 
-                      <div className="flex items-start gap-4 px-2">
+                      <div
+                        className={`flex cursor-pointer items-start gap-3 rounded-[1.5rem] border p-5 transition-colors ${
+                          termsAccepted ? 'border-primary/40 bg-primary/[0.06] ring-2 ring-primary/10' : 'border-border bg-card/70 hover:border-primary/25'
+                        }`}
+                      >
                         <Checkbox
                           id="terms"
                           checked={termsAccepted}
                           onCheckedChange={(checked) => setTermsAccepted(checked as boolean)}
-                          className="w-6 h-6 rounded-lg border-primary/20 mt-1"
+                          className="mt-0.5 h-5 w-5 shrink-0 rounded-md border-primary/30"
                         />
-                        <Label htmlFor="terms" className="text-sm text-muted-foreground font-medium cursor-pointer leading-relaxed">
+                        <Label htmlFor="terms" className="cursor-pointer text-sm font-medium leading-relaxed text-foreground">
                           {configOnline.termos_condicoes || 'Aceito os termos e concordo em receber confirmações por WhatsApp *'}
                         </Label>
                       </div>
@@ -1115,8 +1478,8 @@ Você receberá uma confirmação em breve.
                     <Button 
                       type="button"
                       onClick={handleNextStep}
-                      className="flex-1 h-14 rounded-2xl text-white font-bold shadow-lg transition-all hover:translate-y-[-2px] active:translate-y-[1px] active:shadow-none"
-                      style={{ background: primaryColor }}
+                      className={`flex-1 h-14 font-bold transition-all active:translate-y-[1px] active:shadow-none ${buttonAnimationClass}`}
+                      style={{ ...resolvedButtonStyle, borderRadius: buttonRadius, boxShadow: buttonShadowStyle }}
                     >
                       Continuar
                       <ArrowRight className="w-5 h-5 ml-2" />
@@ -1124,15 +1487,19 @@ Você receberá uma confirmação em breve.
                   ) : (
                     <Button 
                       type="submit" 
-                      className={`flex-1 h-14 rounded-2xl font-bold shadow-lg transition-all active:translate-y-[1px] active:shadow-none ${
+                      className={`flex-1 h-14 font-bold shadow-lg transition-all active:translate-y-[1px] active:shadow-none ${buttonAnimationClass} ${
                         isSubmitting || !termsAccepted || (configOnline.taxa_sinal_percentual > 0 && !taxaAccepted)
                         ? 'bg-muted cursor-not-allowed' 
                         : 'text-white hover:shadow-xl hover:translate-y-[-2px]'
                       }`}
-                      style={{ 
-                        background: !isSubmitting && termsAccepted && (configOnline.taxa_sinal_percentual <= 0 || taxaAccepted)
-                          ? `linear-gradient(135deg, ${primaryColor}, ${primaryColor}dd)` 
-                          : undefined 
+                      style={{
+                        ...( !isSubmitting && termsAccepted && (configOnline.taxa_sinal_percentual <= 0 || taxaAccepted)
+                          ? resolvedButtonStyle
+                          : {}),
+                        borderRadius: buttonRadius,
+                        boxShadow: !isSubmitting && termsAccepted && (configOnline.taxa_sinal_percentual <= 0 || taxaAccepted)
+                          ? buttonShadowStyle
+                          : undefined,
                       }}
                       disabled={isSubmitting || !termsAccepted || (configOnline.taxa_sinal_percentual > 0 && !taxaAccepted)}
                     >

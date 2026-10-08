@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useParams } from "react-router-dom";
 import { Suspense, lazy } from 'react';
 import { SupabaseAuthProvider } from "./contexts/SupabaseAuthContext";
 import { Toaster } from "sonner";
@@ -61,6 +61,18 @@ const RedirectWithQuery = ({ to }: { to: string }) => {
   return <Navigate to={`${to}${location.search}`} replace />;
 };
 
+const RedirectSlugToBooking = () => {
+  const location = useLocation();
+  const { slug } = useParams();
+  const params = new URLSearchParams(location.search);
+
+  if (slug) {
+    params.set('s', slug);
+  }
+
+  return <Navigate to={`/agendamento-online?${params.toString()}`} replace />;
+};
+
 const AppContent = () => {
   const location = useLocation();
   // Atualizado para não incluir as rotas alternativas, mas só a principal
@@ -86,6 +98,8 @@ const AppContent = () => {
         } />
         {/* Rota principal de agendamento online */}
         <Route path="/agendamento-online" element={<Suspense fallback={RouteFallback}><AgendamentoOnline /></Suspense>} />
+        {/* /s/:slug deve redirecionar para a rota canônica de agendamento */}
+        <Route path="/s/:slug" element={<RedirectSlugToBooking />} />
         {/* Rotas alternativas redirecionam para a principal, mantendo parâmetros */}
         <Route path="/agendamento-publico" element={<RedirectWithQuery to="/agendamento-online" />} />
         <Route path="/agendar" element={<RedirectWithQuery to="/agendamento-online" />} />

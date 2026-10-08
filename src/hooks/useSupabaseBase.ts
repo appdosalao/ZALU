@@ -2,12 +2,15 @@ import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { toast } from 'sonner';
+import type { Database } from '@/integrations/supabase/types';
+
+type TableName = keyof Database['public']['Tables'];
 
 /**
  * Hook base genérico para operações CRUD com Supabase
  * Reduz duplicação de código entre hooks específicos
  */
-export function useSupabaseBase<T>(tableName: string) {
+export function useSupabaseBase<T>(tableName: TableName) {
   const { user } = useSupabaseAuth();
   const [data, setData] = useState<T[]>([]);
   const [loading, setLoading] = useState(false);
@@ -25,7 +28,7 @@ export function useSupabaseBase<T>(tableName: string) {
     
     try {
       let query = supabase
-        .from(tableName as any)
+        .from(tableName)
         .select(selectQuery)
         .eq('user_id', user.id);
 
@@ -63,8 +66,8 @@ export function useSupabaseBase<T>(tableName: string) {
     setLoading(true);
     try {
       const { data: result, error: insertError } = await supabase
-        .from(tableName as any)
-        .insert({ ...record, user_id: user.id } as any)
+        .from(tableName)
+        .insert({ ...record, user_id: user.id } as Record<string, unknown>)
         .select()
         .single();
 
@@ -102,8 +105,8 @@ export function useSupabaseBase<T>(tableName: string) {
     setLoading(true);
     try {
       const { error: updateError } = await supabase
-        .from(tableName as any)
-        .update(updates as any)
+        .from(tableName)
+        .update(updates as Record<string, unknown>)
         .eq(idColumn, id)
         .eq('user_id', user.id);
 
@@ -140,7 +143,7 @@ export function useSupabaseBase<T>(tableName: string) {
     setLoading(true);
     try {
       const { error: deleteError } = await supabase
-        .from(tableName as any)
+        .from(tableName)
         .delete()
         .eq(idColumn, id)
         .eq('user_id', user.id);

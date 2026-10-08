@@ -40,6 +40,7 @@ export const RankingClientes = () => {
 
   useEffect(() => {
     carregarRanking(limite);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [limite]);
 
   const listaFiltrada = useMemo(() => {

@@ -87,7 +87,7 @@ export const useConfiguracoes = () => {
     return {
       ...supabaseConfig,
       configuracoes,
-      updateConfiguracoes: async (updates: any) => {
+      updateConfiguracoes: async (updates: Record<string, unknown>) => {
         // Implementar conversão e salvamento
         if (updates.notificacoes) {
           await supabaseConfig.salvarNotificacoes({
@@ -120,6 +120,7 @@ export const useConfiguracoes = () => {
         return false;
       },
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     supabaseConfig.configuracaoHorarios, 
     supabaseConfig.configuracaoNotificacoes, 

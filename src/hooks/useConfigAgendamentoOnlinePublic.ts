@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useMemo, useState } from 'react';
 import { supabasePublic } from '@/integrations/supabase/publicClient';
 import type { ConfigAgendamentoOnline } from '@/hooks/useConfigAgendamentoOnline';
@@ -15,6 +16,12 @@ const defaultConfig: ConfigAgendamentoOnline = {
   whatsapp: '',
   logo_url: '',
   banner_url: '',
+  sobre_texto: '',
+  galeria_urls: [],
+  estilo_fundo: 'aurora',
+  cor_fundo: '#F5F3FF',
+  cor_fundo_secundaria: '#FDF2F8',
+  efeito_visual: 'glow',
   taxa_sinal_percentual: 0,
   tempo_minimo_antecedencia: 60,
   tempo_maximo_antecedencia: 4320,
@@ -22,7 +29,17 @@ const defaultConfig: ConfigAgendamentoOnline = {
   termos_condicoes: 'Ao agendar, você concorda em chegar no horário marcado. Em caso de atraso superior a 15 minutos, o agendamento poderá ser cancelado.',
   mensagem_confirmacao: 'Agendamento confirmado! Em breve você receberá uma confirmação no WhatsApp.',
   cor_primaria: '#8B5CF6',
+  tema_preset: 'salao-feminino',
+  cor_secundaria: '#F5D0FE',
   cor_texto_botao: '#FFFFFF',
+  fonte_personalizada: 'Inter, Segoe UI, sans-serif',
+  card_background: '#FFFFFF',
+  raio_botoes: 22,
+  animacao_botao: 'lift',
+  tema_formulario: 'claro',
+  estilo_card: 'premium',
+  estilo_botao: 'gradiente',
+  sombra_botao: 'media',
   mostrar_precos: true,
   mostrar_duracao: true,
 };
@@ -97,6 +114,4 @@ export function useConfigAgendamentoOnlinePublic(ownerUserId?: string | null) {
 
   return { config, loading };
 }
-
-
 

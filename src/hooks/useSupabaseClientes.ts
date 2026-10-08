@@ -12,7 +12,7 @@ export function useSupabaseClientes() {
   const [loading, setLoading] = useState(false);
 
   // Função utilitária para parsing de valores numéricos
-  const parseValor = (v: any): number => {
+  const parseValor = (v: unknown): number => {
     if (typeof v === 'number') return v;
     if (typeof v === 'string') {
       const s = v.replace(/\./g, '').replace(',', '.');
@@ -52,11 +52,11 @@ export function useSupabaseClientes() {
       const historico = ags
         .map(a => ({
           id: a.id,
-          data: new Date(`${a.data}T${(a as any).hora || '00:00'}`),
+          data: new Date(`${a.data}T${a.hora || '00:00'}`),
           servico: servicoNomeMap.get(a.servico_id) || 'Serviço',
           valor: (() => {
-            const vp = parseValor((a as any).valor_pago);
-            const vt = parseValor((a as any).valor);
+            const vp = parseValor(a.valor_pago);
+            const vt = parseValor(a.valor);
             return vp > 0 ? vp : vt;
           })()
         }))
@@ -80,7 +80,7 @@ export function useSupabaseClientes() {
 
       const ultimaElegivel = ags
         .filter(a => a.data <= hojeStr)
-        .map(a => new Date(`${a.data}T${(a as any).hora || '00:00'}`))
+        .map(a => new Date(`${a.data}T${a.hora || '00:00'}`))
         .sort((a, b) => b.getTime() - a.getTime())[0];
       
       const ultimaVisita = ultimaElegivel ? ultimaElegivel.toISOString() : (historico[0]?.data?.toISOString() || undefined);
@@ -139,9 +139,10 @@ export function useSupabaseClientes() {
 
   useEffect(() => {
     carregarClientes();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-  const criarCliente = async (clienteData: any) => {
+  const criarCliente = async (clienteData: ClienteFormData) => {
     if (!user) {
       toast.error('Usuário não autenticado');
       return false;
@@ -172,7 +173,7 @@ export function useSupabaseClientes() {
       };
       const { data, error } = await supabase
         .from('clientes')
-        .insert(insertPayload as any)
+        .insert(insertPayload)
         .select()
         .single();
 
@@ -196,7 +197,7 @@ export function useSupabaseClientes() {
     }
   };
 
-  const atualizarCliente = async (id: string, updates: any) => {
+  const atualizarCliente = async (id: string, updates: Partial<ClienteFormData>) => {
     if (!user) {
       toast.error('Usuário não autenticado');
       return false;
@@ -232,7 +233,7 @@ export function useSupabaseClientes() {
 
       const clienteAtualizado = clienteFromSupabase(data);
 
-      setClientes(prev => prev.map((c: any) => c.id === id ? clienteAtualizado : c));
+      setClientes(prev => prev.map(c => c.id === id ? clienteAtualizado : c));
       toast.success('Cliente atualizado com sucesso!');
       return true;
     } catch (error) {
@@ -274,7 +275,7 @@ export function useSupabaseClientes() {
       
       // Atualizar lista local
       setClientes(prev => {
-        const novaLista = prev.filter((c: any) => c.id !== id);
+        const novaLista = prev.filter(c => c.id !== id);
         console.log('📝 Lista atualizada:', novaLista.length, 'clientes');
         return novaLista;
       });
@@ -291,7 +292,7 @@ export function useSupabaseClientes() {
   };
 
   const obterClienteComEstatisticas = (id: string) => {
-    return clientes.find((c: any) => c.id === id);
+    return clientes.find(c => c.id === id);
   };
 
   return {

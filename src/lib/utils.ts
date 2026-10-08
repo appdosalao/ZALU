@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
@@ -36,11 +37,18 @@ export function overlaps(start1: number, end1: number, start2: number, end2: num
 }
 
 // ----- Identificadores Públicos do Agendamento Online -----
-// Extrai o slug/public_id da query string (prioridade s > public_id > salao > slug)
+// Extrai o slug/public_id da query string ou do caminho /s/:slug.
+// Prioridade: ?s > ?public_id > ?salao > ?slug > /s/:slug
 export function getPublicIdFromUrl(): string {
   try {
     const params = new URLSearchParams(window.location.search);
-    return params.get('s') || params.get('public_id') || params.get('salao') || params.get('slug') || '';
+    const fromQuery = params.get('s') || params.get('public_id') || params.get('salao') || params.get('slug') || '';
+    if (fromQuery) return fromQuery;
+
+    const pathMatch = window.location.pathname.match(/^\/s\/([^/?#]+)/i);
+    if (pathMatch?.[1]) return decodeURIComponent(pathMatch[1]);
+
+    return '';
   } catch {
     return '';
   }
@@ -73,22 +81,19 @@ export async function resolveOwnerIdFromPublicId(
   }
 }
 
-// Monta o link PÚBLICO de agendamento online a partir da configuração do salão.
-// Prioriza sempre o formato ?s=<public_id> (slug) e só usa ?uid= como fallback.
+export function buildLandingLink(opts: { origin?: string; public_id?: string | null; user_id?: string | null }): string {
+  const base = (opts.origin ?? (typeof window !== 'undefined' ? window.location.origin : '')).replace(/\/$/, '');
+  const pid = typeof opts.public_id === 'string' ? opts.public_id.trim() : '';
+  if (pid) return `${base}/agendamento-online?s=${encodeURIComponent(pid)}`;
+  const uid = typeof opts.user_id === 'string' ? opts.user_id.trim() : '';
+  if (uid) return `${base}/agendamento-online?uid=${encodeURIComponent(uid)}`;
+  return `${base}/agendamento-online`;
+}
+
 export function buildPublicBookingLink(opts: {
   origin?: string;
   public_id?: string | null;
   user_id?: string | null;
 }): string {
-  const base = (opts.origin ?? (typeof window !== 'undefined' ? window.location.origin : '')).replace(/\/$/, '');
-  const pid = typeof opts.public_id === 'string' ? opts.public_id.trim() : '';
-  const uid = typeof opts.user_id === 'string' ? opts.user_id.trim() : '';
-
-  const query = pid
-    ? `s=${encodeURIComponent(pid)}`
-    : uid
-      ? `uid=${encodeURIComponent(uid)}`
-      : '';
-
-  return query ? `${base}/agendamento-online?${query}` : `${base}/agendamento-online`;
+  return buildLandingLink(opts);
 }

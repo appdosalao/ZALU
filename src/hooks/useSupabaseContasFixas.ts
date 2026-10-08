@@ -76,7 +76,7 @@ export const useSupabaseContasFixas = () => {
 
       // Calcular próximo vencimento
       const hoje = new Date();
-      let proximoVencimento = new Date(hoje.getFullYear(), hoje.getMonth(), conta.dataVencimento);
+      const proximoVencimento = new Date(hoje.getFullYear(), hoje.getMonth(), conta.dataVencimento);
       if (proximoVencimento <= hoje) {
         proximoVencimento.setMonth(proximoVencimento.getMonth() + 1);
       }
@@ -110,7 +110,7 @@ export const useSupabaseContasFixas = () => {
   // Atualizar conta fixa
   const updateContaFixa = async (id: string, updates: Partial<ContaFixa>) => {
     try {
-      const updateData: any = {};
+      const updateData: Record<string, unknown> = {};
       
       if (updates.nome) updateData.nome = updates.nome;
       if (updates.valor !== undefined) updateData.valor = updates.valor;

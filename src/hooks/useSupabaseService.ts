@@ -48,7 +48,7 @@ export const useSupabaseService = () => {
     }
   }, []);
 
-  const createAgendamentoOnline = useCallback(async (agendamentoData: any) => {
+  const createAgendamentoOnline = useCallback(async (agendamentoData: Record<string, unknown>) => {
     setLoading(true);
     setError(null);
     

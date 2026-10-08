@@ -73,6 +73,7 @@ export function AgendaSemanal({ buscaTexto = '', onSlotClick }: AgendaSemanalPro
     diasDaSemana.reduce((agendamentos, dia) => (
       [...agendamentos, ...getAgendamentosDoDia(dia)]
     ), [] as typeof todosAgendamentos)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   ), [diasDaSemana, todosAgendamentos, termo]);
 
   const agendadosSemana = useMemo(() => agendamentosSemana.filter(ag => ag.status === 'agendado'), [agendamentosSemana]);

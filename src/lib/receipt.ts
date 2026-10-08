@@ -1,3 +1,4 @@
+ 
 import type { Agendamento } from '@/types/agendamento';
 import { formatBRL } from '@/lib/formatters';
 import DOMPurify from 'dompurify';
@@ -156,10 +157,19 @@ export function printAgendamentoRecibo(params: {
   win.document.open();
   win.document.write(safeHtml);
   win.document.close();
-  try { win.focus(); } catch {}
+  try { win.focus(); } catch { /* no-op */ }
   const t1 = window.setTimeout(() => {
-    try { win.print(); } catch {}
-    const t2 = window.setTimeout(() => { try { win.close(); } catch {} }, 600);
-    try { win.addEventListener && win.addEventListener('afterprint', () => { try { clearTimeout(t2); win.close(); } catch {} }); } catch {}
+    try { win.print(); } catch { /* no-op */ }
+    const t2 = window.setTimeout(() => { try { win.close(); } catch { /* no-op */ } }, 600);
+    try {
+      if (win.addEventListener) {
+        win.addEventListener('afterprint', () => {
+          try {
+            clearTimeout(t2);
+            win.close();
+          } catch { /* no-op */ }
+        });
+      }
+    } catch { /* no-op */ }
   }, 500);
 }

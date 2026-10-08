@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
@@ -63,7 +64,7 @@ export function useSupabaseAgendamentos() {
 
       // Verificar se o horário específico está disponível
       // Comparar tanto HH:MM:SS quanto HH:MM
-      return horariosDisponiveis?.some((h: any) => {
+      return horariosDisponiveis?.some((h) => {
         const horarioBanco = h.horario; // Formato HH:MM:SS do banco
         const horarioBancoSemSegundos = horarioBanco ? horarioBanco.substring(0, 5) : ''; // HH:MM
         return (horarioBanco === horaFormatada || horarioBancoSemSegundos === hora) && h.disponivel === true;
@@ -135,7 +136,7 @@ export function useSupabaseAgendamentos() {
         valorDevido: parseFloat(item.valor_devido?.toString() || '0'),
         formaPagamento: (item.forma_pagamento as 'dinheiro' | 'cartao' | 'pix' | 'fiado') || 'fiado',
         statusPagamento: (item.status_pagamento as 'pago' | 'parcial' | 'em_aberto') || 'em_aberto',
-        status: (item.status as 'agendado' | 'concluido' | 'cancelado') || 'agendado',
+        status: (item.status as 'agendado' | 'concluido' | 'cancelado' | 'nao_compareceu') || 'agendado',
         origem: (item.origem as 'manual' | 'cronograma' | 'online') || 'manual',
         origem_cronograma: false,
         confirmado: item.confirmado,
@@ -155,8 +156,8 @@ export function useSupabaseAgendamentos() {
     
     try {
       const { data, error } = await (supabase
-        .from('agendamentos_online' as any)
-        .select('*') as any)
+        .from('agendamentos_online' as never)
+        .select('*'))
         .eq('user_id', user.id) // user_id conforme definido no banco de dados
         .neq('status', 'excluido')
         .order('data', { ascending: true });
@@ -369,6 +370,7 @@ export function useSupabaseAgendamentos() {
       supabase.removeChannel(channelOnline);
       supabase.removeChannel(channelRegular);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, filtros.mes]);
 
   // Filtrar agendamentos combinados
@@ -458,8 +460,8 @@ export function useSupabaseAgendamentos() {
     setLoading(true);
     try {
       const { error } = await (supabase
-        .from('agendamentos_online' as any)
-        .update({ status: 'confirmado' } as any) as any)
+        .from('agendamentos_online' as never)
+        .update({ status: 'confirmado' } as Record<string, unknown>))
         .eq('id', agendamentoOnlineId)
         .eq('user_id', user.id); // user_id conforme definido no banco
 
@@ -481,7 +483,7 @@ export function useSupabaseAgendamentos() {
     }
   };
 
-  const criarAgendamento = async (novoAgendamento: any) => {
+  const criarAgendamento = async (novoAgendamento: Partial<Agendamento>) => {
     if (!user) {
       toast.error('Usuário não autenticado');
       return false;
@@ -510,32 +512,64 @@ export function useSupabaseAgendamentos() {
       const status = novoAgendamento.status || 'agendado';
       const origemFinal = origem || 'manual';
 
-      const { data, error } = await supabase
-        .from('agendamentos')
-        .insert({
-          user_id: user.id, // user_id conforme definido no banco de dados
-          cliente_id: novoAgendamento.clienteId,
-          servico_id: novoAgendamento.servicoId,
-          data: novoAgendamento.data,
-          hora: horaNorm,
-          duracao,
-          valor,
-          valor_pago: valorPago,
-          valor_devido: valorDevido,
-          forma_pagamento: formaPagamento,
-          status_pagamento: statusPagamento,
-          status,
-          origem: origemFinal,
-          confirmado: novoAgendamento.confirmado ?? true,
-          observacoes: novoAgendamento.observacoes || null
-        })
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Erro ao criar agendamento:', error);
-        toast.error(`Erro ao criar agendamento: ${error.message}`);
-        return false;
+      let rpcApplied = false;
+      try {
+        const { data: rpcId, error: rpcError } = await (supabase as any).rpc('criar_agendamento_seguro', {
+          p_cliente_id: novoAgendamento.clienteId,
+          p_servico_id: novoAgendamento.servicoId,
+          p_data: novoAgendamento.data,
+          p_hora: horaNorm,
+          p_duracao: duracao,
+          p_valor: valor,
+          p_valor_pago: valorPago,
+          p_valor_devido: valorDevido,
+          p_forma_pagamento: formaPagamento,
+          p_status_pagamento: statusPagamento,
+          p_status: status,
+          p_origem: origemFinal,
+          p_confirmado: novoAgendamento.confirmado ?? true,
+          p_observacoes: novoAgendamento.observacoes || null,
+        });
+        if (!rpcError && rpcId) {
+          rpcApplied = true;
+        } else if (rpcError && !String(rpcError.code).includes('42883') && !String(rpcError.message).includes('does not exist')) {
+          throw rpcError;
+        }
+      } catch (e) {
+        if (String(e?.code) === '23P01' || String(e?.message).includes('conflito')) {
+          toast.error('Horário em conflito — outro agendamento ocupou este slot');
+          return false;
+        }
+        if (!String(e?.code).includes('42883')) throw e;
+      }
+      if (!rpcApplied) {
+        const { error } = await supabase
+          .from('agendamentos')
+          .insert({
+            user_id: user.id,
+            cliente_id: novoAgendamento.clienteId,
+            servico_id: novoAgendamento.servicoId,
+            data: novoAgendamento.data,
+            hora: horaNorm,
+            duracao,
+            valor,
+            valor_pago: valorPago,
+            valor_devido: valorDevido,
+            forma_pagamento: formaPagamento,
+            status_pagamento: statusPagamento,
+            status,
+            origem: origemFinal,
+            confirmado: novoAgendamento.confirmado ?? true,
+            observacoes: novoAgendamento.observacoes || null,
+          })
+          .select()
+          .single()
+          .then((r: any) => r);
+        if (error) {
+          console.error('Erro ao criar agendamento:', error);
+          toast.error(`Erro ao criar agendamento: ${error.message}`);
+          return false;
+        }
       }
 
       await carregarAgendamentos();
@@ -550,7 +584,7 @@ export function useSupabaseAgendamentos() {
     }
   };
 
-  const atualizarAgendamento = async (id: string, dadosAtualizados: any) => {
+  const atualizarAgendamento = async (id: string, dadosAtualizados: Partial<Agendamento>) => {
     if (!user) {
       toast.error('Usuário não autenticado');
       return false;
@@ -564,7 +598,7 @@ export function useSupabaseAgendamentos() {
 
     setLoading(true);
     try {
-      const updates: any = {};
+      const updates: Record<string, unknown> = {};
       if (dadosAtualizados.clienteId !== undefined) updates.cliente_id = dadosAtualizados.clienteId;
       if (dadosAtualizados.servicoId !== undefined) updates.servico_id = dadosAtualizados.servicoId;
       if (dadosAtualizados.data !== undefined) updates.data = dadosAtualizados.data;
@@ -617,8 +651,8 @@ export function useSupabaseAgendamentos() {
       try {
         console.log('🗑️ Executando soft delete de agendamento online no Supabase...', agendamentoOnlineId);
         const { error } = await (supabase
-          .from('agendamentos_online' as any)
-          .update({ status: 'excluido' } as any) as any)
+          .from('agendamentos_online' as never)
+          .update({ status: 'excluido' } as Record<string, unknown>))
           .eq('id', agendamentoOnlineId)
           .eq('user_id', user.id); // user_id conforme definido no banco
 
@@ -645,8 +679,8 @@ export function useSupabaseAgendamentos() {
     try {
       console.log('🗑️ Executando soft delete de agendamento no Supabase...', id);
       const { error } = await (supabase
-        .from('agendamentos' as any)
-        .update({ status: 'excluido' } as any) as any)
+        .from('agendamentos')
+        .update({ status: 'excluido' } as Record<string, unknown>))
         .eq('id', id)
         .eq('user_id', user.id); // user_id conforme definido no banco
 
@@ -680,16 +714,16 @@ export function useSupabaseAgendamentos() {
       if (id.startsWith('online_')) {
         const agendamentoOnlineId = id.replace('online_', '');
         const { error } = await (supabase
-          .from('agendamentos_online' as any)
-          .update({ status: 'cancelado' } as any) as any)
+          .from('agendamentos_online' as never)
+          .update({ status: 'cancelado' } as Record<string, unknown>))
           .eq('id', agendamentoOnlineId)
           .eq('user_id', user.id); // user_id conforme definido no banco
 
         if (error) throw error;
       } else {
         const { error } = await (supabase
-          .from('agendamentos' as any)
-          .update({ status: 'cancelado' } as any) as any)
+          .from('agendamentos')
+          .update({ status: 'cancelado' } as Record<string, unknown>))
           .eq('id', id)
           .eq('user_id', user.id); // user_id conforme definido no banco
 

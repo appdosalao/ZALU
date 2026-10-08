@@ -26,7 +26,7 @@ function getOrCreateCsrfToken(): string {
 
 const shouldDebug = () => {
   try {
-    const isDev = Boolean((import.meta as any)?.env?.DEV);
+    const isDev = import.meta.env.DEV;
     if (isDev) return true;
     if (typeof window === 'undefined') return false;
     return new URLSearchParams(window.location.search).has('debugSupabase');

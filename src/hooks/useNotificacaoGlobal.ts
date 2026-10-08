@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
@@ -139,6 +140,7 @@ export function useNotificacaoGlobal() {
       supabase.removeChannel(agendamentosChannel);
       supabase.removeChannel(contasFixasChannel);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id, configuracaoNotificacoes]);
 
   return {

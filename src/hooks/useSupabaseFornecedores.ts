@@ -20,8 +20,9 @@ export function useSupabaseFornecedores() {
 
       if (error) throw error;
       setFornecedores(data || []);
-    } catch (error: any) {
-      toast.error('Erro ao carregar fornecedores: ' + error.message);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Erro ao carregar fornecedores';
+      toast.error('Erro ao carregar fornecedores: ' + message);
     } finally {
       setLoading(false);
     }
@@ -39,8 +40,9 @@ export function useSupabaseFornecedores() {
       if (error) throw error;
       toast.success('Fornecedor cadastrado com sucesso!');
       await loadFornecedores();
-    } catch (error: any) {
-      toast.error('Erro ao cadastrar fornecedor: ' + error.message);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Erro ao cadastrar fornecedor';
+      toast.error('Erro ao cadastrar fornecedor: ' + message);
       throw error;
     }
   };
@@ -55,8 +57,9 @@ export function useSupabaseFornecedores() {
       if (error) throw error;
       toast.success('Fornecedor atualizado com sucesso!');
       await loadFornecedores();
-    } catch (error: any) {
-      toast.error('Erro ao atualizar fornecedor: ' + error.message);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Erro ao atualizar fornecedor';
+      toast.error('Erro ao atualizar fornecedor: ' + message);
       throw error;
     }
   };
@@ -71,8 +74,9 @@ export function useSupabaseFornecedores() {
       if (error) throw error;
       toast.success('Fornecedor excluído com sucesso!');
       await loadFornecedores();
-    } catch (error: any) {
-      toast.error('Erro ao excluir fornecedor: ' + error.message);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Erro ao excluir fornecedor';
+      toast.error('Erro ao excluir fornecedor: ' + message);
       throw error;
     }
   };

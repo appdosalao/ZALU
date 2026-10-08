@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState, useCallback } from 'react';
 import { supabasePublic } from '@/integrations/supabase/publicClient';
 import { getPublicIdFromUrl, getOwnerUserIdFromUrl, resolveOwnerIdFromPublicId } from '@/lib/utils';

@@ -1,24 +1,26 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { Lancamento, NovoLancamento, LancamentoFiltros, ResumoFinanceiro } from '@/types/lancamento';
 import { lancamentoFromSupabase, lancamentoToSupabase } from '@/lib/mappers';
 
 export const useSupabaseLancamentos = () => {
+  const { user: authUser } = useSupabaseAuth();
   const [lancamentos, setLancamentos] = useState<Lancamento[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Carregar lançamentos
   const loadLancamentos = async (dataInicioParam?: string, dataFimParam?: string) => {
     try {
       setLoading(true);
-      const { data: user } = await supabase.auth.getUser();
-      if (!user.user) return;
+      const uid = authUser?.id || (await supabase.auth.getUser()).data.user?.id;
+      if (!uid) return;
 
       let query = supabase
         .from('lancamentos')
         .select('*')
-        .eq('user_id', user.user.id);
+        .eq('user_id', uid);
 
       if (dataInicioParam) {
         query = query.gte('data', dataInicioParam);
@@ -49,14 +51,13 @@ export const useSupabaseLancamentos = () => {
     }
   };
 
-  // Criar lançamento
   const createLancamento = async (lancamento: NovoLancamento) => {
     try {
-      const { data: user } = await supabase.auth.getUser();
-      if (!user.user) throw new Error('Usuário não autenticado');
+      const uid = authUser?.id || (await supabase.auth.getUser()).data.user?.id;
+      if (!uid) throw new Error('Usuário não autenticado');
 
       const insertPayload = {
-        user_id: user.user.id,
+        user_id: uid,
         ...lancamentoToSupabase(lancamento)
       };
       const { data, error } = await supabase
@@ -74,20 +75,12 @@ export const useSupabaseLancamentos = () => {
     }
   };
 
-  // Atualizar lançamento
   const updateLancamento = async (id: string, updates: Partial<Lancamento>) => {
     try {
-      const { data: user } = await supabase.auth.getUser();
-      if (!user.user) throw new Error('Usuário não autenticado');
-
+      const uid = authUser?.id || (await supabase.auth.getUser()).data.user?.id;
+      if (!uid) throw new Error('Usuário não autenticado');
       const updateData = lancamentoToSupabase(updates);
-
-      const { error } = await supabase
-        .from('lancamentos')
-        .update(updateData)
-        .eq('id', id)
-        .eq('user_id', user.user.id);
-
+      const { error } = await supabase.from('lancamentos').update(updateData).eq('id', id).eq('user_id', uid);
       if (error) throw error;
       await loadLancamentos();
       return true;
@@ -97,18 +90,11 @@ export const useSupabaseLancamentos = () => {
     }
   };
 
-  // Deletar lançamento
   const deleteLancamento = async (id: string) => {
     try {
-      const { data: user } = await supabase.auth.getUser();
-      if (!user.user) throw new Error('Usuário não autenticado');
-
-      const { error } = await supabase
-        .from('lancamentos')
-        .delete()
-        .eq('id', id)
-        .eq('user_id', user.user.id);
-
+      const uid = authUser?.id || (await supabase.auth.getUser()).data.user?.id;
+      if (!uid) throw new Error('Usuário não autenticado');
+      const { error } = await supabase.from('lancamentos').delete().eq('id', id).eq('user_id', uid);
       if (error) throw error;
       await loadLancamentos();
     } catch (err) {
@@ -117,16 +103,14 @@ export const useSupabaseLancamentos = () => {
     }
   };
 
-  // Criar lançamento a partir de um agendamento
   const createLancamentoFromAgendamento = async (agendamento: any) => {
     try {
-      const { data: user } = await supabase.auth.getUser();
-      if (!user.user) throw new Error('Usuário não autenticado');
-
+      const uid = authUser?.id || (await supabase.auth.getUser()).data.user?.id;
+      if (!uid) throw new Error('Usuário não autenticado');
       const { data, error } = await supabase
         .from('lancamentos')
         .insert({
-          user_id: user.user.id,
+          user_id: uid,
           tipo: 'entrada',
           valor: agendamento.valorPago || agendamento.valor,
           data: agendamento.data,
@@ -138,7 +122,6 @@ export const useSupabaseLancamentos = () => {
         })
         .select()
         .single();
-
       if (error) throw error;
       await loadLancamentos();
       return data;
@@ -148,16 +131,14 @@ export const useSupabaseLancamentos = () => {
     }
   };
 
-  // Criar lançamento a partir de uma conta fixa
   const createLancamentoFromContaFixa = async (contaFixa: any, valorPago: number, dataPagamento: Date) => {
     try {
-      const { data: user } = await supabase.auth.getUser();
-      if (!user.user) throw new Error('Usuário não autenticado');
-
+      const uid = authUser?.id || (await supabase.auth.getUser()).data.user?.id;
+      if (!uid) throw new Error('Usuário não autenticado');
       const { data, error } = await supabase
         .from('lancamentos')
         .insert({
-          user_id: user.user.id,
+          user_id: uid,
           tipo: 'saida',
           valor: valorPago,
           data: dataPagamento.toISOString().split('T')[0],
@@ -168,7 +149,6 @@ export const useSupabaseLancamentos = () => {
         })
         .select()
         .single();
-
       if (error) throw error;
       await loadLancamentos();
       return data;
@@ -239,28 +219,27 @@ export const useSupabaseLancamentos = () => {
   };
 
   useEffect(() => {
+    if (!authUser?.id) return;
     loadLancamentos();
-
-    // Setup real-time subscriptions
     const channel = supabase
-      .channel('lancamentos-realtime')
+      .channel(`lancamentos-realtime-${authUser.id}`)
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
-          table: 'lancamentos'
+          table: 'lancamentos',
+          filter: `user_id=eq.${authUser.id}`,
         },
         () => {
           loadLancamentos();
         }
       )
       .subscribe();
-
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [authUser?.id]);
 
   return {
     lancamentos,

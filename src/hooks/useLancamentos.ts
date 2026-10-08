@@ -19,6 +19,7 @@ export function useLancamentos() {
       const dataFim = new Date(filtros.ano, filtros.mes + 1, 0).toISOString().split('T')[0];
       supabaseHook.loadLancamentos(dataInicio, dataFim);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filtros.dataInicio, filtros.dataFim, filtros.mes, filtros.ano]);
 
   // Aplicar filtros aos lançamentos

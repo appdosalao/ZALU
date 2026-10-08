@@ -20,7 +20,7 @@ export function useSupabaseCompras() {
 
       if (error) throw error;
       setCompras(data || []);
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Erro ao carregar compras: ' + error.message);
     } finally {
       setLoading(false);
@@ -83,7 +83,7 @@ export function useSupabaseCompras() {
 
       toast.success('Compra registrada com sucesso!');
       await loadCompras();
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Erro ao registrar compra: ' + error.message);
       throw error;
     }
@@ -104,7 +104,7 @@ export function useSupabaseCompras() {
       if (error) throw error;
       toast.success('Pagamento registrado com sucesso!');
       await loadCompras();
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Erro ao registrar pagamento: ' + error.message);
       throw error;
     }

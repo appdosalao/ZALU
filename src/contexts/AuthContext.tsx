@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useEffect, useMemo, useState, useRef } from 'react';
 import type { ReactNode } from 'react';
 import type { Session, User } from '@supabase/supabase-js';
@@ -40,7 +41,26 @@ const withTimeout = async <T,>(promise: PromiseLike<T>, ms: number): Promise<T> 
   });
 };
 
-const normalizeUsuario = (profile: any, assinatura?: any): Usuario => {
+type AuthRecord = Record<string, unknown>;
+
+type LegacySupabaseClient = {
+  from: (table: string) => {
+    select: (columns: string) => {
+      eq: (column: string, value: string) => {
+        maybeSingle: () => Promise<AuthResponse>;
+      };
+    };
+  };
+};
+
+type AuthResponse = {
+  data: AuthRecord | null;
+  error: { code?: string; message?: string } | null;
+};
+
+const getRecordValue = (record: AuthRecord | null | undefined, key: string): unknown => record?.[key];
+
+const normalizeUsuario = (profile: AuthRecord, assinatura?: AuthRecord | null): Usuario => {
   const subscriptionData = assinatura ?? profile;
   return {
     id: String(profile?.id ?? ''),
@@ -95,7 +115,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(null);
       setUsuario(null);
       setSessionError(false);
-      applyTheme(storage.getString(LOCAL_STORAGE_KEYS.APP_THEME) as any);
+      applyTheme(storage.getString(LOCAL_STORAGE_KEYS.APP_THEME));
       return;
     }
 
@@ -127,9 +147,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     hydrationLock.current = nextSession.user.id;
 
     try {
-      let profile: any = null;
-      let assinaturaData: any = null;
-      let profileError: any = null;
+      let profile: AuthRecord | null = null;
+      let assinaturaData: AuthRecord | null = null;
+      let profileError: { code?: string; message?: string } | Error | null = null;
       let attempts = 0;
       const maxAttempts = 4; // Aumentado para 4 tentativas
       const timeouts = [10000, 20000, 30000, 45000]; // Timeouts progressivos
@@ -148,15 +168,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               timeouts[attempts]
             ),
             withTimeout(
-              (supabase as any).from('assinaturas').select('*').eq('usuario_id', nextSession.user.id).maybeSingle(),
+              (supabase as unknown as LegacySupabaseClient).from('assinaturas').select('*').eq('usuario_id', nextSession.user.id).maybeSingle(),
               timeouts[attempts]
             )
           ]);
           
           const duration = Date.now() - startTime;
-          profile = (profileRes as any).data;
-          assinaturaData = (assinaturaRes as any).data;
-          profileError = (profileRes as any).error;
+          profile = (profileRes as AuthResponse).data;
+          assinaturaData = (assinaturaRes as AuthResponse).data;
+          profileError = (profileRes as AuthResponse).error;
           
           if (!profileError && profile) {
             console.log(`[Auth] Perfil carregado com sucesso em ${duration}ms.`);
@@ -307,7 +327,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch {
       try {
         await supabase.auth.signOut();
-      } catch {}
+      } catch (signOutError) {
+        console.error('Erro ao encerrar sessão local:', signOutError);
+      }
     } finally {
       setUsuario(null);
       setUser(null);
@@ -325,9 +347,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      let profile: any = null;
-      let assinaturaData: any = null;
-      let profileError: any = null;
+      let profile: AuthRecord | null = null;
+      let assinaturaData: AuthRecord | null = null;
+      let profileError: { code?: string; message?: string } | Error | null = null;
       let attempts = 0;
       const maxAttempts = 3;
       const timeouts = [10000, 20000, 30000];
@@ -341,13 +363,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               timeouts[attempts]
             ),
             withTimeout(
-              (supabase as any).from('assinaturas').select('*').eq('usuario_id', currentUserId).maybeSingle(),
+              (supabase as unknown as LegacySupabaseClient).from('assinaturas').select('*').eq('usuario_id', currentUserId).maybeSingle(),
               timeouts[attempts]
             )
           ]);
-          profile = (profileRes as any).data;
-          assinaturaData = (assinaturaRes as any).data;
-          profileError = (profileRes as any).error;
+          profile = (profileRes as AuthResponse).data;
+          assinaturaData = (assinaturaRes as AuthResponse).data;
+          profileError = (profileRes as AuthResponse).error;
 
           if (!profileError && profile) break;
           if (profileError?.code === 'PGRST116') break;
@@ -450,6 +472,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       active = false;
       data.subscription.unsubscribe();
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const isAuthenticated = useMemo(() => !!session, [session]);

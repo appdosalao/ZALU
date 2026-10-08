@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Router, Response, Request } from 'express';
 import { authenticate, AuthenticatedRequest } from '../middlewares/authenticate.js';
 import { supabaseAdmin } from '../lib/supabaseServer.js';
@@ -272,7 +273,7 @@ router.post('/webhook', async (req: Request, res: Response) => {
     });
   }
 
-  let eventKey = resolveEventKey(parsed);
+  const eventKey = resolveEventKey(parsed);
   let idempotencyKey: string;
   if (eventKey) {
     idempotencyKey = `cakto:event:${eventKey}`;

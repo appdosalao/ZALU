@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useMemo } from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -16,7 +17,8 @@ import {
   Filter,
   RefreshCw,
   ArrowLeftRight,
-  XCircle
+  XCircle,
+  UserX
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -63,6 +65,7 @@ const statusConfig = {
   agendado: { label: 'Agendado', color: 'bg-info', icon: Calendar },
   concluido: { label: 'Concluído', color: 'bg-success', icon: Check },
   cancelado: { label: 'Cancelado', color: 'bg-destructive', icon: X },
+  nao_compareceu: { label: 'Não compareceu', color: 'bg-amber-500', icon: UserX },
 };
 
 export default function AgendamentosList({

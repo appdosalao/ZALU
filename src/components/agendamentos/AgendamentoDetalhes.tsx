@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { 
@@ -14,7 +15,8 @@ import {
   Check,
   X,
   CreditCard,
-  Award
+  Award,
+  UserX
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -66,6 +68,12 @@ const statusConfig = {
     color: 'bg-destructive text-destructive-foreground', 
     icon: X,
     description: 'Agendamento cancelado'
+  },
+  nao_compareceu: {
+    label: 'Não compareceu',
+    color: 'bg-amber-500 text-white',
+    icon: UserX,
+    description: 'Cliente não compareceu ao atendimento'
   },
 };
 

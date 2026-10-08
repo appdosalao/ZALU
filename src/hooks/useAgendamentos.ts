@@ -75,7 +75,7 @@ export function useAgendamentos() {
   }, [agendamentosData.agendamentosFiltrados, agendamentosData.filtros?.busca, clientes, servicos]);
 
   // Verificar conflito de horário
-  const verificarConflito = (agendamento: any, excluirId?: string) => {
+  const verificarConflito = (agendamento: Partial<Agendamento> & { duracao?: number }, excluirId?: string) => {
     if (!agendamento.data || !agendamento.hora || !agendamento.duracao) {
       return false;
     }
@@ -98,7 +98,7 @@ export function useAgendamentos() {
     });
   };
 
-  const criarAgendamento = async (novoAgendamento: any) => {
+  const criarAgendamento = async (novoAgendamento: Partial<Agendamento> & { clienteId?: string; servicoId?: string }) => {
     const servico = servicos.find(s => s.id === novoAgendamento.servicoId);
     if (!servico) {
       console.error('Serviço não encontrado');

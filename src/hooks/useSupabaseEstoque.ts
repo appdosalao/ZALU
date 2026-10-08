@@ -20,8 +20,9 @@ export function useSupabaseEstoque() {
 
       if (error) throw error;
       setMovimentacoes(data || []);
-    } catch (error: any) {
-      toast.error('Erro ao carregar movimentações: ' + error.message);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Erro ao carregar movimentações';
+      toast.error('Erro ao carregar movimentações: ' + message);
     } finally {
       setLoading(false);
     }
@@ -51,8 +52,9 @@ export function useSupabaseEstoque() {
       if (error) throw error;
       toast.success('Movimentação registrada com sucesso!');
       await loadMovimentacoes();
-    } catch (error: any) {
-      toast.error('Erro ao registrar movimentação: ' + error.message);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Erro ao registrar movimentação';
+      toast.error('Erro ao registrar movimentação: ' + message);
       throw error;
     }
   };

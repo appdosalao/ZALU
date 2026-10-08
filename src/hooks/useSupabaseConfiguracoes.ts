@@ -360,6 +360,7 @@ export const useSupabaseConfiguracoes = () => {
         supabase.removeChannel(backupChannel);
       };
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
   return {

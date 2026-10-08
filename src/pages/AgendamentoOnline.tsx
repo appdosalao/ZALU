@@ -12,7 +12,7 @@ const AgendamentoOnlineForm = React.lazy(() =>
 
 export default function AgendamentoOnline() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 to-secondary/5 p-4">
+    <div className="min-h-screen">
       <PageMeta
         title="Agendamento Online — ZALU"
         description="Agende seu horário no salão de forma rápida e prática: escolha o serviço, o profissional e o horário disponível em poucos cliques."
@@ -28,7 +28,7 @@ export default function AgendamentoOnline() {
           description: 'Agendamento online de serviços de beleza: corte, coloração, manicure, pedicure, escova e muito mais.',
         }}
       />
-      <div className="max-w-2xl mx-auto">
+      <div className="w-full">
         <Suspense 
           fallback={
             <Card>

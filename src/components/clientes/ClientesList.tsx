@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useMemo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,7 +34,8 @@ import {
   Eye,
   User,
   Calendar,
-  X
+  X,
+  UsersRound
 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -64,7 +66,7 @@ const highlightText = (text: string, searchTerm: string): React.ReactNode => {
   if (searchTerms.length === 0) return text;
   
   const normalizedText = normalizeText(text);
-  let result: React.ReactNode[] = [];
+  const result: React.ReactNode[] = [];
   let lastIndex = 0;
   
   // Encontrar todas as posições de match
@@ -145,12 +147,13 @@ export default function ClientesList({ clientes, onEdit, onDelete, onViewDetails
     setCurrentPage(1);
   }, []);
 
-  const sortedClientes = filteredClientes.sort((a, b) => 
+  const sortedClientes = [...filteredClientes].sort((a, b) => 
     (a.nomeCompleto || a.nome || '').localeCompare(b.nomeCompleto || b.nome || '')
   );
 
   const totalPages = Math.ceil(sortedClientes.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
+  const visiblePage = Math.min(currentPage, Math.max(totalPages, 1));
+  const startIndex = (visiblePage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentClientes = sortedClientes.slice(startIndex, endIndex);
 
@@ -183,30 +186,45 @@ export default function ClientesList({ clientes, onEdit, onDelete, onViewDetails
   };
 
   return (
-    <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
-      <CardHeader>
-        <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
-          <CardTitle className="text-xl font-semibold">
-            Lista de Clientes ({filteredClientes.length})
-          </CardTitle>
-          
-          <div className="relative w-full sm:max-w-sm">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+    <Card className="overflow-hidden rounded-3xl border-border/60 shadow-sm">
+      <CardHeader className="gap-4 border-b bg-muted/20 p-4 sm:p-6">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <UsersRound className="h-5 w-5" />
+            </div>
+            <div>
+              <div className="flex flex-wrap items-center gap-2">
+                <CardTitle className="text-lg font-semibold sm:text-xl">Base de clientes</CardTitle>
+                <Badge variant="secondary" className="rounded-full">
+                  {filteredClientes.length} {filteredClientes.length === 1 ? 'cliente' : 'clientes'}
+                </Badge>
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
+                Pesquise, consulte o histórico ou acesse rapidamente os contatos.
+              </p>
+            </div>
+          </div>
+
+          <div className="relative w-full lg:max-w-md">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Buscar por nome, telefone, email..."
+              aria-label="Buscar clientes"
+              placeholder="Buscar por nome, telefone, e-mail ou serviço"
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
                 setCurrentPage(1);
               }}
-              className="pl-10 pr-10 border-border/50"
+              className="h-11 rounded-xl border-border/60 bg-background pl-10 pr-10"
             />
             {searchTerm && (
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={handleClearSearch}
-                className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 w-7 p-0 hover:bg-muted"
+                aria-label="Limpar busca"
+                className="absolute right-1 top-1/2 h-8 w-8 -translate-y-1/2 p-0 hover:bg-muted"
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -216,7 +234,7 @@ export default function ClientesList({ clientes, onEdit, onDelete, onViewDetails
         
         {/* Indicador de resultados da busca */}
         {searchTerm && (
-          <div className="px-6 pb-2 text-sm text-muted-foreground">
+          <div className="text-sm text-muted-foreground">
             {filteredClientes.length === 0 ? (
               <span>Nenhum cliente encontrado para "<strong>{searchTerm}</strong>"</span>
             ) : (
@@ -232,10 +250,10 @@ export default function ClientesList({ clientes, onEdit, onDelete, onViewDetails
         {currentClientes.length > 0 ? (
           <>
             {/* Desktop Table */}
-            <div className="hidden lg:block overflow-responsive">
+            <div className="hidden overflow-x-auto lg:block">
               <Table>
-                <TableHeader>
-                  <TableRow className="border-border/50">
+                <TableHeader className="bg-muted/30">
+                  <TableRow className="border-border/50 hover:bg-transparent">
                     <TableHead className="font-semibold text-responsive-xs">Nome Completo</TableHead>
                     <TableHead className="font-semibold text-responsive-xs">Telefone</TableHead>
                     <TableHead className="font-semibold text-responsive-xs">Serviço Frequente</TableHead>
@@ -247,7 +265,7 @@ export default function ClientesList({ clientes, onEdit, onDelete, onViewDetails
                   {currentClientes.map((cliente) => (
                     <TableRow 
                       key={cliente.id} 
-                      className="border-border/50 hover:bg-accent/50 cursor-pointer transition-colors"
+                      className="cursor-pointer border-border/50 transition-colors hover:bg-accent/40"
                       onClick={() => onViewDetails(cliente)}
                     >
                       <TableCell className="font-medium text-responsive-sm">
@@ -363,27 +381,28 @@ export default function ClientesList({ clientes, onEdit, onDelete, onViewDetails
             </div>
 
             {/* Mobile Cards - Otimizados */}
-            <div className="lg:hidden space-y-2 p-2">
+            <div className="space-y-3 p-3 lg:hidden">
               {currentClientes.map((cliente) => (
                 <Card 
                   key={cliente.id} 
-                  className="border-border/50 bg-card/50 backdrop-blur-sm cursor-pointer active:scale-[0.99] transition-transform"
+                  className="cursor-pointer rounded-2xl border-border/60 bg-card transition-transform active:scale-[0.99]"
                   onClick={() => onViewDetails(cliente)}
                 >
-                  <CardContent className="p-3">
-                    <div className="space-y-3">
+                  <CardContent className="p-4">
+                    <div className="space-y-4">
                       {/* Header com avatar placeholder e info */}
                       <div className="flex items-start gap-3">
-                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10">
                           <User className="h-5 w-5 text-primary" />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <h3 className="font-semibold text-sm truncate">
+                          <h3 className="truncate text-sm font-semibold">
                             {highlightText(cliente.nomeCompleto || cliente.nome || '', searchTerm)}
                           </h3>
-                          <p className="text-xs text-muted-foreground">
+                          <p className="mt-1 text-xs text-muted-foreground">
                             {formatarTelefone(cliente.telefone)}
                           </p>
+                          {cliente.email && <p className="truncate text-xs text-muted-foreground">{cliente.email}</p>}
                         </div>
                       </div>
                       
@@ -490,27 +509,31 @@ export default function ClientesList({ clientes, onEdit, onDelete, onViewDetails
 
             {/* Paginação */}
             {totalPages > 1 && (
-              <div className="flex items-center justify-between px-4 py-4 border-t border-border/50">
-                <div className="text-sm text-muted-foreground">
-                  Mostrando {startIndex + 1} a {Math.min(endIndex, sortedClientes.length)} de {sortedClientes.length} clientes
+              <div className="flex flex-col gap-3 border-t border-border/50 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="text-center text-xs text-muted-foreground sm:text-left sm:text-sm">
+                  Exibindo {startIndex + 1}–{Math.min(endIndex, sortedClientes.length)} de {sortedClientes.length} clientes
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-center gap-2">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                    disabled={currentPage === 1}
+                    aria-label="Página anterior"
+                    disabled={visiblePage === 1}
+                    className="h-9 rounded-xl"
                   >
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
                   <span className="text-sm font-medium">
-                    {currentPage} de {totalPages}
+                    Página {visiblePage} de {totalPages}
                   </span>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                    disabled={currentPage === totalPages}
+                    aria-label="Próxima página"
+                    disabled={visiblePage === totalPages}
+                    className="h-9 rounded-xl"
                   >
                     <ChevronRight className="h-4 w-4" />
                   </Button>

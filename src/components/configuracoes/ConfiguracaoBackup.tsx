@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
@@ -18,7 +19,15 @@ import {
   CheckCircle2,
   File,
   Mail as MailIcon,
-  Send
+  Send,
+  ShieldCheck,
+  Clock3,
+  HardDriveDownload,
+  UsersRound,
+  Scissors,
+  CalendarDays,
+  Repeat2,
+  WalletCards
 } from 'lucide-react';
 import { useSupabaseConfiguracoes } from '@/hooks/useSupabaseConfiguracoes';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
@@ -228,10 +237,10 @@ export function ConfiguracaoBackup() {
 
     setRealizandoBackup(true);
     try {
-      console.log('🔄 Iniciando backup dos dados...');
+      console.log('Iniciando backup dos dados...');
       
       const dadosBackup = await coletarDados();
-      console.log('💾 Dados coletados:', dadosBackup.estatisticas);
+      console.log('Dados coletados:', dadosBackup.estatisticas);
 
       let conteudo: string;
       let nomeArquivo: string;
@@ -283,7 +292,7 @@ export function ConfiguracaoBackup() {
       );
 
     } catch (error) {
-      console.error('❌ Erro ao exportar dados:', error);
+      console.error('Erro ao exportar dados:', error);
       toast.error('Erro ao criar backup. Verifique o console.');
     } finally {
       setRealizandoBackup(false);
@@ -330,7 +339,7 @@ export function ConfiguracaoBackup() {
 
       toast.success(`Backup enviado com sucesso para ${emailDestino}!`);
     } catch (error) {
-      console.error('❌ Erro ao enviar backup por e-mail:', error);
+      console.error('Erro ao enviar backup por e-mail:', error);
       toast.error('Erro ao enviar e-mail. Certifique-se de que a função de e-mail está configurada no Supabase.');
     } finally {
       setEnviandoEmail(false);
@@ -343,7 +352,7 @@ export function ConfiguracaoBackup() {
 
     setImportando(true);
     try {
-      console.log('📥 Iniciando importação de:', file.name);
+      console.log('Iniciando importação de:', file.name);
       
       const texto = await file.text();
       let dadosImportados: any;
@@ -435,7 +444,7 @@ export function ConfiguracaoBackup() {
       toast.success(`Importação concluída! ${importados} registros importados${erros > 0 ? `, ${erros} erros` : ''}.`);
       
     } catch (error) {
-      console.error('❌ Erro na importação:', error);
+      console.error('Erro na importação:', error);
       toast.error('Erro ao importar dados. Verifique o arquivo.');
     } finally {
       setImportando(false);
@@ -450,6 +459,14 @@ export function ConfiguracaoBackup() {
     await salvarBackup(newConfig);
   };
 
+  const categoriasSelecionadas = [
+    localConfig.incluir_clientes,
+    localConfig.incluir_servicos,
+    localConfig.incluir_agendamentos,
+    localConfig.incluir_cronogramas,
+    localConfig.incluir_financeiro,
+  ].filter(Boolean).length;
+
   if (loading) {
     return (
       <Card>
@@ -463,33 +480,69 @@ export function ConfiguracaoBackup() {
   }
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-5 sm:space-y-7">
+      <Card className="overflow-hidden rounded-3xl border-0 bg-gradient-to-br from-slate-950 via-slate-900 to-violet-950 text-white shadow-[0_24px_60px_-32px_rgba(15,23,42,0.75)]">
+        <CardContent className="p-5 sm:p-7">
+          <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+            <div className="max-w-2xl">
+              <Badge className="mb-3 rounded-full border border-white/15 bg-white/10 text-violet-100 hover:bg-white/10">
+                <ShieldCheck className="mr-1.5 h-3.5 w-3.5" />
+                Proteção dos seus dados
+              </Badge>
+              <h2 className="text-xl font-semibold tracking-tight sm:text-2xl">Backup e restauração</h2>
+              <p className="mt-2 text-sm leading-relaxed text-slate-300">
+                Exporte uma cópia dos seus dados, escolha o que incluir e restaure um arquivo JSON quando precisar.
+                Guarde os arquivos em um local seguro.
+              </p>
+            </div>
+            <div className="flex min-w-52 items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-4">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-violet-400/15 text-violet-200">
+                <Clock3 className="h-5 w-5" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs text-slate-400">Último backup</p>
+                <p className="mt-1 text-sm font-semibold text-white">
+                  {configuracaoBackup?.ultimo_backup
+                    ? new Date(configuracaoBackup.ultimo_backup).toLocaleString('pt-BR')
+                    : 'Nenhum backup registrado'}
+                </p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Exportar Dados */}
-      <Card className="card-3d border-border/60">
-        <CardHeader className="p-responsive">
+      <Card className="overflow-hidden rounded-3xl border-border/60 shadow-sm">
+        <CardHeader className="border-b bg-muted/20 p-responsive">
           <CardTitle className="flex items-center gap-2 text-responsive-lg">
             <Download className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0 text-primary" />
             Exportar Dados
           </CardTitle>
           <CardDescription className="text-responsive-sm">
-            Faça backup de todos os seus dados em diferentes formatos
+            Escolha o formato e selecione quais categorias farão parte do arquivo.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4 p-responsive">
           {/* Seleção de formato */}
           <div className="space-y-3">
-            <Label className="text-responsive-base font-medium">Formato de Exportação:</Label>
+            <div>
+              <Label className="text-responsive-base font-semibold">1. Formato do arquivo</Label>
+              <p className="mt-1 text-xs text-muted-foreground">Selecione o formato mais adequado para o uso pretendido.</p>
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
               {FORMATOS_EXPORT.map((formato) => {
                 const Icon = formato.icon;
                 return (
                   <button
                     key={formato.value}
+                    type="button"
+                    aria-pressed={formatoExport === formato.value}
                     onClick={() => setFormatoExport(formato.value as ExportFormat)}
-                    className={`p-3 sm:p-4 border-2 rounded-xl text-left transition-all touch-manipulation shadow-sm ${
+                    className={`p-3 sm:p-4 border rounded-2xl text-left transition-all touch-manipulation ${
                       formatoExport === formato.value
-                        ? 'border-primary bg-primary/5 shadow-md scale-[1.02]'
-                        : 'border-border hover:border-primary/50'
+                        ? 'border-primary bg-primary/5 ring-2 ring-primary/15 shadow-sm'
+                        : 'border-border bg-background hover:border-primary/40 hover:bg-muted/30'
                     }`}
                   >
                     <div className="flex items-center gap-2 sm:gap-3 mb-2">
@@ -504,17 +557,35 @@ export function ConfiguracaoBackup() {
           </div>
 
           {/* Seleção de dados */}
-          <div className="space-y-3">
-            <Label className="text-responsive-base font-medium">Dados para incluir:</Label>
-            <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
+          <div className="space-y-3 border-t pt-5">
+            <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <Label className="text-responsive-base font-semibold">2. Categorias para incluir</Label>
+                <p className="mt-1 text-xs text-muted-foreground">Escolha os dados que devem fazer parte do arquivo.</p>
+              </div>
+              <Badge variant="secondary" className="w-fit rounded-full px-3">
+                {categoriasSelecionadas} de 5 selecionadas
+              </Badge>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2 sm:gap-3">
               {[
-                { key: 'incluir_clientes', label: 'Clientes', icon: '👥' },
-                { key: 'incluir_servicos', label: 'Serviços', icon: '✂️' },
-                { key: 'incluir_agendamentos', label: 'Agendamentos', icon: '📅' },
-                { key: 'incluir_cronogramas', label: 'Cronogramas', icon: '🔄' },
-                { key: 'incluir_financeiro', label: 'Financeiro', icon: '💰' },
+                { key: 'incluir_clientes', label: 'Clientes', description: 'Cadastros e contatos', icon: UsersRound },
+                { key: 'incluir_servicos', label: 'Serviços', description: 'Serviços e valores', icon: Scissors },
+                { key: 'incluir_agendamentos', label: 'Agendamentos', description: 'Agenda e compromissos', icon: CalendarDays },
+                { key: 'incluir_cronogramas', label: 'Cronogramas', description: 'Cronogramas e retornos', icon: Repeat2 },
+                { key: 'incluir_financeiro', label: 'Financeiro', description: 'Lançamentos e contas', icon: WalletCards },
               ].map((item) => (
-                <div key={item.key} className="flex items-center space-x-2 p-2 sm:p-3 border rounded-lg touch-manipulation hover:bg-muted/50 transition-colors">
+                <div
+                  key={item.key}
+                  className={`flex items-center gap-3 rounded-2xl border p-3 transition-colors ${
+                    localConfig[item.key as keyof typeof localConfig]
+                      ? 'border-primary/30 bg-primary/[0.035]'
+                      : 'bg-background hover:bg-muted/40'
+                  }`}
+                >
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                    <item.icon className="h-5 w-5" aria-hidden="true" />
+                  </div>
                   <Switch
                     id={item.key}
                     checked={localConfig[item.key as keyof typeof localConfig] as boolean}
@@ -522,15 +593,16 @@ export function ConfiguracaoBackup() {
                       handleUpdateConfig(item.key, checked)
                     }
                   />
-                  <Label htmlFor={item.key} className="text-responsive-xs cursor-pointer flex-1 select-none font-medium">
-                    {item.icon} {item.label}
+                  <Label htmlFor={item.key} className="min-w-0 flex-1 cursor-pointer select-none">
+                    <span className="block text-sm font-medium">{item.label}</span>
+                    <span className="mt-0.5 block text-xs font-normal text-muted-foreground">{item.description}</span>
                   </Label>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 border-t pt-5 sm:grid-cols-2">
             <Button 
               onClick={exportarDados} 
               disabled={realizandoBackup || enviandoEmail}
@@ -574,8 +646,8 @@ export function ConfiguracaoBackup() {
       </Card>
 
       {/* Importar Dados */}
-      <Card className="card-3d border-border/60">
-        <CardHeader className="p-responsive">
+      <Card className="overflow-hidden rounded-3xl border-border/60 shadow-sm">
+        <CardHeader className="border-b bg-muted/20 p-responsive">
           <CardTitle className="flex items-center gap-2 text-responsive-lg">
             <Upload className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0 text-primary" />
             Restaurar Backup
@@ -593,7 +665,7 @@ export function ConfiguracaoBackup() {
             </AlertDescription>
           </Alert>
 
-          <div className="border-2 border-dashed border-primary/20 rounded-xl p-6 sm:p-10 text-center touch-manipulation bg-primary/5 hover:bg-primary/10 transition-colors">
+          <div className="border-2 border-dashed border-primary/25 rounded-2xl p-6 sm:p-10 text-center touch-manipulation bg-primary/[0.03] hover:bg-primary/[0.07] transition-colors">
             <input
               type="file"
               id="file-upload"
@@ -631,22 +703,22 @@ export function ConfiguracaoBackup() {
       </Card>
 
       {/* Backup Automático */}
-      <Card className="card-3d border-primary/10">
-        <CardHeader className="p-responsive">
+      <Card className="overflow-hidden rounded-3xl border-border/60 shadow-sm">
+        <CardHeader className="border-b bg-muted/20 p-responsive">
           <CardTitle className="flex items-center gap-2 text-responsive-lg">
             <Database className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0 text-primary" />
-            Lembrete de Backup Automático
+            Lembretes de backup
           </CardTitle>
           <CardDescription className="text-responsive-sm">
-            Configure alertas periódicos para nunca esquecer de salvar seus dados
+            Defina quando deseja ser lembrado de exportar uma cópia dos seus dados.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4 p-responsive">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 border rounded-xl bg-muted/30">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 rounded-2xl border bg-muted/30 p-4">
             <div className="flex-1 min-w-0">
-              <Label className="text-responsive-base font-bold">Ativar Alertas de Backup</Label>
+              <Label className="text-responsive-base font-semibold">Ativar lembretes periódicos</Label>
               <p className="text-responsive-xs text-muted-foreground mt-1">
-                O sistema lembrará você de exportar seus dados conforme a frequência escolhida
+                O sistema enviará lembretes; a exportação do arquivo continua sendo feita por você.
               </p>
             </div>
             <Switch
@@ -659,7 +731,7 @@ export function ConfiguracaoBackup() {
           {localConfig.backup_automatico && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2 duration-300">
               <div className="space-y-3">
-                <Label className="text-responsive-sm font-bold">Frequência do Lembrete:</Label>
+                <Label className="text-responsive-sm font-semibold">Frequência</Label>
                 <Select
                   value={localConfig.frequencia_backup}
                   onValueChange={(value) => handleUpdateConfig('frequencia_backup', value)}
@@ -676,7 +748,7 @@ export function ConfiguracaoBackup() {
               </div>
 
               <div className="space-y-3">
-                <Label className="text-responsive-sm font-bold">Horário Preferencial:</Label>
+                <Label className="text-responsive-sm font-semibold">Horário preferencial</Label>
                 <Input
                   type="time"
                   value={localConfig.hora_backup}
@@ -687,7 +759,7 @@ export function ConfiguracaoBackup() {
               </div>
 
               <div className="space-y-3 sm:col-span-2">
-                <Label className="text-responsive-sm font-bold">Email para Lembrete (opcional):</Label>
+                <Label className="text-responsive-sm font-semibold">E-mail para lembrete (opcional)</Label>
                 <Input
                   type="email"
                   placeholder="seu@email.com"
@@ -700,7 +772,7 @@ export function ConfiguracaoBackup() {
 
               {configuracaoBackup?.ultimo_backup && (
                 <div className="sm:col-span-2">
-                  <Alert className="bg-primary/5 border-primary/10 rounded-xl">
+                  <Alert className="rounded-2xl border-primary/15 bg-primary/5">
                     <CheckCircle2 className="h-4 w-4 text-primary" />
                     <AlertDescription className="text-responsive-xs font-medium text-primary">
                       Último backup exportado em: {new Date(configuracaoBackup.ultimo_backup).toLocaleString('pt-BR')}
@@ -714,30 +786,30 @@ export function ConfiguracaoBackup() {
       </Card>
 
       {/* Informações de Segurança */}
-      <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+      <Card className="rounded-3xl border-primary/20 bg-gradient-to-br from-primary/5 to-transparent shadow-sm">
         <CardHeader className="p-responsive">
           <CardTitle className="flex items-center gap-2 text-primary text-responsive-lg">
-            <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+            <HardDriveDownload className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
             Segurança dos Seus Dados
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3 p-responsive">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="flex items-start gap-2 text-responsive-xs">
-              <span className="text-primary font-bold">✓</span>
-              <p><strong>Privacidade Total:</strong> Os dados são gerados e processados localmente no seu navegador.</p>
+            <div className="flex items-start gap-3 rounded-2xl border bg-background/70 p-3 text-responsive-xs">
+              <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+              <p><strong>Privacidade:</strong> O arquivo é preparado no navegador com os dados da sua conta.</p>
             </div>
-            <div className="flex items-start gap-2 text-responsive-xs">
-              <span className="text-primary font-bold">✓</span>
-              <p><strong>Backup Universal:</strong> O formato JSON permite que seus dados sejam lidos por qualquer sistema.</p>
+            <div className="flex items-start gap-3 rounded-2xl border bg-background/70 p-3 text-responsive-xs">
+              <FileJson className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+              <p><strong>Formato portável:</strong> JSON é legível e facilita guardar ou transportar seus dados.</p>
             </div>
-            <div className="flex items-start gap-2 text-responsive-xs">
-              <span className="text-primary font-bold">✓</span>
-              <p><strong>Recomendação:</strong> Faça backup semanalmente e guarde o arquivo em um local seguro (nuvem ou pendrive).</p>
+            <div className="flex items-start gap-3 rounded-2xl border bg-background/70 p-3 text-responsive-xs">
+              <Clock3 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+              <p><strong>Recomendação:</strong> Exporte regularmente e guarde o arquivo em um local seguro.</p>
             </div>
-            <div className="flex items-start gap-2 text-responsive-xs">
-              <span className="text-primary font-bold">✓</span>
-              <p><strong>Restauração:</strong> Use a função de importar apenas em caso de perda de dados ou migração de conta.</p>
+            <div className="flex items-start gap-3 rounded-2xl border bg-background/70 p-3 text-responsive-xs">
+              <Upload className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+              <p><strong>Restauração:</strong> A importação mescla dados ao conteúdo atual; revise o arquivo antes de restaurar.</p>
             </div>
           </div>
         </CardContent>

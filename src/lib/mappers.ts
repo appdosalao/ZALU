@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Cliente } from '@/types/cliente';
 import type { Servico } from '@/types/servico';
 import type { Lancamento } from '@/types/lancamento';

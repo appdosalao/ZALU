@@ -231,12 +231,12 @@ ALTER TABLE public.intervalos_trabalho ENABLE ROW LEVEL SECURITY;
 
 -- POLÍTICAS PARA AGENDAMENTOS ONLINE (Acesso Total para Anon na Inserção)
 DROP POLICY IF EXISTS "Public can insert online appointments" ON public.agendamentos_online;
-CREATE POLICY "Public can insert online appointments" ON public.agendamentos_online FOR INSERT TO anon, public WITH CHECK (true);
+CREATE POLICY "Public can insert online appointments" ON public.agendamentos_online FOR INSERT TO anon WITH CHECK (true);
 
 DROP POLICY IF EXISTS "Public can view availability" ON public.agendamentos_online;
 CREATE POLICY "Public can view availability" 
 ON public.agendamentos_online FOR SELECT 
-TO anon, public 
+TO anon 
 USING ( (
   SELECT user_id FROM public.servicos s WHERE s.id = agendamentos_online.servico_id
 ) = ( 
@@ -247,13 +247,15 @@ USING ( (
 ));
 
 DROP POLICY IF EXISTS "Owners can manage their online appointments" ON public.agendamentos_online;
-CREATE POLICY "Owners can manage their online appointments" ON public.agendamentos_online FOR ALL TO authenticated USING (true);
+CREATE POLICY "Owners can manage their online appointments" ON public.agendamentos_online FOR ALL TO authenticated
+USING (user_id = auth.uid())
+WITH CHECK (user_id = auth.uid());
 
 -- POLÍTICAS PARA SERVIÇOS (Leitura pública total)
 DROP POLICY IF EXISTS "Public can view active services" ON public.servicos;
 CREATE POLICY "Public can view active services" 
 ON public.servicos FOR SELECT 
-TO anon, public 
+TO anon 
 USING (user_id = ( 
   SELECT user_id FROM public.configuracoes_agendamento_online 
   WHERE public_id = current_setting('request.jwt.claims', true)::json->>'salon_slug' 
@@ -262,40 +264,46 @@ USING (user_id = (
 ));
 
 DROP POLICY IF EXISTS "Owners can manage their services" ON public.servicos;
-CREATE POLICY "Owners can manage their services" ON public.servicos FOR ALL TO authenticated USING (true);
+CREATE POLICY "Owners can manage their services" ON public.servicos FOR ALL TO authenticated
+USING (user_id = auth.uid())
+WITH CHECK (user_id = auth.uid());
 
 -- POLÍTICAS PARA CLIENTES (Permitir inserção anônima sem restrição)
 DROP POLICY IF EXISTS "Public can insert clients" ON public.clientes;
-CREATE POLICY "Public can insert clients" ON public.clientes FOR INSERT TO anon, public WITH CHECK (true);
+CREATE POLICY "Public can insert clients" ON public.clientes FOR INSERT TO anon WITH CHECK (true);
 
 DROP POLICY IF EXISTS "Owners can manage their clients" ON public.clientes;
-CREATE POLICY "Owners can manage their clients" ON public.clientes FOR ALL TO authenticated USING (true);
+CREATE POLICY "Owners can manage their clients" ON public.clientes FOR ALL TO authenticated
+USING (user_id = auth.uid())
+WITH CHECK (user_id = auth.uid());
 
 -- POLÍTICAS PARA CONFIGURAÇÕES E HORÁRIOS (Leitura pública total)
 DROP POLICY IF EXISTS "Public can view online configs" ON public.configuracoes_agendamento_online;
-CREATE POLICY "Public can view online configs" ON public.configuracoes_agendamento_online FOR SELECT TO anon, public USING (true);
+CREATE POLICY "Public can view online configs" ON public.configuracoes_agendamento_online FOR SELECT TO anon USING (true);
 
 DROP POLICY IF EXISTS "Public can view schedules" ON public.configuracoes_horarios;
-CREATE POLICY "Public can view schedules" ON public.configuracoes_horarios FOR SELECT TO anon, public USING (true);
+CREATE POLICY "Public can view schedules" ON public.configuracoes_horarios FOR SELECT TO anon USING (true);
 
 DROP POLICY IF EXISTS "Public can view work intervals" ON public.intervalos_trabalho;
-CREATE POLICY "Public can view work intervals" ON public.intervalos_trabalho FOR SELECT TO anon, public USING (true);
+CREATE POLICY "Public can view work intervals" ON public.intervalos_trabalho FOR SELECT TO anon USING (true);
 
--- CONCEDER PERMISSÕES FINAIS (Garantir que anon e public tenham acesso)
-GRANT USAGE ON SCHEMA public TO anon, public, authenticated;
-GRANT ALL ON TABLE public.agendamentos_online TO anon, public, authenticated;
-GRANT ALL ON TABLE public.clientes TO anon, public, authenticated;
-GRANT ALL ON TABLE public.servicos TO anon, public, authenticated;
-GRANT ALL ON TABLE public.configuracoes_agendamento_online TO anon, public, authenticated;
-GRANT ALL ON TABLE public.configuracoes_horarios TO anon, public, authenticated;
-GRANT ALL ON TABLE public.intervalos_trabalho TO anon, public, authenticated;
-GRANT ALL ON TABLE public.agendamentos TO anon, public, authenticated;
-
--- Garantir que as sequências também tenham permissão
-GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO anon, public, authenticated;
+-- CONCEDER SOMENTE PERMISSÕES NECESSÁRIAS
+GRANT USAGE ON SCHEMA public TO anon, authenticated;
+GRANT SELECT, INSERT ON TABLE public.agendamentos_online TO anon;
+GRANT SELECT ON TABLE public.servicos TO anon;
+GRANT SELECT ON TABLE public.configuracoes_agendamento_online TO anon;
+GRANT SELECT ON TABLE public.configuracoes_horarios TO anon;
+GRANT SELECT ON TABLE public.intervalos_trabalho TO anon;
+GRANT ALL ON TABLE public.agendamentos_online TO authenticated;
+GRANT ALL ON TABLE public.clientes TO authenticated;
+GRANT ALL ON TABLE public.servicos TO authenticated;
+GRANT ALL ON TABLE public.configuracoes_agendamento_online TO authenticated;
+GRANT ALL ON TABLE public.configuracoes_horarios TO authenticated;
+GRANT ALL ON TABLE public.intervalos_trabalho TO authenticated;
+GRANT ALL ON TABLE public.agendamentos TO authenticated;
 
 -- Permissão para funções RPC
-GRANT EXECUTE ON FUNCTION public.criar_cliente_agendamento_online(text, text, text, text) TO anon, public, authenticated;
-GRANT EXECUTE ON FUNCTION public.sync_online_para_agendamento() TO anon, public, authenticated;
+GRANT EXECUTE ON FUNCTION public.criar_cliente_agendamento_online(text, text, text, text) TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.sync_online_para_agendamento() TO anon, authenticated;
 
 COMMIT;

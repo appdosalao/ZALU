@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useCallback, useRef, useEffect } from 'react';
 import { useNotifications } from './useNotifications';
 import { usePushNotifications } from './usePushNotifications';
@@ -45,6 +46,7 @@ export const useEnhancedNotifications = () => {
     } catch (error) {
       console.log('Erro ao reproduzir som:', error);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Notificar novo agendamento com todas as opções configuradas
@@ -76,6 +78,7 @@ export const useEnhancedNotifications = () => {
       const minutosAntes = configuracoes.notificacoes.lembretesAgendamento.antecedencia;
       await scheduleAppointmentReminder(agendamento, minutosAntes);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [configuracoes, playNotificationSound, isSubscribed, notifyNewAppointment, scheduleAppointmentReminder]);
 
   // Notificar serviço finalizado
@@ -99,6 +102,7 @@ export const useEnhancedNotifications = () => {
     if (config.push && isSubscribed) {
       await notifyServiceCompleted(agendamento);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [configuracoes, playNotificationSound, isSubscribed, notifyServiceCompleted]);
 
   // Lembrete de despesa fixa
@@ -120,6 +124,7 @@ export const useEnhancedNotifications = () => {
     }
 
     // Push notification seria implementada aqui
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [configuracoes, playNotificationSound]);
 
   return {

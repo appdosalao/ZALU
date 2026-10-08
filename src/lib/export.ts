@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 import type { RelatorioExportacao } from '@/types/relatorio';
 import type { Lancamento } from '@/types/lancamento';
 import type { ContaFixa } from '@/types/contaFixa';
@@ -187,8 +189,8 @@ export function exportRelatorioPDF(relatorio: RelatorioExportacao, brand?: { sal
   win.document.open();
   win.document.write(safeHtml);
   win.document.close();
-  try { win.focus(); } catch {}
-  setTimeout(() => { try { win.print(); } catch {} }, 400);
+  try { win.focus(); } catch { /* no-op */ }
+  setTimeout(() => { try { win.print(); } catch { /* no-op */ } }, 400);
 }
 
 export function exportDespesasUsoCSV(rows: Array<{ data: string; categoria: string; valor: number; descricao: string }>, filename = 'despesas_de_uso.csv') {
@@ -234,8 +236,8 @@ export function exportDespesasUsoPDF(rows: Array<{ data: string; categoria: stri
   win.document.open();
   win.document.write(safeHtml);
   win.document.close();
-  try { win.focus(); } catch {}
-  setTimeout(() => { try { win.print(); } catch {} }, 400);
+  try { win.focus(); } catch { /* no-op */ }
+  setTimeout(() => { try { win.print(); } catch { /* no-op */ } }, 400);
 }
 export function exportVendasPorProdutoCSV(rows: Array<{ produto: string; quantidade: number; valor_total: number }>, filename = 'vendas_por_produto.csv') {
   const csv = toCSV(rows.map(r => ({
@@ -279,8 +281,8 @@ export function exportVendasPorProdutoPDF(rows: Array<{ produto: string; quantid
   win.document.open();
   win.document.write(safeHtml);
   win.document.close();
-  try { win.focus(); } catch {}
-  setTimeout(() => { try { win.print(); } catch {} }, 400);
+  try { win.focus(); } catch { /* no-op */ }
+  setTimeout(() => { try { win.print(); } catch { /* no-op */ } }, 400);
 }
 
 export function exportMovimentacoesEstoqueCSV(rows: Array<{ id: string; tipo: string; data: string; valor: number; descricao: string; status?: string; itens?: number }>, filename = 'movimentacoes_produtos.csv') {
@@ -329,6 +331,6 @@ export function exportMovimentacoesEstoquePDF(rows: Array<{ id: string; tipo: st
   win.document.open();
   win.document.write(safeHtml);
   win.document.close();
-  try { win.focus(); } catch {}
-  setTimeout(() => { try { win.print(); } catch {} }, 400);
+  try { win.focus(); } catch { /* no-op */ }
+  setTimeout(() => { try { win.print(); } catch { /* no-op */ } }, 400);
 }

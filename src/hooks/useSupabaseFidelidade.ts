@@ -1,3 +1,4 @@
+ 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
@@ -25,7 +26,7 @@ export const useSupabaseFidelidade = () => {
   const [ranking, setRanking] = useState<RankingFidelidade[]>([]);
   const [classes, setClasses] = useState<ClasseFidelidade[]>([]);
 
-  const parseValor = (v: any): number => {
+  const parseValor = (v: unknown): number => {
     if (typeof v === 'number') return v;
     if (typeof v === 'string') {
       const s = v.replace(/\./g, '').replace(',', '.');
@@ -48,7 +49,7 @@ export const useSupabaseFidelidade = () => {
 
       if (error && error.code !== 'PGRST116') throw error;
       setPrograma(data);
-    } catch (error: any) {
+    } catch (error) {
       console.error('Erro ao carregar programa:', error);
     }
   };
@@ -146,7 +147,7 @@ export const useSupabaseFidelidade = () => {
       await carregarRanking();
       toast.success(`Sincronização concluída${inseridos ? ` (${inseridos} créditos novos)` : ''}`);
       return true;
-    } catch (error: any) {
+    } catch (error) {
       console.error('Erro ao sincronizar histórico:', error);
       toast.error('Erro ao sincronizar pontos do histórico');
       return false;
@@ -168,7 +169,7 @@ export const useSupabaseFidelidade = () => {
 
       if (error) throw error;
       setRecompensas((data || []) as Recompensa[]);
-    } catch (error: any) {
+    } catch (error) {
       console.error('Erro ao carregar recompensas:', error);
     }
   };
@@ -186,7 +187,7 @@ export const useSupabaseFidelidade = () => {
 
       if (error && error.code !== 'PGRST116') throw error;
       setEstatisticas(data);
-    } catch (error: any) {
+    } catch (error) {
       console.error('Erro ao carregar estatísticas:', error);
     }
   };
@@ -213,7 +214,7 @@ export const useSupabaseFidelidade = () => {
       }));
 
       setRanking(rankingRecalculado as RankingFidelidade[]);
-    } catch (error: any) {
+    } catch (error) {
       console.error('Erro ao carregar ranking:', error);
     } finally {
       setLoading(false);
@@ -233,7 +234,7 @@ export const useSupabaseFidelidade = () => {
 
       if (error) throw error;
       setClasses((data || []) as ClasseFidelidade[]);
-    } catch (error: any) {
+    } catch (error) {
       console.error('Erro ao carregar classes:', error);
     }
   };
@@ -275,7 +276,7 @@ export const useSupabaseFidelidade = () => {
         toast.success('Programa criado com sucesso!');
         return data;
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Erro ao salvar programa:', error);
       toast.error('Erro ao salvar programa de fidelidade');
       return null;
@@ -299,7 +300,7 @@ export const useSupabaseFidelidade = () => {
       if (error) throw error;
       setPrograma(data);
       toast.success(data.ativo ? 'Programa ativado!' : 'Programa desativado!');
-    } catch (error: any) {
+    } catch (error) {
       console.error('Erro ao alterar status do programa:', error);
       toast.error('Erro ao alterar status do programa');
     }
@@ -326,7 +327,7 @@ export const useSupabaseFidelidade = () => {
       await carregarRecompensas();
       toast.success('Recompensa criada com sucesso!');
       return data;
-    } catch (error: any) {
+    } catch (error) {
       console.error('Erro ao criar recompensa:', error);
       toast.error('Erro ao criar recompensa');
       return null;
@@ -355,7 +356,7 @@ export const useSupabaseFidelidade = () => {
       await carregarRecompensas();
       toast.success('Recompensa atualizada!');
       return data;
-    } catch (error: any) {
+    } catch (error) {
       console.error('Erro ao atualizar recompensa:', error);
       toast.error('Erro ao atualizar recompensa');
       return null;
@@ -378,7 +379,7 @@ export const useSupabaseFidelidade = () => {
       
       await carregarRecompensas();
       toast.success('Recompensa excluída!');
-    } catch (error: any) {
+    } catch (error) {
       console.error('Erro ao excluir recompensa:', error);
       toast.error('Erro ao excluir recompensa');
     } finally {
@@ -407,7 +408,7 @@ export const useSupabaseFidelidade = () => {
       await carregarClasses();
       toast.success('Classe criada com sucesso!');
       return data;
-    } catch (error: any) {
+    } catch (error) {
       console.error('Erro ao criar classe:', error);
       toast.error('Erro ao criar classe');
       return null;
@@ -436,7 +437,7 @@ export const useSupabaseFidelidade = () => {
       await carregarClasses();
       toast.success('Classe atualizada!');
       return data;
-    } catch (error: any) {
+    } catch (error) {
       console.error('Erro ao atualizar classe:', error);
       toast.error('Erro ao atualizar classe');
       return null;
@@ -459,7 +460,7 @@ export const useSupabaseFidelidade = () => {
       
       await carregarClasses();
       toast.success('Classe excluída!');
-    } catch (error: any) {
+    } catch (error) {
       console.error('Erro ao excluir classe:', error);
       toast.error('Erro ao excluir classe');
     } finally {
@@ -481,7 +482,7 @@ export const useSupabaseFidelidade = () => {
 
       if (error && error.code !== 'PGRST116') throw error;
       return data;
-    } catch (error: any) {
+    } catch (error) {
       console.error('Erro ao buscar saldo:', error);
       return null;
     }
@@ -501,7 +502,7 @@ export const useSupabaseFidelidade = () => {
 
       if (error && error.code !== 'PGRST116') throw error;
       return data as NivelFidelidade | null;
-    } catch (error: any) {
+    } catch (error) {
       console.error('Erro ao buscar nível:', error);
       return null;
     }
@@ -522,7 +523,7 @@ export const useSupabaseFidelidade = () => {
 
       if (error) throw error;
       return (data || []) as PontoFidelidade[];
-    } catch (error: any) {
+    } catch (error) {
       console.error('Erro ao buscar histórico:', error);
       return [];
     }
@@ -559,7 +560,7 @@ export const useSupabaseFidelidade = () => {
       if (error) throw error;
       toast.success(`${pontos} pontos adicionados!`);
       return data;
-    } catch (error: any) {
+    } catch (error) {
       console.error('Erro ao adicionar pontos:', error);
       toast.error('Erro ao adicionar pontos');
       return null;
@@ -645,6 +646,7 @@ export const useSupabaseFidelidade = () => {
     return () => {
       supabase.removeChannel(channel);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   // Carregar dados iniciais
@@ -656,6 +658,7 @@ export const useSupabaseFidelidade = () => {
       carregarRanking();
       carregarClasses();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   return {

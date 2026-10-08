@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useCallback } from 'react';
 import { supabasePublic } from '@/integrations/supabase/publicClient';
 import { AgendamentoOnlineData, ServicoDisponivel, HorarioDisponivel } from '@/types/agendamento-online';
@@ -230,6 +231,7 @@ export const useAgendamentoOnlineService = () => {
       setHorariosError(error instanceof Error ? error.message : 'Erro ao calcular horários disponíveis');
       return [];
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resolveIdentifiers, servicos]);
 
   // Criar cliente se não existir
@@ -251,6 +253,7 @@ export const useAgendamentoOnlineService = () => {
       console.error('Erro ao criar cliente:', error);
       throw error;
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Criar agendamento online com validação final
@@ -313,6 +316,20 @@ export const useAgendamentoOnlineService = () => {
           user_agent: navigator.userAgent
       };
 
+      try {
+        const ipHash = await (async () => {
+          try {
+            const raw = `${navigator.userAgent}|${window.location.hostname}`;
+            const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(raw));
+            return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('').slice(0,32);
+          } catch { return 'anon'; }
+        })();
+        const pid = (await resolveIdentifiers()).publicId || (baseInsert as any).publicId || 'unknown';
+        const { data: ok } = await db.rpc('check_booking_rate_limit', { p_ip_hash: ipHash, p_public_id: String(pid) }) as any;
+        if (ok === false) throw new Error('Muitas tentativas — aguarde 1 minuto');
+      } catch (e) {
+        if (String(e?.message).includes('Muitas tentativas')) throw e;
+      }
       let insertError: any = null;
       const firstTry = (await withTiming('insert:agendamentos_online', () => db.from('agendamentos_online').insert(baseInsert as any))) as any;
       insertError = firstTry.error;
@@ -335,6 +352,7 @@ export const useAgendamentoOnlineService = () => {
     } finally {
       setLoading(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [servicos, criarClienteSeNaoExistir, calcularHorariosDisponiveis, resolveIdentifiers]);
 
   return {

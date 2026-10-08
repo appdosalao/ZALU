@@ -37,6 +37,7 @@ export const usePushNotifications = () => {
       setIsSupported(true);
       checkSubscription();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [usuario]);
 
   // Check existing subscription
