@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { useNotifications } from './useNotifications';
 import { useEnhancedNotifications } from './useEnhancedNotifications';
 import { useServicos } from './useServicos';
+import { syncCronogramaReturnAfterAppointment } from '@/lib/cronograma-appointments';
 
 interface AgendamentoOnlineData {
   id: string;
@@ -156,10 +157,10 @@ export function useSupabaseAgendamentos() {
     if (!user) return [];
     
     try {
-      const { data, error } = await (supabase
-        .from('agendamentos_online' as never)
-        .select('*'))
-        .eq('user_id', user.id) // user_id conforme definido no banco de dados
+      const { data, error } = await supabase
+        .from('agendamentos_online')
+        .select('*')
+        .filter('user_id', 'eq', user.id)
         .neq('status', 'excluido')
         .order('data', { ascending: true });
 
@@ -628,6 +629,10 @@ export function useSupabaseAgendamentos() {
         return false;
       }
 
+      await syncCronogramaReturnAfterAppointment(user.id, id, {
+        status: typeof updates.status === 'string' ? updates.status : undefined,
+        data: typeof updates.data === 'string' ? updates.data : undefined,
+      });
       await carregarAgendamentos();
       toast.success('Agendamento atualizado com sucesso!');
       return true;
@@ -693,6 +698,7 @@ export function useSupabaseAgendamentos() {
         return false;
       }
 
+      await syncCronogramaReturnAfterAppointment(user.id, id, { status: 'excluido' });
       console.log('✅ Agendamento marcado como excluído no banco');
       await carregarAgendamentos();
       toast.success('Agendamento excluído com sucesso!');
@@ -732,6 +738,7 @@ export function useSupabaseAgendamentos() {
           .eq('user_id', user.id); // user_id conforme definido no banco
 
         if (error) throw error;
+        await syncCronogramaReturnAfterAppointment(user.id, id, { status: 'cancelado' });
       }
 
       await carregarAgendamentos();

@@ -27,7 +27,16 @@ export const useCronogramas = () => {
 };
 
 export const useRetornos = () => {
-  const { retornos, createRetorno, updateRetorno, loading } = useSupabaseCronogramas();
+  const {
+    retornos,
+    cronogramas,
+    createRetorno,
+    updateRetorno,
+    criarAgendamentoDeRetorno,
+    cancelarAgendamentoDeRetorno,
+    loading,
+    error,
+  } = useSupabaseCronogramas();
 
   const marcarRetornoRealizado = async (id: string, idAgendamento?: string) => {
     await updateRetorno(id, { 
@@ -37,7 +46,7 @@ export const useRetornos = () => {
   };
 
   const cancelarRetorno = async (id: string) => {
-    await updateRetorno(id, { status: 'Cancelado' });
+    await cancelarAgendamentoDeRetorno(id);
   };
 
   const getRetornosPendentes = () => {
@@ -54,10 +63,12 @@ export const useRetornos = () => {
 
   return {
     retornos,
+    cronogramas,
     loading,
-    error: null,
+    error,
     createRetorno,
     updateRetorno,
+    criarAgendamentoDeRetorno,
     marcarRetornoRealizado,
     cancelarRetorno,
     getRetornosPendentes,
