@@ -17,7 +17,7 @@ export default defineConfig(() => ({
       srcDir: 'src',
       filename: 'service-worker.js',
       registerType: 'prompt', // Mudar de autoUpdate para prompt para evitar recarregamentos automáticos
-      injectRegister: 'script', // Usar script manual para controle total
+      injectRegister: null, // O hook usePWAUpdate controla o registro do service worker.
       injectManifest: {
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
       },

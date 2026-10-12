@@ -36,7 +36,7 @@ interface PWAProviderProps {
 export const PWAProvider = ({ 
   children, 
   showInstallPrompt = true, 
-  showUpdatePrompt = true, 
+  showUpdatePrompt = false,
   showOfflineIndicator = true 
 }: PWAProviderProps) => {
   const pwaState = usePWA();
