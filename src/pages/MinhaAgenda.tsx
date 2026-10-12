@@ -230,17 +230,17 @@ export default function MinhaAgenda() {
           <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Minha Agenda</h1>
           <p className="text-sm sm:text-base text-muted-foreground">Organize, visualize e gerencie seus atendimentos</p>
         </div>
-        <div className="flex flex-col sm:flex-row gap-3 lg:gap-2">
-          <div className="relative">
+        <div className="flex min-w-0 flex-col sm:flex-row gap-3 lg:gap-2">
+          <div className="relative w-full min-w-0 sm:w-auto">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Buscar por cliente, serviço ou observação"
-              className="pl-9 w-[260px]"
+              className="w-full pl-9 sm:w-[260px]"
               value={buscaTexto}
               onChange={(e) => setBuscaTexto(e.target.value)}
             />
           </div>
-          <Button onClick={handleNovoAgendamento} className="bg-gradient-to-r from-primary to-lilac-primary">
+          <Button onClick={handleNovoAgendamento} className="w-full sm:w-auto bg-gradient-to-r from-primary to-lilac-primary">
             <Plus className="mr-2 h-4 w-4" />
             Novo Agendamento
           </Button>

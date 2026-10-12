@@ -109,7 +109,7 @@ export function AgendaSemanal({ buscaTexto = '', onSlotClick }: AgendaSemanalPro
     <div className="space-y-6">
       {/* Navegação da Semana Aprimorada */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-xl bg-gradient-to-r from-accent/10 to-primary/10 border border-border/50">
-        <div className="flex items-center gap-3">
+        <div className="flex w-full min-w-0 items-center gap-2 sm:w-auto sm:gap-3">
           <Button 
             variant="outline" 
             size="sm" 
@@ -118,8 +118,8 @@ export function AgendaSemanal({ buscaTexto = '', onSlotClick }: AgendaSemanalPro
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <div className="text-center min-w-[280px] lg:min-w-[350px]">
-            <h2 className="text-lg lg:text-xl font-bold tracking-tight bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+          <div className="min-w-0 flex-1 text-center sm:min-w-[280px] lg:min-w-[350px]">
+            <h2 className="text-sm font-bold tracking-tight bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent sm:text-lg lg:text-xl">
               {format(inicioSemana, "dd 'de' MMM", { locale: ptBR })} - {format(fimSemana, "dd 'de' MMM 'de' yyyy", { locale: ptBR })}
             </h2>
           </div>

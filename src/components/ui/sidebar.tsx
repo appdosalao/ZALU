@@ -22,7 +22,7 @@ const SIDEBAR_COOKIE_NAME = "sidebar:state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
 const SIDEBAR_WIDTH = "16rem"
 const SIDEBAR_WIDTH_MOBILE = "18rem"
-const SIDEBAR_WIDTH_ICON = "4.25rem"
+const SIDEBAR_WIDTH_ICON = "4rem"
 const SIDEBAR_KEYBOARD_SHORTCUT = "b"
 
 type SidebarContext = {
@@ -210,7 +210,7 @@ const Sidebar = React.forwardRef<
           <SheetContent
             data-sidebar="sidebar"
             data-mobile="true"
-            className="w-[--sidebar-width] bg-sidebar p-0 text-sidebar-foreground data-[state=open]:duration-300 data-[state=closed]:duration-200 ease-in-out [&>button]:right-3 [&>button]:top-3 [&>button]:h-11 [&>button]:w-11 [&>button]:rounded-xl [&>button]:opacity-100 [&>button]:bg-white/60 [&>button]:text-foreground [&>button]:shadow-sm [&>button]:transition-colors [&>button]:duration-200 [&>button]:ease-in-out [&>button]:hover:bg-white/80 dark:[&>button]:bg-white/10 dark:[&>button]:text-white dark:[&>button]:hover:bg-white/15"
+            className="w-[--sidebar-width] bg-sidebar p-0 text-sidebar-foreground data-[state=open]:duration-300 data-[state=closed]:duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none [&>button]:right-3 [&>button]:top-3 [&>button]:h-11 [&>button]:w-11 [&>button]:rounded-xl [&>button]:opacity-100 [&>button]:bg-white/60 [&>button]:text-foreground [&>button]:shadow-sm [&>button]:transition-colors [&>button]:duration-200 [&>button]:ease-in-out [&>button]:hover:bg-white/80 dark:[&>button]:bg-white/10 dark:[&>button]:text-white dark:[&>button]:hover:bg-white/15"
             style={
               {
                 "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
@@ -277,33 +277,24 @@ const Sidebar = React.forwardRef<
     return (
       <div
         ref={ref}
-        className="group peer hidden md:block text-sidebar-foreground"
+        className="group peer hidden shrink-0 md:block text-sidebar-foreground"
         data-state={state}
         data-collapsible={state === "collapsed" ? collapsible : ""}
         data-variant={variant}
         data-side={side}
       >
-        {/* This is what handles the sidebar gap on desktop */}
         <div
           className={cn(
-            "duration-200 relative h-svh w-[--sidebar-width] bg-transparent transition-[width] ease-linear",
-            "group-data-[collapsible=offcanvas]:w-0",
-            "group-data-[side=right]:rotate-180",
-            variant === "floating" || variant === "inset"
-              ? "group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)_+_theme(spacing.4))]"
-              : "group-data-[collapsible=icon]:w-[--sidebar-width-icon]"
-          )}
-        />
-        <div
-          className={cn(
-            "duration-200 fixed inset-y-0 z-10 hidden h-svh w-[--sidebar-width] transition-[left,right,width] ease-linear md:flex",
-            side === "left"
-              ? "left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]"
-              : "right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]",
-            // Adjust the padding for floating and inset variants.
-            variant === "floating" || variant === "inset"
-              ? "p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)_+_theme(spacing.4)_+2px)]"
-              : "group-data-[collapsible=icon]:w-[--sidebar-width-icon] group-data-[side=left]:border-r group-data-[side=right]:border-l",
+            "sticky top-0 z-10 flex h-svh shrink-0 flex-col transition-[width] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
+            state === "collapsed"
+              ? collapsible === "offcanvas"
+                ? "w-0 overflow-hidden"
+                : variant === "floating" || variant === "inset"
+                  ? "w-[calc(var(--sidebar-width-icon)_+_theme(spacing.4))]"
+                  : "w-[--sidebar-width-icon]"
+              : "w-[--sidebar-width]",
+            side === "right" && "order-last",
+            variant === "floating" || variant === "inset" ? "p-2" : "",
             className
           )}
           {...props}
@@ -325,15 +316,20 @@ const SidebarTrigger = React.forwardRef<
   ElementRef<typeof Button>,
   ComponentProps<typeof Button>
 >(({ className, onClick, ...props }, ref) => {
-  const { toggleSidebar } = useSidebar()
+  const { isMobile, openMobile, state, toggleSidebar } = useSidebar()
+  const sidebarState = isMobile ? (openMobile ? "expanded" : "collapsed") : state
 
   return (
     <Button
       ref={ref}
       data-sidebar="trigger"
+      data-state={sidebarState}
       variant="ghost"
       size="icon"
-      className={cn("h-7 w-7", className)}
+      className={cn(
+        "group h-9 w-9 rounded-xl transition-[background,color,transform] duration-200 ease-out hover:bg-primary/10 active:scale-95 motion-reduce:transition-none [&>svg]:transition-transform [&>svg]:duration-300 [&>svg]:ease-[cubic-bezier(0.22,1,0.36,1)] group-data-[state=expanded]:[&>svg]:rotate-180 motion-reduce:[&>svg]:transition-none",
+        className
+      )}
       onClick={(event) => {
         onClick?.(event)
         toggleSidebar()
@@ -501,8 +497,8 @@ const SidebarGroupLabel = React.forwardRef<
       ref={ref}
       data-sidebar="group-label"
       className={cn(
-        "duration-200 flex h-8 shrink-0 items-center rounded-md px-2 text-xs font-medium text-sidebar-foreground/70 outline-none ring-sidebar-ring transition-[margin,opa] ease-linear focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0",
-        "group-data-[collapsible=icon]:-mt-8 group-data-[collapsible=icon]:opacity-0",
+        "flex h-8 shrink-0 items-center rounded-md px-2 text-xs font-medium text-sidebar-foreground/70 outline-none ring-sidebar-ring transition-[height,margin,opacity,transform] duration-200 ease-out focus-visible:ring-2 motion-reduce:transition-none [&>svg]:size-4 [&>svg]:shrink-0",
+        "group-data-[collapsible=icon]:-mt-2 group-data-[collapsible=icon]:h-0 group-data-[collapsible=icon]:-translate-y-1 group-data-[collapsible=icon]:overflow-hidden group-data-[collapsible=icon]:opacity-0",
         className
       )}
       {...props}
@@ -574,7 +570,7 @@ const SidebarMenuItem = React.forwardRef<
 SidebarMenuItem.displayName = "SidebarMenuItem"
 
 const sidebarMenuButtonVariants = cva(
-  "peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-xl p-2 text-left text-sm outline-none ring-sidebar-ring transition-[width,height,padding,color,background-color,box-shadow,transform] duration-200 ease-in-out hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:!size-12 group-data-[collapsible=icon]:!p-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0",
+  "peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-xl p-2 text-left text-sm outline-none ring-sidebar-ring transition-[width,height,padding,color,background-color,box-shadow,transform] duration-200 ease-out hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 group-data-[collapsible=icon]:!mx-auto group-data-[collapsible=icon]:!size-12 group-data-[collapsible=icon]:!p-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0 motion-reduce:transition-none [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0",
   {
     variants: {
       variant: {
