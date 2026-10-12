@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { useState, useCallback } from 'react';
+import type { TablesInsert } from '@/integrations/supabase/types';
 
 export const useSupabaseService = () => {
   const [loading, setLoading] = useState(false);
@@ -48,7 +49,7 @@ export const useSupabaseService = () => {
     }
   }, []);
 
-  const createAgendamentoOnline = useCallback(async (agendamentoData: Record<string, unknown>) => {
+  const createAgendamentoOnline = useCallback(async (agendamentoData: TablesInsert<'agendamentos_online'>) => {
     setLoading(true);
     setError(null);
     

@@ -3,6 +3,7 @@ import { useServicos } from './useServicos';
 import { useSupabaseClientes } from './useSupabaseClientes';
 import { useMemo } from 'react';
 import { normalizeText } from '@/lib/formatters';
+import type { Agendamento } from '@/types/agendamento';
 
 // Função utilitária para construção segura de datas
 const parseSafeDate = (data: string, hora: string): Date => {

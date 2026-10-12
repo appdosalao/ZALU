@@ -32,5 +32,12 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src/server.ts", "src/routes/**/*.ts", "src/middlewares/**/*.ts", "src/lib/**/*.ts", "api/index.ts"]
+  "include": [
+    "src/server.ts",
+    "src/routes/**/*.ts",
+    "src/middlewares/**/*.ts",
+    "src/lib/supabaseServer.ts",
+    "src/integrations/supabase/types.ts",
+    "api/index.ts"
+  ]
 }

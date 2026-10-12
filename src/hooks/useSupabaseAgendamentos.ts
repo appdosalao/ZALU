@@ -3,6 +3,7 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { Agendamento, AgendamentoFiltros } from '@/types/agendamento';
+import { TablesUpdate } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
 import { useNotifications } from './useNotifications';
 import { useEnhancedNotifications } from './useEnhancedNotifications';
@@ -459,11 +460,12 @@ export function useSupabaseAgendamentos() {
     if (!user) return false;
     setLoading(true);
     try {
-      const { error } = await (supabase
-        .from('agendamentos_online' as never)
-        .update({ status: 'confirmado' } as Record<string, unknown>))
+      const update: TablesUpdate<'agendamentos_online'> = { status: 'confirmado' };
+      const { error } = await supabase
+        .from('agendamentos_online')
+        .update(update)
         .eq('id', agendamentoOnlineId)
-        .eq('user_id', user.id); // user_id conforme definido no banco
+        .filter('user_id', 'eq', user.id);
 
       if (error) {
         console.error('Erro ao confirmar agendamento:', error);
@@ -650,11 +652,12 @@ export function useSupabaseAgendamentos() {
       setLoading(true);
       try {
         console.log('🗑️ Executando soft delete de agendamento online no Supabase...', agendamentoOnlineId);
-        const { error } = await (supabase
-          .from('agendamentos_online' as never)
-          .update({ status: 'excluido' } as Record<string, unknown>))
+        const update: TablesUpdate<'agendamentos_online'> = { status: 'excluido' };
+        const { error } = await supabase
+          .from('agendamentos_online')
+          .update(update)
           .eq('id', agendamentoOnlineId)
-          .eq('user_id', user.id); // user_id conforme definido no banco
+          .filter('user_id', 'eq', user.id);
 
         if (error) {
           console.error('❌ Erro do Supabase ao excluir agendamento online:', error);
@@ -713,11 +716,12 @@ export function useSupabaseAgendamentos() {
     try {
       if (id.startsWith('online_')) {
         const agendamentoOnlineId = id.replace('online_', '');
-        const { error } = await (supabase
-          .from('agendamentos_online' as never)
-          .update({ status: 'cancelado' } as Record<string, unknown>))
+        const update: TablesUpdate<'agendamentos_online'> = { status: 'cancelado' };
+        const { error } = await supabase
+          .from('agendamentos_online')
+          .update(update)
           .eq('id', agendamentoOnlineId)
-          .eq('user_id', user.id); // user_id conforme definido no banco
+          .filter('user_id', 'eq', user.id);
 
         if (error) throw error;
       } else {

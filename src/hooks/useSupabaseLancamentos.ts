@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { Lancamento, NovoLancamento, LancamentoFiltros, ResumoFinanceiro } from '@/types/lancamento';
@@ -11,7 +11,7 @@ export const useSupabaseLancamentos = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const loadLancamentos = async (dataInicioParam?: string, dataFimParam?: string) => {
+  const loadLancamentos = useCallback(async (dataInicioParam?: string, dataFimParam?: string) => {
     try {
       setLoading(true);
       const uid = authUser?.id || (await supabase.auth.getUser()).data.user?.id;
@@ -49,7 +49,7 @@ export const useSupabaseLancamentos = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [authUser?.id]);
 
   const createLancamento = async (lancamento: NovoLancamento) => {
     try {
@@ -239,7 +239,7 @@ export const useSupabaseLancamentos = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [authUser?.id]);
+  }, [authUser?.id, loadLancamentos]);
 
   return {
     lancamentos,

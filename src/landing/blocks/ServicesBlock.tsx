@@ -1,7 +1,27 @@
 import { Scissors, Check, Timer } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import type { ConfigAgendamentoOnline } from '@/hooks/useConfigAgendamentoOnline';
 
-export function ServicesBlock({ servicos, value, onChange, config }: { servicos: any[]; value: string; onChange: (id: string) => void; config: any }) {
+interface ServiceOption {
+  id: string;
+  nome: string;
+  valor: number;
+  duracao: number;
+}
+
+type ServiceDisplayConfig = Pick<ConfigAgendamentoOnline, 'mostrar_precos' | 'mostrar_duracao'>;
+
+export function ServicesBlock({
+  servicos,
+  value,
+  onChange,
+  config,
+}: {
+  servicos: ServiceOption[];
+  value: string;
+  onChange: (id: string) => void;
+  config: ServiceDisplayConfig;
+}) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
       {servicos.map((s) => (

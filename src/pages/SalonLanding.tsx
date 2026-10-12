@@ -54,7 +54,7 @@ export default function SalonLanding() {
           telephone: config.telefone,
         }}
       />
-      <LandingRenderer config={config as any} landing={landing} />
+      <LandingRenderer config={config} landing={landing} />
     </LandingThemeProvider>
   );
 }

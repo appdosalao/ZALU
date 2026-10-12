@@ -12,7 +12,7 @@ interface NotificationSettings {
   soundType: 'notification' | 'notification2' | 'notification3';
 }
 
-interface AgendamentoInput {
+export interface AgendamentoInput {
   id: string;
   userId: string;
   createdAt: string;

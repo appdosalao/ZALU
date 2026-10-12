@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -12,17 +11,7 @@ import {
   Download
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-interface RelatorioHistorico {
-  id: string;
-  data_execucao: string;
-  total_problemas: number;
-  problemas_criticos: number;
-  problemas_altos: number;
-  problemas_medios: number;
-  problemas_baixos: number;
-  estatisticas?: any;
-}
+import type { RelatorioHistorico } from '@/hooks/useAuditoria';
 
 interface AuditoriaHistoricoProps {
   relatorios: RelatorioHistorico[];

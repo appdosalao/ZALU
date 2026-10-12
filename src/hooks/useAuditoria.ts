@@ -5,7 +5,18 @@ import { useLancamentos } from './useLancamentos';
 import { useCronogramas, useRetornos } from './useCronogramas';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import type { Database } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
+
+export type RelatorioHistorico = Database['public']['Tables']['relatorios_auditoria']['Row'];
+
+const formatAuditValue = (value: unknown): string | null => {
+  if (value === null || value === undefined) return null;
+  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+    return String(value);
+  }
+  return JSON.stringify(value) ?? String(value);
+};
 
 export interface ProblemaAuditoria {
   id: string;
@@ -54,7 +65,7 @@ export function useAuditoria() {
   const { retornos } = useRetornos();
   const { user } = useSupabaseAuth();
   const [salvando, setSalvando] = useState(false);
-  const [relatoriosHistorico, setRelatoriosHistorico] = useState<Record<string, unknown>[]>([]);
+  const [relatoriosHistorico, setRelatoriosHistorico] = useState<RelatorioHistorico[]>([]);
   const [relatorioBackend, setRelatorioBackend] = useState<RelatorioAuditoria | null>(null);
   const [carregandoBackend, setCarregandoBackend] = useState(false);
   const [useBackend] = useState(true); // Flag para usar backend
@@ -680,8 +691,8 @@ export function useAuditoria() {
           entidade: p.entidade,
           entidade_id: p.entidadeId,
           campo: p.campo || null,
-          valor_atual: p.valorAtual || null,
-          valor_esperado: p.valorEsperado || null,
+          valor_atual: formatAuditValue(p.valorAtual),
+          valor_esperado: formatAuditValue(p.valorEsperado),
           sugestao: p.sugestao || null
         }));
 

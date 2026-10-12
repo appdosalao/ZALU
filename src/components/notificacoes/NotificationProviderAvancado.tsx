@@ -2,6 +2,7 @@
 import { useState, useEffect, useContext, createContext } from 'react';
 import type { ReactNode } from 'react';
 import { useNotifications } from '@/hooks/useNotifications';
+import type { AgendamentoInput } from '@/hooks/useNotifications';
 import { useNotificationScheduler } from '@/hooks/useNotificationScheduler';
 import type { AppointmentNotificationInput, FixedExpenseNotificationInput } from '@/hooks/useNotificationScheduler';
 import { useEnhancedNotifications } from '@/hooks/useEnhancedNotifications';
@@ -9,10 +10,8 @@ import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { useConfiguracoes } from '@/hooks/useConfiguracoes';
 import { NotificacaoAgendamento } from './NotificacaoAgendamento';
 
-type NotificationRecord = AppointmentNotificationInput;
-
 interface NotificationContextType {
-  checkForNewAgendamentos: (agendamentos: NotificationRecord[]) => void;
+  checkForNewAgendamentos: (agendamentos: AgendamentoInput[]) => void;
   scheduleAppointmentReminder: (agendamento: AppointmentNotificationInput, minutosAntes?: number) => Promise<void>;
   notifyNewAppointment: (agendamento: AppointmentNotificationInput) => Promise<void>;
   notifyServiceCompleted: (agendamento: AppointmentNotificationInput) => Promise<void>;

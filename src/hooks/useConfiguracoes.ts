@@ -1,6 +1,18 @@
 import { useSupabaseConfiguracoes } from './useSupabaseConfiguracoes';
 import { useMemo } from 'react';
 
+type ConfiguracoesUpdates = {
+  notificacoes?: {
+    push?: { ativo?: boolean };
+    novosAgendamentos?: { sonoro?: boolean };
+    lembretesAgendamento?: { antecedencia?: number };
+  };
+  backup?: {
+    backupAutomatico?: boolean;
+    emailBackup?: string;
+  };
+};
+
 export const useConfiguracoes = () => {
   const supabaseConfig = useSupabaseConfiguracoes();
   
@@ -87,7 +99,7 @@ export const useConfiguracoes = () => {
     return {
       ...supabaseConfig,
       configuracoes,
-      updateConfiguracoes: async (updates: Record<string, unknown>) => {
+      updateConfiguracoes: async (updates: ConfiguracoesUpdates) => {
         // Implementar conversão e salvamento
         if (updates.notificacoes) {
           await supabaseConfig.salvarNotificacoes({
