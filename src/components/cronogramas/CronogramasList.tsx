@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
+import { format, parseISO } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -7,23 +9,13 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Clock, Edit, Trash2, Play, Pause, CheckCircle } from "lucide-react";
 import { useCronogramas } from "@/hooks/useCronogramas";
-import { useSupabaseClientes } from "@/hooks/useSupabaseClientes";
-import { useServicos } from "@/hooks/useServicos";
-import { useSupabaseAgendamentos } from "@/hooks/useSupabaseAgendamentos";
 import { toast } from "sonner";
 import CronogramaForm from "./CronogramaForm";
-import CronogramaComAgendamentos from "./CronogramaComAgendamentos";
 
 export default function CronogramasList() {
   const [editingCronograma, setEditingCronograma] = useState<any>(null);
   const [showForm, setShowForm] = useState(false);
-  const [activatingCronograma, setActivatingCronograma] = useState<any>(null);
-  const [showActivationDialog, setShowActivationDialog] = useState(false);
-
-  const { cronogramas, loading, deleteCronograma } = useCronogramas();
-  const { clientes } = useSupabaseClientes();
-  const { servicos } = useServicos();
-  const { agendamentos, criarAgendamento } = useSupabaseAgendamentos();
+  const { cronogramas, loading, deleteCronograma, updateCronograma } = useCronogramas();
 
   const handleDelete = async (id: string) => {
     try {
@@ -48,34 +40,20 @@ export default function CronogramasList() {
     setEditingCronograma(null);
   };
 
-  const handleAtivarCronograma = (cronograma: any) => {
-    setActivatingCronograma(cronograma);
-    setShowActivationDialog(true);
-  };
-
-  const handleGerarAgendamentos = async (agendamentos: any[]) => {
+  const handleAlterarStatus = async (cronograma: any) => {
+    const novoStatus = cronograma.status === "ativo" ? "cancelado" : "ativo";
     try {
-      // Criar múltiplos agendamentos usando o hook do Supabase
-      for (const agendamentoData of agendamentos) {
-        await criarAgendamento(agendamentoData);
-      }
-      
-      setShowActivationDialog(false);
-      setActivatingCronograma(null);
-      
-      toast("Cronograma ativado", {
-        description: `${agendamentos.length} agendamentos foram criados com sucesso.`,
+      await updateCronograma(cronograma.id_cronograma, { status: novoStatus });
+      toast.success(novoStatus === "ativo" ? "Cronograma reativado" : "Cronograma pausado", {
+        description: novoStatus === "ativo"
+          ? "O próximo retorno previsto está disponível na lista de retornos."
+          : "Nenhuma nova ocorrência será criada enquanto o cronograma estiver pausado.",
       });
     } catch (error) {
-      toast.error("Erro", {
-        description: "Erro ao gerar agendamentos.",
+      toast.error("Não foi possível alterar o cronograma", {
+        description: error instanceof Error ? error.message : "Tente novamente.",
       });
     }
-  };
-
-  const handleCancelAtivar = () => {
-    setShowActivationDialog(false);
-    setActivatingCronograma(null);
   };
 
   const getStatusBadge = (status: string) => {
@@ -99,23 +77,9 @@ export default function CronogramasList() {
   };
 
   const getProximoRetorno = (cronograma: any) => {
-    const dataInicio = new Date(cronograma.data_inicio);
-    const hoje = new Date();
-    
-    let intervalo = 7; // padrão semanal
-    if (cronograma.recorrencia === 'Quinzenal') intervalo = 14;
-    else if (cronograma.recorrencia === 'Mensal') intervalo = 30;
-    else if (cronograma.recorrencia === 'Personalizada' && cronograma.intervalo_dias) {
-      intervalo = cronograma.intervalo_dias;
-    }
-
-    // Encontrar a próxima data
-    const proximaData = new Date(dataInicio);
-    while (proximaData <= hoje) {
-      proximaData.setDate(proximaData.getDate() + intervalo);
-    }
-
-    return proximaData.toLocaleDateString('pt-BR');
+    const data = cronograma.proximo_retorno || cronograma.data_inicio;
+    const parsed = parseISO(data);
+    return Number.isNaN(parsed.getTime()) ? "Não definido" : format(parsed, "dd/MM/yyyy", { locale: ptBR });
   };
 
   if (loading) {
@@ -155,35 +119,13 @@ export default function CronogramasList() {
         </Dialog>
       </div>
 
-      <Dialog open={showActivationDialog} onOpenChange={setShowActivationDialog}>
-        <DialogContent className="max-w-3xl">
-          <DialogHeader>
-            <DialogTitle>Ativar Cronograma</DialogTitle>
-            <DialogDescription>
-              Configure os agendamentos automáticos para este cronograma
-            </DialogDescription>
-          </DialogHeader>
-          {activatingCronograma && (
-            <CronogramaComAgendamentos
-              cronograma={activatingCronograma}
-              clientes={clientes.map(c => ({ id: c.id, nome: c.nome }))}
-              servicos={servicos}
-              agendamentosExistentes={agendamentos}
-              onGerarAgendamentos={handleGerarAgendamentos}
-              onSuccess={() => setShowActivationDialog(false)}
-              onCancel={handleCancelAtivar}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
-
       {cronogramas.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-16">
             <Calendar className="h-12 w-12 text-muted-foreground mb-4" />
             <h3 className="text-lg font-semibold mb-2">Nenhum cronograma cadastrado</h3>
             <p className="text-muted-foreground text-center mb-4">
-              Crie seu primeiro cronograma para automatizar retornos de clientes
+              Crie um cronograma para acompanhar os próximos retornos dos clientes
             </p>
             <Button onClick={() => setShowForm(true)}>
               Criar Primeiro Cronograma
@@ -232,16 +174,16 @@ export default function CronogramasList() {
                 )}
 
                 <div className="flex flex-col sm:flex-row gap-2 pt-3">
-                  {cronograma.status === 'ativo' && (
+                  {cronograma.status !== 'concluido' && (
                     <Button
-                      variant="default"
+                      variant={cronograma.status === "ativo" ? "outline" : "default"}
                       size="sm"
-                      onClick={() => handleAtivarCronograma(cronograma)}
+                      onClick={() => handleAlterarStatus(cronograma)}
                       className="flex-1"
                     >
-                      <Play className="h-4 w-4 mr-1" />
-                      <span className="hidden sm:inline">Ativar</span>
-                      <span className="sm:hidden">Ativar</span>
+                      {cronograma.status === "ativo"
+                        ? <><Pause className="mr-1 h-4 w-4" />Pausar</>
+                        : <><Play className="mr-1 h-4 w-4" />Reativar</>}
                     </Button>
                   )}
                   

@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { syncCronogramaReturnAfterAppointment } from '@/lib/cronograma-appointments';
 import { formatBRL } from '@/lib/formatters';
 import { toast } from 'sonner';
 
@@ -192,6 +193,10 @@ export function AgendamentosPendentesConfirmacao() {
         toast.error('Este agendamento foi alterado em outro lugar. Atualize a página e confira a agenda.');
         return;
       }
+      await syncCronogramaReturnAfterAppointment(user.id, atual.id, {
+        status: resultado === 'nao_compareceu' ? 'nao_compareceu' : 'concluido',
+        data: atual.data,
+      });
 
       ignoradosNaSessao.current.add(atual.id);
       const proximos = pendentes.slice(1);
