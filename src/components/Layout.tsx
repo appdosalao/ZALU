@@ -40,9 +40,9 @@ function LayoutContent({ children }: LayoutProps) {
   });
 
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={false}>
         <AgendamentosPendentesConfirmacao />
-        <div className="min-h-screen flex w-full bg-gradient-to-br from-background via-lilac-lighter to-background">
+        <div className="min-h-screen min-w-0 flex-1 flex bg-gradient-to-br from-background via-lilac-lighter to-background">
           <AppSidebar />
           
           <div className="flex-1 flex flex-col min-w-0">
@@ -72,7 +72,7 @@ function LayoutContent({ children }: LayoutProps) {
             </header>
 
             {/* Main Content */}
-        <main className="flex-1 overflow-auto pb-16 sm:pb-0">
+        <main className="min-w-0 flex-1 overflow-auto pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-0">
           <div className="container-responsive">
             {children}
           </div>

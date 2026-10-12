@@ -14,19 +14,29 @@ export function useLandingConfig(slug?: string) {
     (async () => {
       try {
         setLoading(true);
-        const { data } = await (supabasePublic as any)
+        const { data } = await supabasePublic
           .from('configuracoes_agendamento_online')
           .select('*')
-          .eq('public_id', slug)
+          .filter('public_id', 'eq', slug)
           .eq('ativo', true)
           .maybeSingle();
         if (!active) return;
         if (data) {
           setConfig(data as ConfigAgendamentoOnline);
-          const raw = (data as any).landing_config;
+          const raw = (data as typeof data & { landing_config?: unknown }).landing_config;
           setLanding(normalizeLandingConfig(raw && typeof raw === 'object' ? raw : null));
-          try { (supabasePublic as any).from('landing_views').insert({ public_id: slug }); } catch {}
+          void (supabasePublic as any)
+            .from('landing_views')
+            .insert({ public_id: slug })
+            .then(({ error }: { error: unknown }) => {
+              if (error) console.error('Erro ao registrar visualização da landing page:', error);
+            })
+            .catch((error: unknown) => {
+              console.error('Erro ao registrar visualização da landing page:', error);
+            });
         }
+      } catch (error) {
+        if (active) console.error('Erro ao carregar configuração da landing page:', error);
       } finally { if (active) setLoading(false); }
     })();
     return () => { active = false; };

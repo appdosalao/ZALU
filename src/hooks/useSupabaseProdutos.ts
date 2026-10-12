@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Produto, NovoProduto } from '@/types/produto';
 import { toast } from 'sonner';
 import { produtoFromSupabase, produtoToSupabase } from '@/lib/mappers';
+import type { TablesInsert } from '@/integrations/supabase/types';
 
 export function useSupabaseProdutos() {
   const [produtos, setProdutos] = useState<Produto[]>([]);
@@ -37,8 +38,10 @@ export function useSupabaseProdutos() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Usuário não autenticado');
 
-      const produtoSanitizado = {
+      const produtoSanitizado: TablesInsert<'produtos'> = {
         user_id: user.id,
+        nome: produto.nome,
+        categoria: produto.categoria,
         estoque_atual: 0,
         ...produtoToSupabase(produto)
       };

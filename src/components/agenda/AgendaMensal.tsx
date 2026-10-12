@@ -136,7 +136,7 @@ export function AgendaMensal({ buscaTexto = '' }: AgendaMensalProps) {
     <div className="space-y-4 lg:space-y-6">
       {/* Navegação do Mês Aprimorada */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-xl bg-gradient-to-r from-accent/10 to-primary/10 border border-border/50">
-        <div className="flex items-center gap-3">
+        <div className="flex w-full min-w-0 items-center gap-2 sm:w-auto sm:gap-3">
           <Button 
             variant="outline" 
             size="sm" 
@@ -145,8 +145,8 @@ export function AgendaMensal({ buscaTexto = '' }: AgendaMensalProps) {
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <div className="text-center min-w-[220px] lg:min-w-[280px]">
-            <h2 className="text-lg lg:text-xl font-bold tracking-tight bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+          <div className="min-w-0 flex-1 text-center sm:min-w-[220px] lg:min-w-[280px]">
+            <h2 className="text-base font-bold tracking-tight bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent sm:text-lg lg:text-xl">
               {format(mesAtual, "MMMM 'de' yyyy", { locale: ptBR })}
             </h2>
           </div>
@@ -206,8 +206,8 @@ export function AgendaMensal({ buscaTexto = '' }: AgendaMensalProps) {
 
       {/* Calendário Mensal com contagem por dia */}
       <Card className="border-0 bg-card/60">
-        <CardContent className="p-4 space-y-3">
-          <div className="grid grid-cols-7 gap-2 text-xs text-muted-foreground">
+        <CardContent className="space-y-3 p-2 sm:p-4">
+          <div className="grid grid-cols-7 gap-1 text-[10px] text-muted-foreground sm:gap-2 sm:text-xs">
             <div className="text-center font-medium">Dom</div>
             <div className="text-center font-medium">Seg</div>
             <div className="text-center font-medium">Ter</div>
@@ -216,7 +216,7 @@ export function AgendaMensal({ buscaTexto = '' }: AgendaMensalProps) {
             <div className="text-center font-medium">Sex</div>
             <div className="text-center font-medium">Sáb</div>
           </div>
-          <div className="grid grid-cols-7 gap-2" role="grid" aria-label="Calendário mensal">
+          <div className="grid grid-cols-7 gap-1 sm:gap-2" role="grid" aria-label="Calendário mensal">
             {diasVisiveis.map((dia) => {
               const dentroDoMes = isSameMonth(dia, mesAtual);
               const chave = toISODate(dia);
@@ -226,16 +226,16 @@ export function AgendaMensal({ buscaTexto = '' }: AgendaMensalProps) {
                   key={chave}
                   type="button"
                   onClick={() => { setDiaSelecionado(dia); setDetalheAberto(true); }}
-                  className={`relative p-2 rounded-lg text-left border transition-colors ${
+                  className={`relative min-h-11 min-w-0 rounded-lg border p-1 text-left transition-colors sm:min-h-14 sm:p-2 ${
                     dentroDoMes ? 'bg-background hover:bg-muted border-border/60' : 'bg-muted/40 text-muted-foreground/70 border-transparent'
                   }`}
                   aria-label={`${format(dia, "dd 'de' MMMM", { locale: ptBR })} - ${count} agendamentos`}
                   role="gridcell"
                 >
-                  <div className="flex items-center justify-between">
-                    <span className={`text-sm font-medium ${dentroDoMes ? 'text-foreground' : 'text-muted-foreground/70'}`}>{format(dia, 'd', { locale: ptBR })}</span>
+                  <div className="flex min-w-0 flex-col items-start gap-0.5 sm:flex-row sm:items-center sm:justify-between">
+                    <span className={`text-xs font-medium sm:text-sm ${dentroDoMes ? 'text-foreground' : 'text-muted-foreground/70'}`}>{format(dia, 'd', { locale: ptBR })}</span>
                     {count > 0 && (
-                      <Badge className="bg-info/20 text-info border-0" aria-label={`${count} agendamentos`}>
+                      <Badge className="h-4 min-w-0 whitespace-nowrap border-0 bg-info/20 px-1 text-[9px] leading-none text-info sm:h-5 sm:px-1.5 sm:text-xs" aria-label={`${count} agendamentos`}>
                         {count}
                       </Badge>
                     )}

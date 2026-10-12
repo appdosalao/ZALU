@@ -115,7 +115,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(null);
       setUsuario(null);
       setSessionError(false);
-      applyTheme(storage.getString(LOCAL_STORAGE_KEYS.APP_THEME));
+      const storedTheme = storage.getString(LOCAL_STORAGE_KEYS.APP_THEME);
+      applyTheme(storedTheme === 'feminino' || storedTheme === 'masculino' ? storedTheme : undefined);
       return;
     }
 

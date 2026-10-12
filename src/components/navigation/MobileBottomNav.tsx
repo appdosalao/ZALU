@@ -26,23 +26,8 @@ export default function MobileBottomNav() {
   const { config } = useConfigAgendamentoOnline();
   const isActive = (path: string) =>
     path === "/" ? location.pathname === "/" : location.pathname === path || location.pathname.startsWith(`${path}/`);
-  const grad = (href: string) => {
-    return "from-primary to-lilac-primary";
-  };
-
-  const iconWrapClass = (active: boolean, gradient: string) => {
-    const base =
-      "relative h-10 w-10 rounded-[22px] flex items-center justify-center transition-all duration-200 ease-in-out ring-1 ring-black/5 dark:ring-white/10 shadow-[inset_0_1px_0_0_hsl(0_0%_100%/0.70),0_18px_34px_-24px_hsl(var(--primary)/0.25)] before:content-[''] before:absolute before:inset-0 before:rounded-[inherit] before:bg-gradient-to-b before:from-white/70 before:via-white/25 before:to-transparent before:pointer-events-none after:content-[''] after:absolute after:inset-[1px] after:rounded-[inherit] after:bg-gradient-to-b after:from-white/55 after:to-transparent after:opacity-90 after:pointer-events-none";
-
-    if (active) {
-      return `${base} bg-gradient-to-br ${gradient} text-white ring-white/35 shadow-[inset_0_1px_0_0_hsl(0_0%_100%/0.35),0_1px_0_0_hsl(0_0%_100%/0.18),0_26px_46px_-30px_hsl(var(--primary)/0.75)]`;
-    }
-
-    return `${base} bg-gradient-to-br from-white/85 to-white/55 text-sidebar-primary group-hover:-translate-y-px group-hover:scale-[1.03] dark:from-white/12 dark:to-white/6 dark:text-sidebar-foreground`;
-  };
-
-  const navItemClass = "group relative flex min-h-12 flex-col items-center justify-center gap-1 rounded-2xl px-1 py-2 outline-none transition-colors duration-200 ease-in-out hover:bg-white/35 focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background";
-  const labelClass = (active: boolean) => `text-[11px] ${active ? "text-primary font-medium" : "text-muted-foreground"}`;
+  const navItemClass = "group relative flex min-h-12 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-full px-1 py-1.5 outline-none transition-colors duration-200 ease-out hover:bg-primary/5 focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none";
+  const labelClass = (active: boolean) => `text-[9px] leading-none ${active ? "font-semibold text-primary" : "text-muted-foreground"}`;
   const currentRoot = useMemo(() => {
     const p = location.pathname;
     if (p === "/") return "/";
@@ -60,20 +45,16 @@ export default function MobileBottomNav() {
   });
 
   return (
-    <div className="sm:hidden fixed bottom-0 left-0 right-0 z-50 pb-[max(env(safe-area-inset-bottom),0.25rem)]">
-      <div className="relative border-t border-primary/15 bg-gradient-to-b from-background/95 via-sidebar/95 to-background/95 backdrop-blur-2xl shadow-[0_-16px_42px_-28px_hsl(var(--primary)/0.45)] before:content-[''] before:absolute before:left-3 before:right-3 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-primary/40 before:to-transparent dark:border-white/10 dark:from-sidebar dark:via-sidebar dark:to-sidebar dark:before:via-primary/50">
-      <div className="mx-auto grid w-full max-w-md grid-cols-4 gap-1.5 px-2.5 pt-1 pb-1">
+    <div className="md:hidden fixed inset-x-0 bottom-0 z-50 px-3 pb-[max(env(safe-area-inset-bottom),0.75rem)]">
+      <div className="mx-auto flex w-full max-w-md items-center justify-between gap-1 rounded-full border border-border/70 bg-background/95 p-1.5 shadow-[0_8px_30px_-12px_hsl(var(--foreground)/0.22)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/95">
         <Link
           to="/"
           className={navItemClass}
           aria-label="Início"
           aria-current={currentRoot === "/" ? "page" : undefined}
         >
-          <div className={iconWrapClass(isActive("/"), grad("/"))}>
-            <LayoutDashboard className="h-[18px] w-[18px]" strokeWidth={2.2} />
-          </div>
+          <LayoutDashboard className={`h-4 w-4 ${currentRoot === "/" ? "text-primary" : "text-muted-foreground"}`} strokeWidth={2.2} />
           <span className={labelClass(currentRoot === "/")}>Início</span>
-          {currentRoot === "/" ? <span className="absolute -top-0.5 h-1 w-7 rounded-full bg-gradient-to-r from-primary/70 to-lilac-primary/70" /> : null}
         </Link>
         <Link
           to="/minha-agenda"
@@ -81,11 +62,8 @@ export default function MobileBottomNav() {
           aria-label="Agenda"
           aria-current={currentRoot === "/minha-agenda" ? "page" : undefined}
         >
-          <div className={iconWrapClass(isActive("/minha-agenda"), grad("/minha-agenda"))}>
-            <Calendar className="h-[18px] w-[18px]" strokeWidth={2.2} />
-          </div>
+          <Calendar className={`h-4 w-4 ${currentRoot === "/minha-agenda" ? "text-primary" : "text-muted-foreground"}`} strokeWidth={2.2} />
           <span className={labelClass(currentRoot === "/minha-agenda")}>Agenda</span>
-          {currentRoot === "/minha-agenda" ? <span className="absolute -top-0.5 h-1 w-7 rounded-full bg-gradient-to-r from-primary/70 to-lilac-primary/70" /> : null}
         </Link>
         <Link
           to="/financeiro"
@@ -93,11 +71,8 @@ export default function MobileBottomNav() {
           aria-label="Financeiro"
           aria-current={currentRoot === "/financeiro" ? "page" : undefined}
         >
-          <div className={iconWrapClass(isActive("/financeiro"), grad("/financeiro"))}>
-            <DollarSign className="h-[18px] w-[18px]" strokeWidth={2.2} />
-          </div>
+          <DollarSign className={`h-4 w-4 ${currentRoot === "/financeiro" ? "text-primary" : "text-muted-foreground"}`} strokeWidth={2.2} />
           <span className={labelClass(currentRoot === "/financeiro")}>Financeiro</span>
-          {currentRoot === "/financeiro" ? <span className="absolute -top-0.5 h-1 w-7 rounded-full bg-gradient-to-r from-primary/70 to-lilac-primary/70" /> : null}
         </Link>
         <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
           <SheetTrigger asChild>
@@ -107,11 +82,8 @@ export default function MobileBottomNav() {
               aria-expanded={moreOpen}
               aria-current={moreIsActive ? "page" : undefined}
             >
-              <div className={iconWrapClass(moreOpen || moreIsActive, "from-primary to-lilac-primary")}>
-                <MoreHorizontal className="h-[18px] w-[18px]" strokeWidth={2.2} />
-              </div>
+              <MoreHorizontal className={`h-4 w-4 ${moreOpen || moreIsActive ? "text-primary" : "text-muted-foreground"}`} strokeWidth={2.2} />
               <span className={labelClass(moreOpen || moreIsActive)}>Mais</span>
-              {moreOpen || moreIsActive ? <span className="absolute -top-0.5 h-1 w-7 rounded-full bg-gradient-to-r from-primary/70 to-pink-accent/70" /> : null}
             </button>
           </SheetTrigger>
           <SheetContent side="bottom" className="max-h-[88dvh] overflow-y-auto rounded-t-[2rem] border-t border-primary/15 bg-gradient-to-b from-lilac-lighter/70 via-background to-background pb-[max(env(safe-area-inset-bottom),1rem)] shadow-[0_-24px_70px_-45px_hsl(var(--primary)/0.40)] dark:from-sidebar dark:via-sidebar dark:to-background">
@@ -161,7 +133,6 @@ export default function MobileBottomNav() {
             </div>
           </SheetContent>
         </Sheet>
-      </div>
       </div>
     </div>
   );

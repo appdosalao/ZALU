@@ -22,12 +22,13 @@ export interface HistoricoServico {
 }
 
 export interface ClienteFormData {
-  nomeCompleto: string;
+  nome?: string;
+  nomeCompleto?: string;
   email?: string;
   telefone: string;
   endereco?: string;
   dataNascimento?: Date | string;
   servicoFrequente?: string;
-  ultimaVisita?: Date;
+  ultimaVisita?: Date | string;
   observacoes?: string;
 }

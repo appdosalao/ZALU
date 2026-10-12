@@ -9,6 +9,7 @@ npm run dev        # Start dev server at http://localhost:8080
 npm run build      # Production build (output: dist/)
 npm run build:dev  # Development build
 npm run lint       # Run ESLint on all TS/TSX files
+npm run typecheck  # Type-check frontend and backend
 npm run preview    # Preview production build locally
 ```
 
@@ -42,12 +43,7 @@ QueryClientProvider → BrowserRouter → SupabaseAuthProvider
 - `src/integrations/supabase/publicClient.ts` – anonymous client with no session; used only by the public booking page (`/agendamento-online`) so that unauthenticated visitors can read services/schedules.
 
 ### Data Layer Pattern (Hooks)
-`src/hooks/useSupabaseBase.ts` provides a generic `useSupabaseBase<T>(tableName)` hook with:
-- `loadData()` – SELECT filtered by `user_id`
-- `createRecord()` / `updateRecord()` / `deleteRecord()` – mutations with toasts
-- `setupRealtimeSubscription()` – Supabase Postgres CDC channel
-
-Every domain hook (`useSupabaseAgendamentos`, `useSupabaseClientes`, `useSupabaseServicos`, etc.) builds on top of this base. When adding a new data entity, create a `useSupabase{Entity}.ts` in `src/hooks/` following the same pattern.
+Domain hooks such as `useSupabaseAgendamentos`, `useSupabaseClientes`, and `useSupabaseServicos` own their queries and mutations. Scope tenant data by the authenticated user's `user_id`, handle Supabase errors explicitly, and reuse the mappers in `src/lib/mappers.ts` when converting between database and UI models. When adding an entity, create a focused `useSupabase{Entity}.ts` hook in `src/hooks/` and follow the existing domain-hook patterns.
 
 ### Subscription & Access Control
 Users have `subscription_status` (`trial | active | expired | inactive`) and `plan_type` (`mensal | vitalicio`). The current commercial model is the mensal plan; vitalicio is legacy/optional. Trial blocking is enforced at the database level via `enforce_trial_block.sql`. Payment goes through Cakto (see `/checkout`, `/pagamento/retorno`, `/integracao-cakto`).

@@ -29,7 +29,7 @@ const agendamentoSchema = z.object({
   valorDevido: z.number().min(0, 'Valor devido deve ser positivo'),
   formaPagamento: z.enum(['dinheiro', 'cartao', 'pix', 'fiado']),
   statusPagamento: z.enum(['pago', 'parcial', 'em_aberto']),
-  status: z.enum(['agendado', 'concluido', 'cancelado']),
+  status: z.enum(['agendado', 'concluido', 'cancelado', 'nao_compareceu']),
   observacoes: z.string().optional(),
   dataPrevistaPagamento: z.string().optional(),
 });
@@ -207,7 +207,7 @@ export default function AgendamentoForm({
             <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
               <div className="grid gap-4 sm:gap-6 sm:grid-cols-2">
               {/* Cliente */}
-              <FormField
+              <FormField<AgendamentoFormData, "clienteId">
                 control={form.control}
                 name="clienteId"
                 render={({ field }) => (
@@ -239,7 +239,7 @@ export default function AgendamentoForm({
               />
 
               {/* Serviço */}
-              <FormField
+              <FormField<AgendamentoFormData, "servicoId">
                 control={form.control}
                 name="servicoId"
                 render={({ field }) => (
@@ -273,7 +273,7 @@ export default function AgendamentoForm({
               />
 
               {/* Data */}
-              <FormField
+              <FormField<AgendamentoFormData, "data">
                 control={form.control}
                 name="data"
                 render={({ field }) => (
@@ -294,7 +294,7 @@ export default function AgendamentoForm({
               />
 
               {/* Hora */}
-              <FormField
+              <FormField<AgendamentoFormData, "hora">
                 control={form.control}
                 name="hora"
                 render={({ field }) => (
@@ -344,7 +344,7 @@ export default function AgendamentoForm({
               />
 
               {/* Duração */}
-              <FormField
+              <FormField<AgendamentoFormData, "duracao">
                 control={form.control}
                 name="duracao"
                 render={({ field }) => (
@@ -369,7 +369,7 @@ export default function AgendamentoForm({
               />
 
               {/* Valor */}
-              <FormField
+              <FormField<AgendamentoFormData, "valor">
                 control={form.control}
                 name="valor"
                 render={({ field }) => (
@@ -398,7 +398,7 @@ export default function AgendamentoForm({
               />
 
               {/* Forma de Pagamento */}
-              <FormField
+              <FormField<AgendamentoFormData, "formaPagamento">
                 control={form.control}
                 name="formaPagamento"
                 render={({ field }) => (
@@ -426,7 +426,7 @@ export default function AgendamentoForm({
               />
 
               {/* Valor Pago */}
-              <FormField
+              <FormField<AgendamentoFormData, "valorPago">
                 control={form.control}
                 name="valorPago"
                 render={({ field }) => (
@@ -464,7 +464,7 @@ export default function AgendamentoForm({
               />
 
               {/* Valor Devido */}
-              <FormField
+              <FormField<AgendamentoFormData, "valorDevido">
                 control={form.control}
                 name="valorDevido"
                 render={({ field }) => (
@@ -491,7 +491,7 @@ export default function AgendamentoForm({
             </div>
 
             {/* Status */}
-            <FormField
+            <FormField<AgendamentoFormData, "status">
               control={form.control}
               name="status"
               render={({ field }) => (
@@ -507,6 +507,7 @@ export default function AgendamentoForm({
                       <SelectItem value="agendado">Agendado</SelectItem>
                       <SelectItem value="concluido">Concluído</SelectItem>
                       <SelectItem value="cancelado">Cancelado</SelectItem>
+                      <SelectItem value="nao_compareceu">Não compareceu</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -518,7 +519,7 @@ export default function AgendamentoForm({
             {(form.watch('formaPagamento') === 'fiado' || 
               form.watch('statusPagamento') === 'parcial' ||
               form.watch('statusPagamento') === 'em_aberto') && (
-              <FormField
+              <FormField<AgendamentoFormData, "dataPrevistaPagamento">
                 control={form.control}
                 name="dataPrevistaPagamento"
                 render={({ field }) => (
@@ -547,7 +548,7 @@ export default function AgendamentoForm({
             )}
 
             {/* Observações */}
-            <FormField
+            <FormField<AgendamentoFormData, "observacoes">
               control={form.control}
               name="observacoes"
               render={({ field }) => (

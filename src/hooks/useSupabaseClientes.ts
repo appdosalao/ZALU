@@ -5,6 +5,7 @@ import { Cliente, ClienteFormData } from '@/types/cliente';
 import { toast } from 'sonner';
 import { validateUniqueName } from '@/lib/validators';
 import { clienteFromSupabase, clienteToSupabase } from '@/lib/mappers';
+import type { TablesInsert } from '@/integrations/supabase/types';
 
 export function useSupabaseClientes() {
   const { user } = useSupabaseAuth();
@@ -166,8 +167,10 @@ export function useSupabaseClientes() {
 
     setLoading(true);
     try {
-      const insertPayload = {
+      const insertPayload: TablesInsert<'clientes'> = {
         user_id: user.id,
+        nome,
+        telefone: clienteData.telefone,
         historico_servicos: [],
         ...clienteToSupabase({ ...clienteData, nome })
       };

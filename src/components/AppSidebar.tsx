@@ -130,15 +130,14 @@ export function AppSidebar() {
   };
 
   const iconWrapClass = (active: boolean, gradient: string) => {
-    const isCollapsed = state === "collapsed";
     const base =
-      `relative ${isCollapsed ? "h-10 w-10 rounded-[22px]" : "h-9 w-9 rounded-2xl"} flex items-center justify-center transition-all duration-200 ease-in-out ring-1 ring-black/5 dark:ring-white/10 shadow-[inset_0_1px_0_0_hsl(0_0%_100%/0.70),0_18px_34px_-24px_hsl(var(--primary)/0.25)] before:content-[''] before:absolute before:inset-0 before:rounded-[inherit] before:bg-gradient-to-b before:from-white/70 before:via-white/25 before:to-transparent before:pointer-events-none after:content-[''] after:absolute after:inset-[1px] after:rounded-[inherit] after:bg-gradient-to-b after:from-white/55 after:to-transparent after:opacity-90 after:pointer-events-none`;
+      "relative flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ring-1 ring-black/5 transition-[background,color,box-shadow,transform] duration-200 ease-out group-hover:scale-[1.04] group-active:scale-95 motion-reduce:transition-none dark:ring-white/10";
 
     if (active) {
-      return `${base} bg-gradient-to-br ${gradient} text-white ring-white/35 shadow-[inset_0_1px_0_0_hsl(0_0%_100%/0.35),0_1px_0_0_hsl(0_0%_100%/0.18),0_26px_46px_-30px_hsl(var(--primary)/0.75)] dark:ring-white/15 dark:shadow-[inset_0_1px_0_0_hsl(0_0%_100%/0.10),0_1px_0_0_hsl(0_0%_100%/0.06),0_30px_52px_-32px_hsl(0_0%_0%/0.75)]`;
+      return `${base} bg-gradient-to-br ${gradient} text-white shadow-md shadow-primary/20 ring-white/40 group-hover:shadow-lg group-hover:shadow-primary/25`;
     }
 
-    return `${base} bg-gradient-to-br from-white/80 to-white/50 text-sidebar-primary group-hover:-translate-y-px group-hover:scale-[1.03] dark:from-white/12 dark:to-white/6 dark:text-sidebar-foreground`;
+    return `${base} bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary md:bg-white/10 md:text-white/65 md:group-hover:bg-white/15 md:group-hover:text-white`;
   };
 
   const handleInstallClick = async () => {
@@ -165,44 +164,40 @@ export function AppSidebar() {
 
   return (
     <Sidebar 
-      className="border-r border-sidebar-border/60 bg-transparent [&_[data-sidebar=sidebar]]:bg-gradient-to-b [&_[data-sidebar=sidebar]]:from-lilac-lighter/90 [&_[data-sidebar=sidebar]]:to-sidebar [&_[data-sidebar=sidebar]]:shadow-[0_1px_0_0_hsl(0_0%_100%/0.65),0_22px_60px_-40px_hsl(var(--primary)/0.22)] dark:[&_[data-sidebar=sidebar]]:from-sidebar dark:[&_[data-sidebar=sidebar]]:to-sidebar dark:[&_[data-sidebar=sidebar]]:shadow-[0_1px_0_0_hsl(0_0%_100%/0.06),0_30px_70px_-45px_hsl(0_0%_0%/0.60)] transition-all duration-300 ease-in-out"
+      className="text-white [&_[data-sidebar=sidebar]]:rounded-2xl [&_[data-sidebar=sidebar]]:border [&_[data-sidebar=sidebar]]:border-white/10 [&_[data-sidebar=sidebar]]:bg-gradient-to-b [&_[data-sidebar=sidebar]]:from-slate-900 [&_[data-sidebar=sidebar]]:to-slate-950 [&_[data-sidebar=sidebar]]:shadow-xl [&_[data-sidebar=sidebar]]:shadow-slate-950/20"
       collapsible="icon"
-      variant="sidebar"
+      variant="floating"
     >
-      <SidebarHeader className="relative overflow-hidden border-b border-sidebar-border/60 bg-gradient-to-br from-white/65 via-lilac-lighter/45 to-pink-accent/10 backdrop-blur-xl dark:from-white/8 dark:via-sidebar dark:to-sidebar">
-        <div className="pointer-events-none absolute -right-8 -top-10 h-24 w-24 rounded-full bg-pink-accent/15 blur-2xl" />
-        <div className="flex items-center gap-2 p-2">
-          <div className="relative">
-            <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-primary/20 to-transparent blur" />
-            <div className="relative rounded-2xl bg-white/55 p-1 shadow-[0_1px_0_0_hsl(0_0%_100%/0.70),0_14px_30px_-18px_hsl(var(--primary)/0.25)] dark:bg-white/10 dark:shadow-[0_1px_0_0_hsl(0_0%_100%/0.06),0_18px_36px_-20px_hsl(0_0%_0%/0.55)]">
-              <AppLogo size={28} rounded="xl" />
-            </div>
+      <SidebarHeader className="border-b border-white/10 bg-white/[0.03] p-3 group-data-[collapsible=icon]:p-2">
+        <div className="flex min-h-12 items-center gap-3 rounded-xl px-1 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
+          <div className="shrink-0 rounded-xl bg-white/10 p-1 shadow-sm ring-1 ring-white/10">
+            <AppLogo size={30} rounded="lg" />
           </div>
           {state === "expanded" && (
             <div className="min-w-0 flex-1">
-              <h2 className="text-sm font-bold bg-gradient-to-r from-primary to-lilac-primary bg-clip-text text-transparent truncate">
+              <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground md:text-white/50">Seu espaço</p>
+              <h2 className="truncate text-sm font-semibold leading-5 text-foreground md:text-white">
                 {usuario?.nome_personalizado_app || 'Sistema'}
               </h2>
-              <p className="text-xs text-sidebar-foreground/70 truncate">
+              <p className="truncate text-xs leading-4 text-muted-foreground md:text-white/60">
                 {usuario?.nome_completo}
-              </p>
-              <p className="mt-1 text-[10px] font-medium uppercase tracking-[0.16em] text-primary/75">
-                Gestão do salão
               </p>
             </div>
           )}
         </div>
       </SidebarHeader>
 
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Navegação</SidebarGroupLabel>
+      <SidebarContent className="gap-0 py-2 group-data-[collapsible=icon]:py-1">
+        <SidebarGroup className="group-data-[collapsible=icon]:px-1 group-data-[collapsible=icon]:py-0">
+          <SidebarGroupLabel className="h-7 px-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground md:text-white/45">
+            Navegação
+          </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="group-data-[collapsible=icon]:gap-0">
               {navigationItems.map((item) => {
                 const Icon = item.icon;
                 const active = isActive(item.href);
-                const iconSizeClass = state === "collapsed" ? "h-[18px] w-[18px]" : "h-4 w-4";
+                const iconSizeClass = "h-[18px] w-[18px]";
                 
                 return (
                   <SidebarMenuItem key={item.href}>
@@ -211,18 +206,23 @@ export function AppSidebar() {
                       isActive={active}
                       size="lg"
                       tooltip={item.title}
-                      className="group relative h-12 rounded-xl px-3 py-2 overflow-hidden transition-all duration-200 ease-in-out hover:bg-white/40 hover:-translate-y-px active:translate-y-0 data-[active=true]:bg-gradient-to-b data-[active=true]:from-white/75 data-[active=true]:to-white/45 data-[active=true]:text-sidebar-foreground data-[active=true]:ring-1 data-[active=true]:ring-primary/15 data-[active=true]:shadow-[0_1px_0_0_hsl(0_0%_100%/0.80),0_22px_44px_-30px_hsl(var(--primary)/0.40)] data-[active=true]:before:content-[''] data-[active=true]:before:absolute data-[active=true]:before:inset-0 data-[active=true]:before:bg-gradient-to-b data-[active=true]:before:from-white/55 data-[active=true]:before:to-transparent data-[active=true]:before:pointer-events-none data-[active=true]:after:content-[''] data-[active=true]:after:absolute data-[active=true]:after:left-0 data-[active=true]:after:top-2 data-[active=true]:after:bottom-2 data-[active=true]:after:w-1 data-[active=true]:after:rounded-full data-[active=true]:after:bg-gradient-to-b data-[active=true]:after:from-primary data-[active=true]:after:to-lilac-primary data-[active=true]:after:shadow-[0_0_0_1px_hsl(0_0%_100%/0.35)] dark:hover:bg-white/10 dark:data-[active=true]:bg-white/10 dark:data-[active=true]:ring-white/10 dark:data-[active=true]:shadow-[0_1px_0_0_hsl(0_0%_100%/0.06),0_22px_44px_-30px_hsl(0_0%_0%/0.65)]"
+                      className="group relative h-11 rounded-xl px-2.5 py-1 text-sidebar-foreground transition-[background,color,box-shadow,transform] duration-200 ease-out hover:-translate-y-px hover:bg-primary/5 active:translate-y-0 active:scale-[0.99] active:bg-primary/10 data-[active=true]:bg-primary/10 data-[active=true]:text-primary data-[active=true]:ring-1 data-[active=true]:ring-primary/15 md:text-white/70 md:hover:bg-white/[0.07] md:hover:text-white md:active:bg-white/10 md:data-[active=true]:bg-primary/20 md:data-[active=true]:text-white md:data-[active=true]:ring-primary/40 md:data-[active=true]:after:absolute md:data-[active=true]:after:inset-y-3 md:data-[active=true]:after:left-0 md:data-[active=true]:after:w-0.5 md:data-[active=true]:after:rounded-full md:data-[active=true]:after:bg-primary md:data-[active=true]:after:shadow-[0_0_10px_hsl(var(--primary)/0.7)] motion-reduce:transition-none"
                     >
                       <Link
                         to={item.href}
-                        className="flex w-full items-center gap-3 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0"
+                        className="flex w-full min-w-0 items-center gap-3 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0"
                         onClick={handleNavClick}
                         aria-current={active ? "page" : undefined}
                       >
                         <div className={iconWrapClass(active, badgeFor(item.href))}>
                           <Icon className={`${iconSizeClass} flex-shrink-0`} strokeWidth={2.2} />
                         </div>
-                        <span className="truncate group-data-[collapsible=icon]:sr-only">{item.title}</span>
+                        <span
+                          aria-hidden={state === "collapsed"}
+                          className="min-w-0 max-w-48 truncate font-medium transition-[max-width,opacity,transform] duration-200 ease-out group-data-[collapsible=icon]:max-w-0 group-data-[collapsible=icon]:-translate-x-1 group-data-[collapsible=icon]:opacity-0 motion-reduce:transition-none"
+                        >
+                          {item.title}
+                        </span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -232,16 +232,18 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup>
-          <SidebarGroupLabel>Links Externos</SidebarGroupLabel>
+        <SidebarGroup className="pt-1 group-data-[collapsible=icon]:px-1 group-data-[collapsible=icon]:py-0">
+          <SidebarGroupLabel className="h-7 px-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground md:text-white/45">
+            Links externos
+          </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="group-data-[collapsible=icon]:gap-0">
               <SidebarMenuItem>
                 <SidebarMenuButton 
                   onClick={handleInstallClick}
                   size="lg"
                   tooltip="Instalar App"
-                  className="group h-12 rounded-xl px-3 py-2 transition-all duration-200 ease-in-out hover:bg-white/40 hover:-translate-y-px active:translate-y-0 dark:hover:bg-white/10"
+                  className="group h-11 rounded-xl px-2.5 py-1 text-sidebar-foreground transition-[background,color,transform] duration-200 ease-out hover:-translate-y-px hover:bg-primary/5 hover:text-foreground active:translate-y-0 active:scale-[0.99] active:bg-primary/10 md:text-white/70 md:hover:bg-white/[0.07] md:hover:text-white md:active:bg-white/10 motion-reduce:transition-none"
                 >
                   <div className={iconWrapClass(false, "from-primary to-lilac-primary")}>
                     <Download className="h-4 w-4 flex-shrink-0" />
@@ -254,13 +256,13 @@ export function AppSidebar() {
                   asChild
                   size="lg"
                   tooltip="Agendamento Online"
-                  className="group h-12 rounded-xl px-3 py-2 transition-all duration-200 ease-in-out hover:bg-white/40 hover:-translate-y-px active:translate-y-0 dark:hover:bg-white/10"
+                  className="group h-11 rounded-xl px-2.5 py-1 text-sidebar-foreground transition-[background,color,transform] duration-200 ease-out hover:-translate-y-px hover:bg-primary/5 hover:text-foreground active:translate-y-0 active:scale-[0.99] active:bg-primary/10 md:text-white/70 md:hover:bg-white/[0.07] md:hover:text-white md:active:bg-white/10 motion-reduce:transition-none"
                 >
                   <a 
                     href={onlineBookingLink} 
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-primary"
+                    className="flex items-center gap-2 text-sidebar-foreground md:text-white/70"
                     onClick={handleNavClick}
                   >
                     <div className={iconWrapClass(false, "from-primary to-lilac-primary")}>
@@ -275,13 +277,13 @@ export function AppSidebar() {
                   asChild
                   size="lg"
                   tooltip="Instagram"
-                  className="group h-12 rounded-xl px-3 py-2 transition-all duration-200 ease-in-out hover:bg-white/40 hover:-translate-y-px active:translate-y-0 dark:hover:bg-white/10"
+                  className="group h-11 rounded-xl px-2.5 py-1 text-sidebar-foreground transition-[background,color,transform] duration-200 ease-out hover:-translate-y-px hover:bg-primary/5 hover:text-foreground active:translate-y-0 active:scale-[0.99] active:bg-primary/10 md:text-white/70 md:hover:bg-white/[0.07] md:hover:text-white md:active:bg-white/10 motion-reduce:transition-none"
                 >
                   <a
                     href="https://www.instagram.com/zalu_saloes/"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-primary"
+                    className="flex items-center gap-2 text-sidebar-foreground md:text-white/70"
                     onClick={handleNavClick}
                   >
                     <div className={iconWrapClass(false, "from-rose-500 to-pink-400")}>
@@ -296,13 +298,13 @@ export function AppSidebar() {
                   asChild
                   size="lg"
                   tooltip="Facebook"
-                  className="group h-12 rounded-xl px-3 py-2 transition-all duration-200 ease-in-out hover:bg-white/40 hover:-translate-y-px active:translate-y-0 dark:hover:bg-white/10"
+                  className="group h-11 rounded-xl px-2.5 py-1 text-sidebar-foreground transition-[background,color,transform] duration-200 ease-out hover:-translate-y-px hover:bg-primary/5 hover:text-foreground active:translate-y-0 active:scale-[0.99] active:bg-primary/10 md:text-white/70 md:hover:bg-white/[0.07] md:hover:text-white md:active:bg-white/10 motion-reduce:transition-none"
                 >
                   <a
                     href="https://www.facebook.com/BELLAGEST/"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-primary"
+                    className="flex items-center gap-2 text-sidebar-foreground md:text-white/70"
                     onClick={handleNavClick}
                   >
                     <div className={iconWrapClass(false, "from-indigo-500 to-sky-400")}>
@@ -317,7 +319,7 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-border/50">
+      <SidebarFooter className="border-t border-sidebar-border/60 bg-background/40 p-2 group-data-[collapsible=icon]:p-1 md:border-white/10 md:bg-black/10">
         <SidebarMenu>
           {!isMobileDevice ? (
             <SidebarMenuItem>
@@ -325,7 +327,7 @@ export function AppSidebar() {
                 onClick={() => toggleSidebar?.()}
                 size="lg"
                 tooltip={state === "expanded" ? "Recolher menu" : "Expandir menu"}
-                className="group h-12 rounded-xl px-3 py-2 transition-all duration-200 ease-in-out hover:bg-white/40 hover:-translate-y-px active:translate-y-0 dark:hover:bg-white/10"
+                className="group h-11 rounded-xl px-2.5 py-1 text-sidebar-foreground transition-[background,color,transform] duration-200 ease-out hover:-translate-y-px hover:bg-primary/5 hover:text-foreground active:translate-y-0 active:scale-[0.99] md:text-white/70 md:hover:bg-white/[0.07] md:hover:text-white motion-reduce:transition-none"
               >
                 <div className={iconWrapClass(false, "from-primary to-lilac-primary")}>
                   {state === "expanded" ? (
@@ -343,9 +345,9 @@ export function AppSidebar() {
               onClick={() => void logout()}
               size="lg"
               tooltip="Sair"
-              className="group h-12 rounded-xl px-3 py-2 transition-all duration-200 ease-in-out hover:bg-destructive/10 hover:-translate-y-px active:translate-y-0"
+              className="group h-11 rounded-xl px-2.5 py-1 text-sidebar-foreground transition-[background,color,transform] duration-200 ease-out hover:-translate-y-px hover:bg-destructive/10 hover:text-destructive active:translate-y-0 active:scale-[0.99] md:text-white/70 md:hover:bg-rose-500/10 md:hover:text-rose-300 motion-reduce:transition-none"
             >
-              <div className="relative h-8 w-8 rounded-xl flex items-center justify-center bg-white/60 text-destructive shadow-[0_1px_0_0_hsl(0_0%_100%/0.80),0_12px_24px_-16px_hsl(0_84%_55%/0.18)] before:content-[''] before:absolute before:inset-0 before:rounded-[inherit] before:bg-gradient-to-b before:from-white/65 before:to-transparent before:pointer-events-none group-hover:bg-white/75 group-hover:-translate-y-px dark:bg-white/10 dark:shadow-[0_1px_0_0_hsl(0_0%_100%/0.06),0_18px_32px_-18px_hsl(0_0%_0%/0.55)]">
+              <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-destructive/10 text-destructive transition-colors group-hover:bg-destructive/15">
                 <LogOut className="h-4 w-4 flex-shrink-0" />
               </div>
               <span className="truncate group-data-[collapsible=icon]:sr-only">Sair</span>

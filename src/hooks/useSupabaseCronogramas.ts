@@ -5,7 +5,7 @@ import { Cronograma, Retorno } from '@/types/cronograma';
 import { cronogramaFromSupabase, cronogramaToSupabase, retornoFromSupabase, retornoToSupabase } from '@/lib/mappers';
 
 // Interface estendida para cronogramas com dados relacionados
-interface CronogramaCompleto extends Cronograma {
+export interface CronogramaCompleto extends Cronograma {
   cliente_nome_real?: string;
   cliente_telefone?: string;
   cliente_email?: string;
@@ -19,7 +19,7 @@ interface CronogramaCompleto extends Cronograma {
 }
 
 // Interface estendida para retornos com dados relacionados
-interface RetornoCompleto extends Retorno {
+export interface RetornoCompleto extends Retorno {
   cliente_nome?: string;
   cliente_telefone?: string;
   tipo_servico?: string;

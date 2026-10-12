@@ -92,7 +92,12 @@ export function normalizeLandingConfig(input: unknown): LandingConfig {
   const seo = (obj.seo as LandingSeo) ?? defaultLandingConfig.seo;
   return {
     theme: { ...defaultLandingTheme, ...theme },
-    blocks: blocks.map((b, i) => ({ visible: true, order: i, props: {}, ...b, order: b.order ?? i })),
+    blocks: blocks.map((block, index) => ({
+      ...block,
+      visible: block.visible ?? true,
+      order: block.order ?? index,
+      props: block.props ?? {},
+    })),
     seo: { ...defaultLandingConfig.seo, ...seo },
     version: typeof obj.version === 'number' ? obj.version : 1,
   };

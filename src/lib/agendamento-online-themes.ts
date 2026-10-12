@@ -34,7 +34,7 @@ export function getBookingPageBackground(
   backgroundColor: string,
   secondaryBackgroundColor: string,
   primaryColor: string,
-  visualMode: 'claro' | 'escuro',
+  visualMode: 'claro' | 'escuro' | 'neutro' | 'alto-contraste',
 ): string {
   switch (style) {
     case 'solid':

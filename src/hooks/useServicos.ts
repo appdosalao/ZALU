@@ -5,6 +5,7 @@ import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { toast } from 'sonner';
 import { validateUniqueName } from '@/lib/validators';
 import { servicoFromSupabase, servicoToSupabase } from '@/lib/mappers';
+import type { TablesInsert } from '@/integrations/supabase/types';
 
 export function useServicos() {
   const { user } = useSupabaseAuth();
@@ -70,7 +71,7 @@ export function useServicos() {
         let valorA: string | number | undefined = a[campo];
         let valorB: string | number | undefined = b[campo];
 
-        if (typeof valorA === 'string') {
+        if (typeof valorA === 'string' && typeof valorB === 'string') {
           valorA = valorA.toLowerCase();
           valorB = valorB.toLowerCase();
         }
@@ -109,9 +110,13 @@ export function useServicos() {
 
     setLoading(true);
     try {
-      const insertPayload = {
+      const insertPayload: TablesInsert<'servicos'> = {
         user_id: user.id,
-        ...servicoToSupabase(novoServico)
+        nome: novoServico.nome,
+        valor: novoServico.valor,
+        duracao: novoServico.duracao,
+        descricao: novoServico.descricao ?? null,
+        observacoes: novoServico.observacoes ?? null,
       };
       const { data, error } = await supabase
         .from('servicos')
