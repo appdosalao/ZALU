@@ -1,7 +1,7 @@
 import { clientsClaim } from 'workbox-core';
 import { cleanupOutdatedCaches, precacheAndRoute } from 'workbox-precaching';
 import { registerRoute } from 'workbox-routing';
-import { NetworkFirst, CacheFirst } from 'workbox-strategies';
+import { CacheFirst } from 'workbox-strategies';
 import { ExpirationPlugin } from 'workbox-expiration';
 import { CacheableResponsePlugin } from 'workbox-cacheable-response';
 
@@ -12,19 +12,9 @@ clientsClaim();
 cleanupOutdatedCaches();
 precacheAndRoute(self.__WB_MANIFEST);
 
-// Cache Supabase API
-registerRoute(
-  ({ url }) => url.origin.includes('supabase.co'),
-  new NetworkFirst({
-    cacheName: 'supabase-api',
-    plugins: [
-      new ExpirationPlugin({
-        maxEntries: 50,
-        maxAgeSeconds: 24 * 60 * 60 // 24 hours
-      })
-    ]
-  })
-);
+self.addEventListener('activate', (event) => {
+  event.waitUntil(caches.delete('supabase-api'));
+});
 
 // Cache Google Fonts
 registerRoute(
