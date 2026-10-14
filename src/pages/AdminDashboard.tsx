@@ -17,6 +17,7 @@ import {
   Users,
 } from 'lucide-react';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { parseApiResponse } from '@/lib/apiResponse';
 import { toast } from 'sonner';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -189,8 +190,7 @@ export default function AdminDashboard() {
         },
         body: JSON.stringify({ active }),
       });
-      const payload = await response.json() as { message?: string };
-      if (!response.ok) throw new Error(payload.message || 'Não foi possível atualizar o divulgador.');
+      await parseApiResponse<{ message?: string }>(response);
       toast.success(active ? 'Divulgador ativado com código exclusivo.' : 'Divulgador desativado; o histórico foi preservado.');
       await loadOverview(true);
     } catch (actionError) {

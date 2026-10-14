@@ -226,6 +226,9 @@ app.use(generalLimiter);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api', referralRoutes);
+app.get('/api/health', (_req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
 app.use('/api', (_req, res) => {
   res.status(404).json({
     error: 'api_route_not_found',

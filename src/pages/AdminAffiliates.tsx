@@ -39,6 +39,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { parseApiResponse } from '@/lib/apiResponse';
 import {
   Table,
   TableBody,
@@ -136,9 +137,7 @@ export default function AdminAffiliates() {
         ...init?.headers,
       },
     });
-    const payload = await response.json() as { message?: string };
-    if (!response.ok) throw new Error(payload.message || `A operação falhou (HTTP ${response.status}).`);
-    return payload;
+    return parseApiResponse<{ message?: string } & Record<string, unknown>>(response);
   }, [session?.access_token]);
 
   const loadAffiliates = useCallback(async (refresh = false) => {

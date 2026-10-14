@@ -27,6 +27,7 @@ import {
 } from '@/lib/passwordPolicy';
 import { cadastroSchema } from '@/lib/validation';
 import { getStoredReferralCode, normalizeReferralCode, storeReferralCode } from '@/lib/referral';
+import { parseApiResponse } from '@/lib/apiResponse';
 
 const Cadastro = () => {
   const navigate = useNavigate();
@@ -94,8 +95,7 @@ const Cadastro = () => {
     setReferralFeedback({ text: 'Validando código...', valid: null });
     try {
       const response = await fetch(`/api/referrals/validate?code=${encodeURIComponent(code)}`);
-      const result = await response.json() as { valid?: boolean; message?: string };
-      if (!response.ok) throw new Error(result.message || 'Não foi possível validar o código.');
+      const result = await parseApiResponse<{ valid?: boolean }>(response);
       const valid = result.valid === true;
       setReferralFeedback({
         text: valid ? 'Código de indicação válido.' : 'Código não encontrado ou inativo. Você ainda pode criar sua conta.',

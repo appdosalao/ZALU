@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { parseApiResponse } from '@/lib/apiResponse';
 import {
   Table,
   TableBody,
@@ -84,8 +85,7 @@ export default function AffiliateDashboard() {
       const response = await fetch('/api/referrals/me', {
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
-      const body = await response.json() as AffiliateData & { message?: string };
-      if (!response.ok) throw new Error(body.message || 'Não foi possível carregar os dados de divulgação.');
+      const body = await parseApiResponse<AffiliateData>(response);
       setData(body);
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : 'Erro inesperado ao carregar sua divulgação.');
