@@ -39,6 +39,7 @@
     "src/config/adminAccess.ts",
     "src/config/adminPlans.ts",
     "src/lib/supabaseServer.ts",
+    "src/integrations/supabase/affiliateTypes.ts",
     "src/integrations/supabase/types.ts",
     "api/index.ts"
   ]

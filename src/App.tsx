@@ -34,6 +34,8 @@ const Produtos = lazy(() => import('./pages/Produtos'));
 const Assinatura = lazy(() => import('./pages/Assinatura'));
 const IntegracaoCakto = lazy(() => import('./pages/IntegracaoCakto'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+const AdminAffiliates = lazy(() => import('./pages/AdminAffiliates'));
+const AffiliateDashboard = lazy(() => import('./pages/AffiliateDashboard'));
 const AdminLogin = lazy(() => import('./pages/Login').then((module) => ({ default: module.AdminLogin })));
 
 const Onboarding = lazy(() => import('./pages/Onboarding'));
@@ -203,6 +205,13 @@ const AppContent = () => {
             </Layout>
           </ProtectedRoute>
         } />
+        <Route path="/divulgacao" element={
+          <ProtectedRoute requirePaid={false}>
+            <Layout>
+              <Suspense fallback={RouteFallback}><AffiliateDashboard /></Suspense>
+            </Layout>
+          </ProtectedRoute>
+        } />
         <Route path="/admin" element={
           <ProtectedRoute requirePaid={false} loginPath="/admin/login">
             <AdminRoute>
@@ -215,6 +224,15 @@ const AppContent = () => {
                 }>
                   <AdminDashboard />
                 </Suspense>
+              </AdminLayout>
+            </AdminRoute>
+          </ProtectedRoute>
+        } />
+        <Route path="/admin/divulgadores" element={
+          <ProtectedRoute requirePaid={false} loginPath="/admin/login">
+            <AdminRoute>
+              <AdminLayout>
+                <Suspense fallback={RouteFallback}><AdminAffiliates /></Suspense>
               </AdminLayout>
             </AdminRoute>
           </ProtectedRoute>

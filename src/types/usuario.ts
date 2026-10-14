@@ -23,6 +23,8 @@ export interface Usuario {
   subscription_updated_at: string | null;
   paid_access: boolean;
   paid_at: string | null;
+  is_divulgador: boolean;
+  indicado_por: string | null;
 }
 
 export interface UsuarioCadastro {
@@ -33,6 +35,7 @@ export interface UsuarioCadastro {
   tema_preferencia: 'feminino' | 'masculino';
   senha: string;
   confirmar_senha: string;
+  codigo_indicacao?: string;
 }
 
 export interface UsuarioLogin {

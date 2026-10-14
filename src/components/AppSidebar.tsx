@@ -19,7 +19,8 @@ import {
   Download,
   ChevronsLeft,
   ChevronsRight,
-  Crown
+  Crown,
+  Share2,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import {
@@ -79,6 +80,11 @@ const navigationItems: { title: string; href: string; icon: LucideIcon }[] = [
     icon: Megaphone,
   },
   {
+    title: "Divulgação",
+    href: "/divulgacao",
+    icon: Share2,
+  },
+  {
     title: "Produtos",
     href: "/produtos",
     icon: Package,
@@ -108,6 +114,9 @@ export function AppSidebar() {
   const { config } = useConfigAgendamentoOnline();
   const { isInstallable, isInstalled, installApp } = usePWAContext();
   const currentPath = location.pathname;
+  const visibleNavigationItems = navigationItems.filter(
+    (item) => item.href !== "/divulgacao" || usuario?.is_divulgador === true
+  );
   const isActive = (path: string) =>
     path === "/" ? currentPath === "/" : currentPath === path || currentPath.startsWith(`${path}/`);
 
@@ -194,7 +203,7 @@ export function AppSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="group-data-[collapsible=icon]:gap-0">
-              {navigationItems.map((item) => {
+              {visibleNavigationItems.map((item) => {
                 const Icon = item.icon;
                 const active = isActive(item.href);
                 const iconSizeClass = "h-[18px] w-[18px]";

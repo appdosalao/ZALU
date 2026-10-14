@@ -12,10 +12,17 @@ Sistema completo de agendamento para salões de beleza com formulário público 
 - **URL Admin:** `https://96bf76d4-a482-415d-bae4-8f0e245637fa.lovableproject.com/login`
 
 ### **Painel de Administração da Plataforma**
-- Acesse `/admin` após entrar com a conta `resellr7@gmail.com`; a tela de login mostra o atalho administrativo discretamente quando esse e-mail é informado.
+- Acesse `/admin/login` e entre com a conta `resellr7@gmail.com`; a tela de login comum também mostra um atalho administrativo discreto.
 - O backend autoriza exclusivamente esse e-mail, independentemente do link exibido no frontend.
 - O painel considera ativo quem entrou nos últimos 30 dias; contas sem login ou sem acesso há mais de 30 dias aparecem como inativas.
 - A receita é uma estimativa de MRR dos planos pagos ativos, com os valores trimestral e anual rateados por mês. Assinaturas sem um ID de produto reconhecido são sinalizadas e excluídas da estimativa.
+
+### **Programa de Divulgadores**
+- Antes de publicar esta funcionalidade, aplique manualmente no Supabase a migration [`20261014090000_affiliate_referrals.sql`](./supabase/migrations/20261014090000_affiliate_referrals.sql).
+- Admin: em `/admin`, ative um divulgador na lista de contas ou abra `/admin/divulgadores` para ajustar código, comissão e modo de pagamento (recorrente ou primeiro pagamento), consultar indicados e marcar pagamentos de comissão.
+- Divulgador: a conta ativa recebe a área `/divulgacao`, com código e link para compartilhar. No cadastro, `?ref=CODIGO` preenche o campo; códigos inválidos não impedem criar a conta.
+- A comissão é criada somente para pagamento aprovado recebido no webhook Cakto, quando o evento fornece um ID de pagamento e valor identificáveis. O padrão é 10% recorrente; o administrador pode alterar a taxa global e escolher comissão única ou recorrente.
+- Configure `SUPABASE_SERVICE_ROLE_KEY` e `CAKTO_WEBHOOK_SECRET` no ambiente do backend/Vercel. Nunca exponha a chave service-role no frontend.
 
 ## 📋 Funcionalidades do Formulário Público
 
@@ -64,6 +71,13 @@ npm run dev
 2. Novos agendamentos aparecem automaticamente
 3. Novos clientes são cadastrados automaticamente
 4. Gerencie todos os agendamentos centralizadamente
+
+### **Teste manual do programa de divulgadores**
+1. Aplique a migration no Supabase e entre em `/admin/login` com o e-mail autorizado.
+2. Ative um usuário como divulgador; copie o código gerado.
+3. Cadastre um usuário de teste pelo link `/cadastro?ref=CODIGO` e confirme que ele aparece como indicado.
+4. Em ambiente de teste, envie ao endpoint `/api/payment/webhook` um evento Cakto de pagamento aprovado com `external_id` do usuário, ID único da cobrança, valor em unidade monetária e o segredo configurado. Use o formato real de payload do Cakto no ambiente de teste.
+5. Confira a comissão em `/admin/divulgadores`; envie um evento de estorno com o mesmo ID da cobrança para confirmar seu cancelamento. Marque uma comissão pendente como paga para testar a liquidação.
 
 ## 🔄 Integração de Dados
 

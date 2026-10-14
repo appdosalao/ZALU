@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 import { z } from 'zod';
 import { timingSafeEqual, scryptSync, createHash } from 'crypto';
 import { getAdminPlan } from '../config/adminPlans.js';
+import { supabaseAffiliateAdmin } from '../lib/supabaseServer.js';
 
 if (process.env.NODE_ENV !== 'test') {
   dotenv.config();
@@ -18,8 +19,9 @@ const CAKTO_WEBHOOK_SECRET_RAW = process.env.CAKTO_WEBHOOK_SECRET || '';
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:8080';
 
 const UUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
-const APPROVED_STATUS_SET = new Set(['paid', 'approved', 'PAID', 'APPROVED']);
-const APPROVED_EVENT_SET = new Set(['purchase_approved', 'PURCHASE_APPROVED']);
+const APPROVED_STATUS_SET = new Set(['paid', 'approved']);
+const APPROVED_EVENT_SET = new Set(['purchase_approved']);
+const CANCELLED_STATUS_SET = new Set(['refunded', 'refund', 'cancelled', 'canceled', 'chargeback', 'charged_back']);
 
 const CaktoWebhookPayloadSchema = z.object({
   secret: z.string().nullish(),
@@ -58,6 +60,15 @@ const CaktoWebhookPayloadSchema = z.object({
   product_id: z.string().nullish(),
   productId: z.string().nullish(),
   product: z.unknown().nullish(),
+  amount: z.unknown().optional(),
+  total_amount: z.unknown().optional(),
+  payment_amount: z.unknown().optional(),
+  total: z.unknown().optional(),
+  price: z.unknown().optional(),
+  order_id: z.string().nullish(),
+  payment_id: z.string().nullish(),
+  transaction_id: z.string().nullish(),
+  purchase_id: z.string().nullish(),
   status: z.string().nullish(),
   id: z.string().nullish(),
   event_id: z.string().nullish(),
@@ -159,6 +170,73 @@ const resolveEventType = (parsed: z.infer<typeof CaktoWebhookPayloadSchema>): st
     return parsed.event.custom_id;
   }
   if (isTruthyNonEmpty(parsed.type)) return parsed.type;
+  return null;
+};
+
+const resolvePaymentReference = (parsed: z.infer<typeof CaktoWebhookPayloadSchema>) => {
+  const data = parsed.data;
+  const candidates = [
+    getNestedValue(data, 'order_id'),
+    getNestedValue(data, 'payment_id'),
+    getNestedValue(data, 'transaction_id'),
+    getNestedValue(data, 'purchase_id'),
+    parsed.order_id,
+    parsed.payment_id,
+    parsed.transaction_id,
+    parsed.purchase_id,
+    getNestedValue(data, 'id'),
+    parsed.id,
+  ];
+  const reference = candidates.find(isTruthyNonEmpty);
+  return typeof reference === 'string' ? reference.trim().slice(0, 200) : null;
+};
+
+const parseMoneyAmount = (value: unknown): number | null => {
+  const directValue = typeof value === 'object' && value !== null
+    ? getNestedValue(value, 'value') ?? getNestedValue(value, 'amount')
+    : value;
+  if (typeof directValue !== 'string' && typeof directValue !== 'number') return null;
+  let normalized: string | number = directValue;
+  if (typeof directValue === 'string') {
+    normalized = directValue.trim().replace(/^R\$\s*/i, '').replace(/\s/g, '');
+    if (normalized.includes(',') && normalized.includes('.')) {
+      normalized = normalized.lastIndexOf(',') > normalized.lastIndexOf('.')
+        ? normalized.replace(/\./g, '').replace(',', '.')
+        : normalized.replace(/,/g, '');
+    } else {
+      normalized = normalized.replace(',', '.');
+    }
+  }
+  const amount = Number(normalized);
+  return Number.isFinite(amount) && amount > 0 && amount <= 1_000_000
+    ? Math.round(amount * 100) / 100
+    : null;
+};
+
+const resolvePaymentAmount = (parsed: z.infer<typeof CaktoWebhookPayloadSchema>) => {
+  const data = parsed.data;
+  const fields = parsed.fields;
+  const candidates = [
+    getNestedValue(data, 'amount'),
+    getNestedValue(data, 'total_amount'),
+    getNestedValue(data, 'payment_amount'),
+    getNestedValue(data, 'total'),
+    getNestedValue(data, 'price'),
+    getNestedValue(fields, 'amount'),
+    getNestedValue(fields, 'total_amount'),
+    getNestedValue(fields, 'payment_amount'),
+    getNestedValue(fields, 'total'),
+    getNestedValue(fields, 'price'),
+    parsed.amount,
+    parsed.total_amount,
+    parsed.payment_amount,
+    parsed.total,
+    parsed.price,
+  ];
+  for (const candidate of candidates) {
+    const amount = parseMoneyAmount(candidate);
+    if (amount !== null) return amount;
+  }
   return null;
 };
 
@@ -284,9 +362,62 @@ router.post('/webhook', async (req: Request, res: Response) => {
 
   const status = resolveStatus(parsed);
   const eventType = resolveEventType(parsed);
+  const normalizedStatus = status?.trim().toLowerCase() ?? '';
+  const normalizedEventType = eventType?.trim().toLowerCase() ?? '';
   const isApproved =
-    (status !== null && APPROVED_STATUS_SET.has(status)) ||
-    (eventType !== null && APPROVED_EVENT_SET.has(eventType));
+    APPROVED_STATUS_SET.has(normalizedStatus) ||
+    APPROVED_EVENT_SET.has(normalizedEventType);
+  const isCancelled =
+    CANCELLED_STATUS_SET.has(normalizedStatus) ||
+    /refund|chargeback|cancel/.test(normalizedEventType);
+
+  if (isCancelled) {
+    const paymentReference = resolvePaymentReference(parsed);
+    const subscriptionCancellation =
+      /subscription.*cancel|cancel.*subscription/.test(normalizedEventType);
+    if (!paymentReference) {
+      if (!subscriptionCancellation) {
+        console.warn('[Webhook] Estorno/cancelamento sem referência do pagamento; nenhuma comissão foi alterada.');
+        return res.status(200).json({
+          received: true,
+          processed: false,
+          reason: 'missing_payment_reference',
+        });
+      }
+      console.info('[Webhook] Cancelamento de assinatura sem ID de cobrança; comissões pendentes do indicado serão canceladas.');
+    }
+
+    try {
+      const authUserRes = await supabaseAdmin.auth.admin.getUserById(externalId);
+      if (authUserRes.error || !authUserRes.data.user) {
+        return res.status(400).json({ error: 'user_not_found', message: 'Usuário identificado pelo externalId não existe.' });
+      }
+
+      const { data: cancelledCount, error } = await supabaseAffiliateAdmin.rpc('cancel_referral_commission', {
+        p_referred_user_id: externalId,
+        p_payment_reference: paymentReference,
+      });
+      if (error) throw error;
+      if (cancelledCount === 0) {
+        console.info(
+          paymentReference
+            ? `[Webhook] Nenhuma comissão pendente ou paga corresponde ao pagamento ${paymentReference.slice(0, 32)}…`
+            : '[Webhook] Nenhuma comissão pendente para cancelar por encerramento da assinatura.'
+        );
+      }
+      return res.status(200).json({
+        received: true,
+        processed: true,
+        cancelledCommissions: cancelledCount,
+      });
+    } catch (error) {
+      console.error('[Webhook] Falha ao cancelar comissão por estorno/cancelamento:', error);
+      return res.status(500).json({
+        error: 'referral_commission_cancellation_error',
+        message: 'Não foi possível atualizar a comissão vinculada ao pagamento.',
+      });
+    }
+  }
 
   if (!isApproved) {
     const statusForLog = status === null ? 'undefined' : String(status).slice(0, 64);
@@ -360,6 +491,23 @@ router.post('/webhook', async (req: Request, res: Response) => {
 
   const productId = resolveProductId(parsed);
   const plan = getAdminPlan(productId);
+  const paymentReference = resolvePaymentReference(parsed);
+  const paymentAmount = resolvePaymentAmount(parsed);
+  let referralCommissionFailed = false;
+
+  if (paymentReference && paymentAmount !== null) {
+    const { error: commissionError } = await supabaseAffiliateAdmin.rpc('record_referral_commission', {
+      p_referred_user_id: externalId,
+      p_payment_reference: paymentReference,
+      p_payment_amount: paymentAmount,
+    });
+    if (commissionError) {
+      console.error('[Webhook] Falha ao registrar comissão de indicação:', commissionError);
+      referralCommissionFailed = true;
+    }
+  } else {
+    console.warn('[Webhook] Pagamento aprovado sem valor/referência identificável; comissão não registrada.');
+  }
 
   if (usuario.paid_access === true) {
     if (productId && !usuario.cakto_product_id) {
@@ -379,6 +527,12 @@ router.post('/webhook', async (req: Request, res: Response) => {
           message: 'Erro ao atualizar o plano da assinatura',
         });
       }
+    }
+    if (referralCommissionFailed) {
+      return res.status(500).json({
+        error: 'referral_commission_error',
+        message: 'O acesso foi preservado, mas a comissão não foi registrada; o provedor deve reenviar o webhook.',
+      });
     }
     console.log(`[Webhook] Usuário já possui paid_access=true. Evento ${idempotencyKey.slice(0, 32)}… tratado como idempotente.`);
     return res.status(200).json({
@@ -431,6 +585,13 @@ router.post('/webhook', async (req: Request, res: Response) => {
     });
   } catch (metaErr: any) {
     console.warn('[Webhook] Não foi possível atualizar metadata do auth.user (não bloqueante):', metaErr?.message || metaErr);
+  }
+
+  if (referralCommissionFailed) {
+    return res.status(500).json({
+      error: 'referral_commission_error',
+      message: 'O acesso foi preservado, mas a comissão não foi registrada; o provedor deve reenviar o webhook.',
+    });
   }
 
   console.log(`[Webhook] Pagamento aprovado. paid_access=true concedido via evento ${idempotencyKey.slice(0, 24)}…`);

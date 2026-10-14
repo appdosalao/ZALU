@@ -5,6 +5,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import paymentRoutes from './routes/payment.js';
 import adminRoutes from './routes/admin.js';
+import referralRoutes from './routes/referrals.js';
 
 dotenv.config();
 
@@ -224,6 +225,7 @@ app.use(generalLimiter);
 
 app.use('/api/payment', paymentRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api', referralRoutes);
 app.use('/api', (_req, res) => {
   res.status(404).json({
     error: 'api_route_not_found',

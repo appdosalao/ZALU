@@ -1,6 +1,6 @@
 import { Router, Response } from 'express';
 import { authenticate, AuthenticatedRequest } from '../middlewares/authenticate.js';
-import { supabaseAdmin } from '../lib/supabaseServer.js';
+import { supabaseAdmin, supabaseAffiliateAdmin } from '../lib/supabaseServer.js';
 import { ADMIN_PLAN_CATALOG, getAdminPlan } from '../config/adminPlans.js';
 import { isAdminEmail } from '../config/adminAccess.js';
 import type { Database } from '../integrations/supabase/types.js';
@@ -25,6 +25,13 @@ type UsuarioRow = Pick<
   | 'cakto_product_id'
 >;
 
+type AffiliateInfo = {
+  user_id: string;
+  referral_code: string;
+  commission_rate: number;
+  active: boolean;
+};
+
 router.get('/overview', authenticate, async (req: AuthenticatedRequest, res: Response) => {
   if (!isAdminEmail(req.user?.email)) {
     return res.status(403).json({
@@ -47,6 +54,20 @@ router.get('/overview', authenticate, async (req: AuthenticatedRequest, res: Res
       if (!data || data.length < PAGE_SIZE) break;
     }
 
+    const affiliateProfiles: AffiliateInfo[] = [];
+    for (let from = 0; ; from += PAGE_SIZE) {
+      const { data, error } = await supabaseAffiliateAdmin
+        .from('affiliate_profiles')
+        .select('user_id,referral_code,commission_rate,active')
+        .range(from, from + PAGE_SIZE - 1);
+
+      if (error) throw error;
+      affiliateProfiles.push(...(data ?? []));
+      if (!data || data.length < PAGE_SIZE) break;
+    }
+
+    const affiliateById = new Map(affiliateProfiles.map((profile) => [profile.user_id, profile]));
+
     const authUsers = [];
     for (let page = 1; ; page += 1) {
       const { data, error } = await supabaseAdmin.auth.admin.listUsers({
@@ -68,37 +89,43 @@ router.get('/overview', authenticate, async (req: AuthenticatedRequest, res: Res
     monthStart.setDate(1);
     monthStart.setHours(0, 0, 0, 0);
 
-    const customers = usuarios.map((usuario) => {
-      const lastSignInAt = lastSignInById.get(usuario.id) ?? null;
-      const parsedSignIn = lastSignInAt ? Date.parse(lastSignInAt) : Number.NaN;
-      const activeByUsage = Number.isFinite(parsedSignIn) && parsedSignIn >= inactiveCutoff;
-      const trialStart = usuario.trial_start_date
-        ? Date.parse(usuario.trial_start_date)
-        : Number.NaN;
-      const trialActive =
-        usuario.subscription_status === 'trial' &&
-        Number.isFinite(trialStart) &&
-        now < trialStart + TRIAL_DAYS * 24 * 60 * 60 * 1000;
-      const paidActive =
-        usuario.paid_access === true && usuario.subscription_status === 'active';
-      const plan = getAdminPlan(usuario.cakto_product_id);
+    const customers = usuarios
+      .filter((usuario) => !isAdminEmail(usuario.email))
+      .map((usuario) => {
+        const lastSignInAt = lastSignInById.get(usuario.id) ?? null;
+        const parsedSignIn = lastSignInAt ? Date.parse(lastSignInAt) : Number.NaN;
+        const activeByUsage = Number.isFinite(parsedSignIn) && parsedSignIn >= inactiveCutoff;
+        const trialStart = usuario.trial_start_date
+          ? Date.parse(usuario.trial_start_date)
+          : Number.NaN;
+        const trialActive =
+          usuario.subscription_status === 'trial' &&
+          Number.isFinite(trialStart) &&
+          now < trialStart + TRIAL_DAYS * 24 * 60 * 60 * 1000;
+        const paidActive =
+          usuario.paid_access === true && usuario.subscription_status === 'active';
+        const plan = getAdminPlan(usuario.cakto_product_id);
 
-      return {
-        id: usuario.id,
-        name: usuario.nome_personalizado_app || usuario.nome_completo,
-        email: usuario.email,
-        createdAt: usuario.created_at,
-        lastSignInAt,
-        activity: activeByUsage ? 'active' as const : 'inactive' as const,
-        isTrial: trialActive,
-        isPaidActive: paidActive,
-        subscriptionStatus: usuario.subscription_status,
-        planType: usuario.plan_type,
-        planName: plan?.name ?? null,
-        productId: usuario.cakto_product_id,
-        monthlyRevenue: paidActive ? plan?.monthlyRevenue ?? null : null,
-      };
-    });
+        return {
+          id: usuario.id,
+          name: usuario.nome_personalizado_app || usuario.nome_completo,
+          email: usuario.email,
+          createdAt: usuario.created_at,
+          lastSignInAt,
+          activity: activeByUsage ? 'active' as const : 'inactive' as const,
+          isTrial: trialActive,
+          isPaidActive: paidActive,
+          subscriptionStatus: usuario.subscription_status,
+          planType: usuario.plan_type,
+          planName: plan?.name ?? null,
+          productId: usuario.cakto_product_id,
+          monthlyRevenue: paidActive ? plan?.monthlyRevenue ?? null : null,
+          isAffiliate: affiliateById.has(usuario.id),
+          affiliateActive: affiliateById.get(usuario.id)?.active ?? false,
+          referralCode: affiliateById.get(usuario.id)?.referral_code ?? null,
+          commissionRate: affiliateById.get(usuario.id)?.commission_rate ?? null,
+        };
+      });
 
     const planSummary = ADMIN_PLAN_CATALOG.map((plan) => {
       const subscribers = customers.filter(

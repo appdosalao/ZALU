@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { Database } from '../integrations/supabase/types.js';
+import type { AffiliateDatabase } from '../integrations/supabase/affiliateTypes.js';
 import dotenv from 'dotenv';
 
 if (process.env.NODE_ENV !== 'test') {
@@ -19,3 +20,14 @@ export const supabaseAdmin = createClient<Database>(supabaseUrl, supabaseService
     autoRefreshToken: false,
   },
 });
+
+export const supabaseAffiliateAdmin = createClient<AffiliateDatabase>(
+  supabaseUrl,
+  supabaseServiceRoleKey,
+  {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+  }
+);

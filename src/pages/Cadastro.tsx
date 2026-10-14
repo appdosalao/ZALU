@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
@@ -26,13 +26,16 @@ import {
   passwordStrength,
 } from '@/lib/passwordPolicy';
 import { cadastroSchema } from '@/lib/validation';
+import { getStoredReferralCode, normalizeReferralCode, storeReferralCode } from '@/lib/referral';
 
 const Cadastro = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { cadastrar } = useSupabaseAuth();
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isBuying, setIsBuying] = useState(false);
+  const [referralFeedback, setReferralFeedback] = useState<{ text: string; valid: boolean | null } | null>(null);
 
   const { register, handleSubmit, formState: { errors }, watch, setValue } = useForm<UsuarioCadastro>({
     resolver: zodResolver(cadastroSchema) as any,
@@ -61,6 +64,54 @@ const Cadastro = () => {
     }
   }, [temaEscolhido]);
 
+  useEffect(() => {
+    const rawReferralFromUrl = searchParams.get('ref') ?? '';
+    const referralFromUrl = searchParams.has('ref')
+      ? normalizeReferralCode(rawReferralFromUrl)
+      : '';
+    const code = searchParams.has('ref') ? referralFromUrl : getStoredReferralCode();
+    storeReferralCode(code);
+    setValue('codigo_indicacao', code, { shouldValidate: false });
+    if (searchParams.has('ref') && rawReferralFromUrl.trim() && !referralFromUrl) {
+      setReferralFeedback({
+        text: 'Código de indicação inválido. Você ainda pode criar sua conta sem ele.',
+        valid: false,
+      });
+    } else {
+      setReferralFeedback(null);
+    }
+  }, [searchParams, setValue]);
+
+  const validateReferral = async (value: string) => {
+    const code = normalizeReferralCode(value);
+    if (!code) {
+      setReferralFeedback(value.trim()
+        ? { text: 'Informe um código válido de 6 a 8 caracteres.', valid: false }
+        : null);
+      return false;
+    }
+
+    setReferralFeedback({ text: 'Validando código...', valid: null });
+    try {
+      const response = await fetch(`/api/referrals/validate?code=${encodeURIComponent(code)}`);
+      const result = await response.json() as { valid?: boolean; message?: string };
+      if (!response.ok) throw new Error(result.message || 'Não foi possível validar o código.');
+      const valid = result.valid === true;
+      setReferralFeedback({
+        text: valid ? 'Código de indicação válido.' : 'Código não encontrado ou inativo. Você ainda pode criar sua conta.',
+        valid,
+      });
+      return valid;
+    } catch (validationError) {
+      console.error('[Cadastro] Falha ao validar código de indicação:', validationError);
+      setReferralFeedback({
+        text: 'Não foi possível validar agora. O sistema confirmará o código ao criar a conta.',
+        valid: null,
+      });
+      return null;
+    }
+  };
+
   const onSubmit = async (data: UsuarioCadastro) => {
     setIsLoading(true);
     setError('');
@@ -71,10 +122,26 @@ const Cadastro = () => {
         setIsLoading(false);
         return;
       }
-      
-      const ok = await cadastrar(data);
+
+      const referralCode = normalizeReferralCode(data.codigo_indicacao);
+      let signupReferralCode = referralCode || undefined;
+      if (data.codigo_indicacao?.trim() && !referralCode) {
+        toast.warning('O código de indicação está incompleto ou inválido. A conta será criada sem vinculá-lo.');
+      }
+      if (referralCode) {
+        const referralValid = await validateReferral(referralCode);
+        if (referralValid === false) {
+          toast.warning('O código de indicação não está ativo. A conta será criada sem vinculá-lo.');
+          signupReferralCode = undefined;
+        } else if (referralValid === null) {
+          toast.message('O código será confirmado com segurança durante a criação da conta.');
+        }
+      }
+
+      const ok = await cadastrar({ ...data, codigo_indicacao: signupReferralCode });
 
       if (ok) {
+        storeReferralCode('');
         const { data: authData } = await supabase.auth.getSession();
 
         if (!authData.session) {
@@ -262,6 +329,44 @@ const Cadastro = () => {
                       <p className="text-xs text-destructive mt-1 font-medium">{errors.telefone.message}</p>
                     )}
                   </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="codigo_indicacao" className="font-semibold">
+                    Código de indicação <span className="font-normal text-muted-foreground">(opcional)</span>
+                  </Label>
+                  <Input
+                    id="codigo_indicacao"
+                    autoComplete="off"
+                    autoCapitalize="characters"
+                    maxLength={8}
+                    placeholder="Ex.: ZALU2026"
+                    {...register('codigo_indicacao', {
+                      onChange: (event) => {
+                        const code = event.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8);
+                        setValue('codigo_indicacao', code, { shouldDirty: true, shouldValidate: true });
+                        storeReferralCode(normalizeReferralCode(code));
+                        setReferralFeedback(null);
+                      },
+                      onBlur: (event) => {
+                        if (event.target.value.trim()) void validateReferral(event.target.value);
+                      },
+                    })}
+                    disabled={isLoading}
+                    aria-describedby={referralFeedback ? 'codigo-indicacao-feedback' : undefined}
+                  />
+                  {referralFeedback && (
+                    <p
+                      id="codigo-indicacao-feedback"
+                      role="status"
+                      className={`text-xs ${referralFeedback.valid === true ? 'text-emerald-600' : referralFeedback.valid === false ? 'text-destructive' : 'text-muted-foreground'}`}
+                    >
+                      {referralFeedback.text}
+                    </p>
+                  )}
+                  {errors.codigo_indicacao && (
+                    <p className="text-xs text-destructive">{errors.codigo_indicacao.message}</p>
+                  )}
                 </div>
 
                 <div className="space-y-3">

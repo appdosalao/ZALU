@@ -2,10 +2,13 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ArrowUpRight,
   AlertTriangle,
+  ChevronLeft,
+  ChevronRight,
   CalendarDays,
   CheckCircle2,
   CircleDollarSign,
   Clock3,
+  Gift,
   Loader2,
   RefreshCw,
   Search,
@@ -14,11 +17,22 @@ import {
   Users,
 } from 'lucide-react';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { toast } from 'sonner';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import {
   Table,
   TableBody,
@@ -42,6 +56,10 @@ type AdminCustomer = {
   planName: string | null;
   productId: string | null;
   monthlyRevenue: number | null;
+  isAffiliate: boolean;
+  affiliateActive: boolean;
+  referralCode: string | null;
+  commissionRate: number | null;
 };
 
 type AdminOverview = {
@@ -76,6 +94,9 @@ export default function AdminDashboard() {
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<'all' | 'active' | 'inactive' | 'trial' | 'paid'>('all');
+  const [page, setPage] = useState(1);
+  const [affiliateSavingId, setAffiliateSavingId] = useState<string | null>(null);
+  const [customerToDeactivate, setCustomerToDeactivate] = useState<AdminCustomer | null>(null);
 
   const loadOverview = useCallback(async (isRefresh = false) => {
     if (!session?.access_token) {
@@ -125,6 +146,10 @@ export default function AdminDashboard() {
     void loadOverview();
   }, [loadOverview]);
 
+  useEffect(() => {
+    setPage(1);
+  }, [filter, search]);
+
   const filteredCustomers = useMemo(() => {
     if (!overview) return [];
     const query = search.trim().toLowerCase();
@@ -142,6 +167,40 @@ export default function AdminDashboard() {
       return matchesQuery && matchesFilter;
     });
   }, [filter, overview, search]);
+
+  const pageSize = 10;
+  const pageCount = Math.max(1, Math.ceil(filteredCustomers.length / pageSize));
+  const currentPage = Math.min(page, pageCount);
+  const paginatedCustomers = filteredCustomers.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+  const setAffiliateStatus = async (customer: AdminCustomer, active: boolean) => {
+    if (!session?.access_token) {
+      toast.error('Sua sessão expirou. Entre novamente para administrar divulgadores.');
+      return;
+    }
+
+    setAffiliateSavingId(customer.id);
+    try {
+      const response = await fetch(`/api/admin/affiliates/${encodeURIComponent(customer.id)}`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ active }),
+      });
+      const payload = await response.json() as { message?: string };
+      if (!response.ok) throw new Error(payload.message || 'Não foi possível atualizar o divulgador.');
+      toast.success(active ? 'Divulgador ativado com código exclusivo.' : 'Divulgador desativado; o histórico foi preservado.');
+      await loadOverview(true);
+    } catch (actionError) {
+      console.error('[Admin] Falha ao atualizar divulgador:', actionError);
+      toast.error(actionError instanceof Error ? actionError.message : 'Não foi possível atualizar o divulgador.');
+    } finally {
+      setAffiliateSavingId(null);
+      setCustomerToDeactivate(null);
+    }
+  };
 
   if (loading) {
     return (
@@ -427,10 +486,11 @@ export default function AdminDashboard() {
                 <TableHead className="text-slate-400">Plano</TableHead>
                 <TableHead className="text-slate-400">Último acesso</TableHead>
                 <TableHead className="text-slate-400">Cadastro</TableHead>
+                <TableHead className="text-slate-400">Divulgação</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredCustomers.map((customer) => (
+              {paginatedCustomers.map((customer) => (
                 <TableRow key={customer.id} className="border-white/5 hover:bg-white/[0.03]">
                   <TableCell className="min-w-52">
                     <div className="font-medium text-slate-100">{customer.name}</div>
@@ -469,19 +529,105 @@ export default function AdminDashboard() {
                   </TableCell>
                   <TableCell className="text-slate-400">{formatDate(customer.lastSignInAt)}</TableCell>
                   <TableCell className="text-slate-400">{formatDate(customer.createdAt)}</TableCell>
+                  <TableCell>
+                    <div className="flex flex-col items-start gap-1.5">
+                      {customer.affiliateActive ? (
+                        <Badge variant="outline" className="border-violet-300/30 bg-violet-400/10 text-violet-100">
+                          <Gift className="mr-1 h-3 w-3" /> Divulgador · {customer.referralCode}
+                        </Badge>
+                      ) : customer.isAffiliate ? (
+                        <Badge variant="outline" className="border-slate-500/40 text-slate-300">
+                          Divulgação desativada
+                        </Badge>
+                      ) : null}
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        className="h-8 border-white/15 bg-slate-950/30 px-2.5 text-xs text-slate-100 hover:bg-white/10 hover:text-white focus-visible:ring-violet-300"
+                        disabled={affiliateSavingId === customer.id}
+                        onClick={() => customer.affiliateActive
+                          ? setCustomerToDeactivate(customer)
+                          : void setAffiliateStatus(customer, true)}
+                      >
+                        {affiliateSavingId === customer.id && <Loader2 className="mr-1.5 h-3 w-3 animate-spin" />}
+                        {customer.affiliateActive
+                          ? 'Remover divulgador'
+                          : customer.isAffiliate
+                            ? 'Reativar divulgador'
+                            : 'Tornar divulgador'}
+                      </Button>
+                    </div>
+                  </TableCell>
                 </TableRow>
               ))}
               {filteredCustomers.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6} className="h-24 text-center text-slate-500">
+                  <TableCell colSpan={7} className="h-24 text-center text-slate-400">
                     Nenhuma conta encontrada para esse filtro.
                   </TableCell>
                 </TableRow>
               )}
             </TableBody>
           </Table>
+          {filteredCustomers.length > 0 && (
+            <div className="mt-4 flex flex-col gap-3 border-t border-white/10 pt-4 text-sm text-slate-300 sm:flex-row sm:items-center sm:justify-between">
+              <p aria-live="polite">
+                Exibindo {(currentPage - 1) * pageSize + 1}–{Math.min(currentPage * pageSize, filteredCustomers.length)} de {filteredCustomers.length} contas
+              </p>
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="border-white/15 bg-slate-950/30 text-slate-100 hover:bg-white/10 hover:text-white focus-visible:ring-violet-300"
+                  onClick={() => setPage((value) => Math.max(1, value - 1))}
+                  disabled={currentPage <= 1}
+                  aria-label="Página anterior"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  Anterior
+                </Button>
+                <span className="min-w-24 text-center">Página {currentPage} de {pageCount}</span>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="border-white/15 bg-slate-950/30 text-slate-100 hover:bg-white/10 hover:text-white focus-visible:ring-violet-300"
+                  onClick={() => setPage((value) => Math.min(pageCount, value + 1))}
+                  disabled={currentPage >= pageCount}
+                  aria-label="Próxima página"
+                >
+                  Próxima
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
+      <AlertDialog open={!!customerToDeactivate} onOpenChange={(open) => !open && setCustomerToDeactivate(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Desativar divulgador?</AlertDialogTitle>
+            <AlertDialogDescription>
+              O código deixará de aceitar novas indicações e comissões. Os indicados e pagamentos anteriores serão preservados.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={!!affiliateSavingId}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={!!affiliateSavingId || !customerToDeactivate}
+              onClick={(event) => {
+                event.preventDefault();
+                if (customerToDeactivate) void setAffiliateStatus(customerToDeactivate, false);
+              }}
+            >
+              {affiliateSavingId ? 'Desativando...' : 'Desativar divulgador'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

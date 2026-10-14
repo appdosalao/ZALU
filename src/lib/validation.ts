@@ -169,6 +169,10 @@ export const cadastroSchema = z
     email: safeEmail,
     telefone: safePhone,
     tema_preferencia: z.enum(['feminino', 'masculino']).default('feminino'),
+    codigo_indicacao: z.preprocess(
+      (val) => val == null || val === '' ? undefined : sanitizePlain(typeof val === 'string' ? val : '').toUpperCase(),
+      z.string().max(64, 'Código de indicação muito longo').optional()
+    ),
     senha: senhaForteSchema,
     confirmar_senha: z.string().min(1, 'Confirmação de senha é obrigatória'),
   })

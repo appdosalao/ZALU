@@ -87,6 +87,8 @@ const normalizeUsuario = (profile: AuthRecord, assinatura?: AuthRecord | null): 
     subscription_updated_at: (subscriptionData?.subscription_updated_at ?? null) as Usuario['subscription_updated_at'],
     paid_access: Boolean(subscriptionData?.paid_access ?? false),
     paid_at: (subscriptionData?.paid_at ?? null) as Usuario['paid_at'],
+    is_divulgador: Boolean(profile?.is_divulgador ?? false),
+    indicado_por: (profile?.indicado_por ?? null) as Usuario['indicado_por'],
   };
 };
 
@@ -310,6 +312,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           nome_personalizado_app: dados.nome_personalizado_app,
           telefone: dados.telefone,
           tema_preferencia: dados.tema_preferencia,
+          referral_code: dados.codigo_indicacao?.trim().toUpperCase() || null,
         },
       },
     });
