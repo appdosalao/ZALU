@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Mail, MessageCircle } from 'lucide-react';
 
-export function AuthFooter({ showAdminAccess = false }: { showAdminAccess?: boolean }) {
+export function AuthFooter() {
   return (
     <div className="mt-4 text-center space-y-2 text-muted-foreground">
       <div className="flex items-center justify-center gap-4 text-xs">
@@ -29,17 +29,6 @@ export function AuthFooter({ showAdminAccess = false }: { showAdminAccess?: bool
       </div>
       <div className="text-[10px]">
         © {new Date().getFullYear()} Lilac Luxe Salon
-        {showAdminAccess && (
-          <>
-            {' · '}
-            <Link
-              to="/admin/login"
-              className="text-muted-foreground/60 transition-colors hover:text-muted-foreground"
-            >
-              Acesso administrativo
-            </Link>
-          </>
-        )}
       </div>
     </div>
   );

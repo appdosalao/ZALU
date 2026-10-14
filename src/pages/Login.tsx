@@ -356,6 +356,15 @@ const Login = ({ adminMode = false }: { adminMode?: boolean }) => {
                         <Badge variant="secondary" className="ml-1 text-[11px] h-5 px-2 bg-primary/10 text-primary border-none group-hover:bg-primary group-hover:text-white transition-colors">7 DIAS</Badge>
                       </Link>
                     </Button>
+                    <div className="pt-1 text-center">
+                      <Link
+                        to="/admin/login"
+                        className="inline-flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-primary"
+                      >
+                        <LockKeyhole className="h-3 w-3" />
+                        Acesso administrativo
+                      </Link>
+                    </div>
                   </>
                 )}
               </form>
@@ -364,7 +373,7 @@ const Login = ({ adminMode = false }: { adminMode?: boolean }) => {
           
           <div className="mt-8">
             <div className={adminMode ? '[&_div]:text-slate-500 [&_a:hover]:text-slate-300' : undefined}>
-              <AuthFooter showAdminAccess={!adminMode} />
+              <AuthFooter />
             </div>
           </div>
         </div>
