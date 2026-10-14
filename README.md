@@ -11,6 +11,12 @@ Sistema completo de agendamento para salões de beleza com formulário público 
 ### **Acesso Administrativo**
 - **URL Admin:** `https://96bf76d4-a482-415d-bae4-8f0e245637fa.lovableproject.com/login`
 
+### **Painel de Administração da Plataforma**
+- Acesse `/admin` após entrar com a conta `resellr7@gmail.com`; a tela de login mostra o atalho administrativo discretamente quando esse e-mail é informado.
+- O backend autoriza exclusivamente esse e-mail, independentemente do link exibido no frontend.
+- O painel considera ativo quem entrou nos últimos 30 dias; contas sem login ou sem acesso há mais de 30 dias aparecem como inativas.
+- A receita é uma estimativa de MRR dos planos pagos ativos, com os valores trimestral e anual rateados por mês. Assinaturas sem um ID de produto reconhecido são sinalizadas e excluídas da estimativa.
+
 ## 📋 Funcionalidades do Formulário Público
 
 ### ✅ **Campos do Formulário:**
@@ -36,6 +42,14 @@ Sistema completo de agendamento para salões de beleza com formulário público 
 - PWA (Progressive Web App)
 
 ## 🚀 Como Usar
+
+### Desenvolvimento local
+O frontend usa a porta `8080` e encaminha as chamadas `/api` para o backend na porta `3000`. Inicie os dois processos em terminais separados:
+
+```sh
+npm run server:dev
+npm run dev
+```
 
 ### **Para Clientes:**
 1. Acesse o link do formulário

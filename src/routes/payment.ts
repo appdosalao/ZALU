@@ -5,6 +5,7 @@ import { supabaseAdmin } from '../lib/supabaseServer.js';
 import dotenv from 'dotenv';
 import { z } from 'zod';
 import { timingSafeEqual, scryptSync, createHash } from 'crypto';
+import { getAdminPlan } from '../config/adminPlans.js';
 
 if (process.env.NODE_ENV !== 'test') {
   dotenv.config();
@@ -54,6 +55,9 @@ const CaktoWebhookPayloadSchema = z.object({
   type: z.string().nullish(),
   external_id: z.string().nullish(),
   refId: z.string().nullish(),
+  product_id: z.string().nullish(),
+  productId: z.string().nullish(),
+  product: z.unknown().nullish(),
   status: z.string().nullish(),
   id: z.string().nullish(),
   event_id: z.string().nullish(),
@@ -77,6 +81,29 @@ const hashPayloadForIdempotency = (rawBody: unknown, externalId: string): string
 };
 
 const isTruthyNonEmpty = (v: unknown): v is string => typeof v === 'string' && v.trim().length > 0;
+
+const getNestedValue = (value: unknown, key: string): unknown => {
+  if (typeof value !== 'object' || value === null) return undefined;
+  return (value as Record<string, unknown>)[key];
+};
+
+const resolveProductId = (parsed: z.infer<typeof CaktoWebhookPayloadSchema>): string | null => {
+  const product = getNestedValue(parsed.data, 'product');
+  const candidates = [
+    parsed.product_id,
+    parsed.productId,
+    getNestedValue(parsed.product, 'id'),
+    getNestedValue(parsed.product, 'product_id'),
+    getNestedValue(parsed.data, 'product_id'),
+    getNestedValue(parsed.data, 'productId'),
+    getNestedValue(product, 'id'),
+    getNestedValue(product, 'product_id'),
+    getNestedValue(parsed.fields, 'product_id'),
+    getNestedValue(getNestedValue(parsed.fields, 'product'), 'id'),
+  ];
+  const productId = candidates.find(isTruthyNonEmpty);
+  return typeof productId === 'string' ? productId.trim() : null;
+};
 
 const resolveIncomingSecret = (parsed: z.infer<typeof CaktoWebhookPayloadSchema>): string | null => {
   const candidates = [
@@ -282,7 +309,11 @@ router.post('/webhook', async (req: Request, res: Response) => {
   }
 
   let usuarioExists = false;
-  let usuario: { paid_access: boolean | null; subscription_status: string | null } | null = null;
+  let usuario: {
+    paid_access: boolean | null;
+    subscription_status: string | null;
+    cakto_product_id: string | null;
+  } | null = null;
   try {
     const authUserRes = await supabaseAdmin.auth.admin.getUserById(externalId);
     if (authUserRes.error || !authUserRes.data.user) {
@@ -295,7 +326,7 @@ router.post('/webhook', async (req: Request, res: Response) => {
 
     const usuarioRes = await supabaseAdmin
       .from('usuarios')
-      .select('paid_access, subscription_status')
+      .select('paid_access, subscription_status, cakto_product_id')
       .eq('id', externalId)
       .maybeSingle();
 
@@ -327,7 +358,28 @@ router.post('/webhook', async (req: Request, res: Response) => {
     });
   }
 
+  const productId = resolveProductId(parsed);
+  const plan = getAdminPlan(productId);
+
   if (usuario.paid_access === true) {
+    if (productId && !usuario.cakto_product_id) {
+      const { error: planUpdateError } = await supabaseAdmin
+        .from('usuarios')
+        .update({
+          cakto_product_id: productId,
+          ...(plan ? { plan_type: plan.name === 'Anual' ? 'vitalicio' : 'mensal' } : {}),
+        })
+        .eq('id', externalId)
+        .is('cakto_product_id', null);
+
+      if (planUpdateError) {
+        console.error('[Webhook] Erro ao associar plano à assinatura existente:', planUpdateError);
+        return res.status(500).json({
+          error: 'database_error',
+          message: 'Erro ao atualizar o plano da assinatura',
+        });
+      }
+    }
     console.log(`[Webhook] Usuário já possui paid_access=true. Evento ${idempotencyKey.slice(0, 32)}… tratado como idempotente.`);
     return res.status(200).json({
       received: true,
@@ -347,6 +399,8 @@ router.post('/webhook', async (req: Request, res: Response) => {
       paid_at: now,
       subscription_status: 'active',
       payment_provider: 'cakto',
+      ...(productId ? { cakto_product_id: productId } : {}),
+      ...(plan ? { plan_type: plan.name === 'Anual' ? 'vitalicio' : 'mensal' } : {}),
       cakto_last_event: eventTypeStored,
       cakto_last_status: statusStored,
       subscription_updated_at: now,

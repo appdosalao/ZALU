@@ -9,6 +9,8 @@ import Layout from "./components/Layout";
 import { NotificationProviderAvancado } from "./components/notificacoes/NotificationProviderAvancado";
 import { BackupPrompt } from "./components/configuracoes/BackupPrompt";
 import { PWAUpdateNotification } from "./components/PWAUpdateNotification";
+import AdminRoute from "./components/admin/AdminRoute";
+import AdminLayout from "./components/admin/AdminLayout";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -31,6 +33,8 @@ const Marketing = lazy(() => import('./pages/Marketing'));
 const Produtos = lazy(() => import('./pages/Produtos'));
 const Assinatura = lazy(() => import('./pages/Assinatura'));
 const IntegracaoCakto = lazy(() => import('./pages/IntegracaoCakto'));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+const AdminLogin = lazy(() => import('./pages/Login').then((module) => ({ default: module.AdminLogin })));
 
 const Onboarding = lazy(() => import('./pages/Onboarding'));
 const Login = lazy(() => import('./pages/Login'));
@@ -78,15 +82,17 @@ const AppContent = () => {
   // Atualizado para não incluir as rotas alternativas, mas só a principal
   const publicRoutes = ['/agendamento-online', '/login', '/cadastro', '/esqueci-senha', '/auth/callback', '/redefinir-senha', '/privacidade', '/termos', '/sobre', '/checkout', '/pagamento/retorno', '/payment/success'];
   const isPublicRoute = publicRoutes.some(path => location.pathname.startsWith(path));
+  const isAdminRoute = location.pathname.startsWith('/admin');
 
   return (
     <div id="app-container">
-      {!isPublicRoute && <BackupPrompt />}
+      {!isPublicRoute && !isAdminRoute && <BackupPrompt />}
       <Toaster position="top-right" />
       <PWAUpdateNotification />
       <Routes>
         {/* Rotas públicas */}
         <Route path="/login" element={<Suspense fallback={RouteFallback}><Login /></Suspense>} />
+        <Route path="/admin/login" element={<Suspense fallback={RouteFallback}><AdminLogin /></Suspense>} />
         <Route path="/cadastro" element={<Suspense fallback={RouteFallback}><Cadastro /></Suspense>} />
         <Route path="/esqueci-senha" element={<Suspense fallback={RouteFallback}><EsqueciSenha /></Suspense>} />
         <Route path="/auth/callback" element={<Suspense fallback={RouteFallback}><AuthCallback /></Suspense>} />
@@ -195,6 +201,22 @@ const AppContent = () => {
             <Layout>
               <Suspense fallback={RouteFallback}><IntegracaoCakto /></Suspense>
             </Layout>
+          </ProtectedRoute>
+        } />
+        <Route path="/admin" element={
+          <ProtectedRoute requirePaid={false} loginPath="/admin/login">
+            <AdminRoute>
+              <AdminLayout>
+                <Suspense fallback={
+                  <div className="flex min-h-[50vh] items-center justify-center gap-3 text-slate-300">
+                    <div className="h-6 w-6 animate-spin rounded-full border-2 border-violet-400 border-t-transparent" />
+                    Carregando painel administrativo...
+                  </div>
+                }>
+                  <AdminDashboard />
+                </Suspense>
+              </AdminLayout>
+            </AdminRoute>
           </ProtectedRoute>
         } />
 

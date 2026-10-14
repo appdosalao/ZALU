@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import paymentRoutes from './routes/payment.js';
+import adminRoutes from './routes/admin.js';
 
 dotenv.config();
 
@@ -113,7 +114,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.options('*', (req, res) => {
+app.options('/{*path}', (req, res) => {
   const origin = req.headers.origin;
   if (origin && (allowedOrigins.size === 0 || allowedOrigins.has(origin))) {
     res.setHeader('Access-Control-Allow-Origin', origin);
@@ -222,6 +223,13 @@ app.use('/api/payment/checkout', authSensitiveLimiter);
 app.use(generalLimiter);
 
 app.use('/api/payment', paymentRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api', (_req, res) => {
+  res.status(404).json({
+    error: 'api_route_not_found',
+    message: 'Rota de API não encontrada.',
+  });
+});
 
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });

@@ -21,6 +21,7 @@ import {
   ChevronsRight,
   Crown
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -41,7 +42,7 @@ import { useConfigAgendamentoOnline } from "@/hooks/useConfigAgendamentoOnline";
 import { buildPublicBookingLink } from "@/lib/utils";
 import { toast } from "sonner";
 
-const navigationItems = [
+const navigationItems: { title: string; href: string; icon: LucideIcon }[] = [
   {
     title: "Dashboard",
     href: "/",
@@ -107,7 +108,6 @@ export function AppSidebar() {
   const { config } = useConfigAgendamentoOnline();
   const { isInstallable, isInstalled, installApp } = usePWAContext();
   const currentPath = location.pathname;
-
   const isActive = (path: string) =>
     path === "/" ? currentPath === "/" : currentPath === path || currentPath.startsWith(`${path}/`);
 

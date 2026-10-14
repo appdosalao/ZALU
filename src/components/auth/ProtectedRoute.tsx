@@ -9,9 +9,14 @@ import { PaywallScreen } from '@/components/PaywallScreen';
 interface ProtectedRouteProps {
   children: ReactNode;
   requirePaid?: boolean;
+  loginPath?: string;
 }
 
-export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requirePaid = true }) => {
+export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
+  children,
+  requirePaid = true,
+  loginPath = '/login',
+}) => {
   const { isAuthenticated, isLoading: authLoading, usuario, session, sessionError, refreshProfile, logout } = useSupabaseAuth();
   const { isPaid, isLoading: paidLoading } = usePaidAccess();
   const navigate = useNavigate();
@@ -94,7 +99,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requir
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to={loginPath} replace />;
   }
 
   if (!usuario) {
